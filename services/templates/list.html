@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load octicons %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item">Services</li>
+{% endblock %}
+{% load helpers %}
+{% block content %}
+<div>
+    <div class="btn-group" role="group">
+        <div class="btn-group " role="group">
+            <button type="button" class="btn btn-outline-secondary dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="#">
+                {% octicon "filters" %} Activity
+            </button>
+            <ul class="dropdown-menu">
+                <li>
+                    <a class="dropdown-item {% if request.GET.active %}active{% endif %}" href="{% qs request active='yes' %}">Active only</a>
+                </li>
+                <li>
+                    <a class="dropdown-item {% if request.GET.active == False %}active{% endif %}" href="{% qs request active='no' %}">Inactive only</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% qs request active=None %}">All</a>
+                </li>
+            </ul>
+        </div>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-secondary dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="#">
+                Level
+            </button>
+            <ul class="dropdown-menu">
+                {% for level in levels %}
+                <li>
+                    <a class="dropdown-item {% if level == request.GET.level %}active{% endif %}" href="{% qs request level=level %}">Level {{ level }} only</a>
+                </li>
+                {% endfor %}
+                <li>
+                    <a class="dropdown-item" href="{% qs request level=None %}">All</a>
+                </li>
+            </ul>
+        </div>
+        <button type="button" class="btn btn-outline-secondary">
+            <a class="dropdown-item" href="{% url 'services:list' %}">Reset</a>
+        </button>
+    </div>
+
+    {% if services %}
+        <table class="table table-striped my-3">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th></th>
+                    <th>Type</th>
+                </tr>
+            </thead>
+            <tbody>    
+                {% for service in services %}
+                    <tr>
+                        <td><a href="{% url 'services:show' service.slug %}">{{ service.name }}</a></td>
+                        <td>
+                            {% include "level.html" with level=service.service_level %}
+                            {% include "active.html" with active=service.is_active show_inactive_only=True %}
+                        </td>
+                        <td>{{ service.service_type }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="blankslate my-3">
+            {% include "blankslate.html" with msg="No services matched those filters." %}
+        </div>
+    {% endif %}
+
+    {% if services %}
+        <div class="pagination">
+            <span class="step-links">
+                {% if services.has_previous %}
+                    <a href="?page=1">&laquo; first</a>
+                    <a href="?page={{ services.previous_page_number }}">previous</a>
+                {% endif %}
+        
+                <span class="current">
+                    Page {{ services.number }} of {{ services.paginator.num_pages }}.
+                </span>
+        
+                {% if services.has_next %}
+                    <a href="?page={{ services.next_page_number }}">next</a>
+                    <a href="?page={{ services.paginator.num_pages }}">last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

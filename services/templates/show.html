@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load helpers %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'services:list' %}">Services</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ service.name }}</li>
+{% endblock %}
+{% block content %}
+<div>
+    <h3>{{ service.name }}</h3>
+    <p>
+        {% include "level.html" with level=service.service_level %}
+        {% include "active.html" with active=service.is_active %}
+    </p>
+    {% if service.description %}
+        <p>{{ service.description|markdown }}</p>
+    {% endif %}
+
+    <div class="row">
+        <div class="card col m-3">
+            <div class="card-body">
+                <h5 class="card-title">This service depends on</h5>
+                <div class="card-text">
+                    {% for dependency in service.dependencies.all %}
+                        <a href="{% url 'services:show' dependency.slug %}">{{ dependency.name }}</a> 
+                        {% include "level.html" with level=dependency.service_level %}
+                        {% include "active.html" with active=dependency.is_active show_inactive_only=True %}
+                        <br>
+                    {% empty %}
+                        Nothing
+                    {% endfor %}
+                </div>
+            </div>        
+        </div>
+        <div class="card col m-3">
+            <div class="card-body">
+                <h5 class="card-title">Depends on this service</h5>
+                <div class="card-text">
+                    {% for dependency in service.service_set.all %}
+                        <a href="{% url 'services:show' dependency.slug %}">{{ dependency.name }}</a> 
+                        {% include "level.html" with level=dependency.service_level %}
+                        {% include "active.html" with active=dependency.is_active show_inactive_only=True %}
+                        <br>
+                    {% empty %}
+                        Nothing
+                    {% endfor %}
+                </div>      
+            </div>
+        </div>
+    </div>
+    {% if service.oncall %}
+        <h4>Oncall</h4>
+        <pre>{{ service.oncall }}</pre>
+    {% endif %}
+    {% if service.ownership %}
+        <h4>Ownership</h4>
+        <pre>{{ service.ownership }}</pre>
+    {% endif %}
+    {% if service.metrics %}
+        <h4>Metrics</h4>
+        <pre>{{ service.metrics }}</pre>
+    {% endif %}
+</div>
+{% endblock %}

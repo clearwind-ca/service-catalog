@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row pt-5">
+    <h2>Debug page</h2>
+    <p class="form-text">Full of useful debugging information.</p>
+    <h3>Repositories</h3>
+    <p class="form-text">Returned from <code>.get_repos()</code>.</p>
+    <pre>
+        {% for repo in repos %}
+            {{ repo.full_name }}
+        {% endfor %}
+    </pre>
+</div>
+{% endblock %}

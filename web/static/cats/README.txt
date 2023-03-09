@@ -1,0 +1,1 @@
+Pictures are from pixabay and under the pixabay license which is here: https://pixabay.com/service/terms/
