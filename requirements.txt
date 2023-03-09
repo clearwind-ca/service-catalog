@@ -5,4 +5,4 @@ PyGithub==1.58
 Faker==16.6.1
 octicons==2.1.0
 markdown==3.4.1
-dotenv==0.21.1
+python-dotenv==0.21.1
