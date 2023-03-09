@@ -21,7 +21,10 @@ def create_source():
 def create_service(source):
     """Create a service."""
     return models.Service.objects.create(
-        name=fake.user_name(), description=fake.text(), service_type="application", source=source
+        name=fake.user_name(),
+        description=fake.text(),
+        service_type="application",
+        source=source,
     )
 
 
@@ -74,7 +77,9 @@ class Views(TestCase):
         """Test the page for viewing a service when not logged in."""
         source = create_source()
         service = create_service(source)
-        response = self.client.get(reverse("services:show", kwargs={"slug": service.slug}))
+        response = self.client.get(
+            reverse("services:show", kwargs={"slug": service.slug})
+        )
         self.assertEqual(response.status_code, 302)
 
     def test_get_service(self):
@@ -82,7 +87,9 @@ class Views(TestCase):
         self.client.force_login(self.user)
         source = create_source()
         service = create_service(source)
-        response = self.client.get(reverse("services:show", kwargs={"slug": service.slug}))
+        response = self.client.get(
+            reverse("services:show", kwargs={"slug": service.slug})
+        )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "show.html")
 
@@ -96,5 +103,3 @@ class TestDependencies(TestCase):
         service_parent.dependencies.add(service_child)
         self.assertEqual(service_parent.dependencies.first(), service_child)
         self.assertEqual(service_child.dependencies.count(), 0)
-
-

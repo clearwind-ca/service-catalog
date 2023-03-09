@@ -3,6 +3,7 @@ from django.test import RequestFactory, TestCase
 from .helpers import process_query_params
 from .templatetags.helpers import colour, markdown_filter, qs
 
+
 class TestProcessQueryParams(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
@@ -49,19 +50,20 @@ class TestColour(TestCase):
 
 class TestMarkdown(TestCase):
     def test_markdown_filter(self):
-        self.assertEqual(
-            markdown_filter("# Hello"), '<h1>Hello</h1>')
+        self.assertEqual(markdown_filter("# Hello"), "<h1>Hello</h1>")
+
 
 class TestQs(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
-    
+
     def _test_qs(self, params, **overrides):
         request = self.factory.get(f"/?{params}")
+
         @process_query_params
         def test(request, query_params=None):
             return query_params
-        
+
         test(request)
         return qs(request, **overrides)
 
@@ -69,11 +71,13 @@ class TestQs(TestCase):
         self.assertEqual(self._test_qs(""), "")
         # Irrelevant params are ignored.
         self.assertEqual(self._test_qs("foo=bar"), "")
-        self.assertEqual(self._test_qs("page=10"), "?page=10")        
+        self.assertEqual(self._test_qs("page=10"), "?page=10")
         # Override params works.
         self.assertEqual(self._test_qs("page=10", page=3), "?page=3")
         # Preserve other params.
-        self.assertEqual(self._test_qs("page=10&active=yes", page=3), "?page=3&active=yes")
+        self.assertEqual(
+            self._test_qs("page=10&active=yes", page=3), "?page=3&active=yes"
+        )
         # No is False and then converted back to no.
         self.assertEqual(self._test_qs("active=no"), "?active=no")
         # Something that converts to None is ignored

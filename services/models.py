@@ -47,6 +47,7 @@ class Service(models.Model):
     def get_levels(self):
         return self.objects.values("service_level").distinct().order_by("service_level")
 
+
 class Source(models.Model):
     name = models.CharField(max_length=100)
     service = models.CharField(max_length=1, choices=(("G", "GitHub"),))

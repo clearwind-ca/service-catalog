@@ -4,8 +4,10 @@ def attempt_int(value):
     except (TypeError, ValueError):
         pass
 
+
 def attempt_yesno(value):
-    if value is None: return
+    if value is None:
+        return
     try:
         value = str(value).lower()
     except (TypeError, ValueError):
@@ -15,17 +17,15 @@ def attempt_yesno(value):
         "no": False,
     }.get(value)
 
-default_query_params = {
-    "per_page": 10,
-    "page": None,
-    "active": None,
-    "level": None
-}
+
+default_query_params = {"per_page": 10, "page": None, "active": None, "level": None}
+
 
 def process_query_params(func):
     """
     A decorator for processing query params, that we'll use in any list view.
     """
+
     def wrapper(request, *args, **kwargs):
         parsed = default_query_params.copy()
         parsed["page"] = attempt_int(request.GET.get("page"))
@@ -43,6 +43,7 @@ def process_query_params(func):
         return func(request, *args, **kwargs)
 
     return wrapper
+
 
 def site_context(request):
     """

@@ -23,10 +23,12 @@ def list(request):
     paginator = Paginator(services, per_page=get["per_page"])
     page_number = get["page"]
     page_obj = paginator.get_page(page_number)
-    
+
     context = {
         "services": page_obj,
-        "levels": sorted([k[0] for k in Service.objects.values_list("service_level").distinct()])
+        "levels": sorted(
+            [k[0] for k in Service.objects.values_list("service_level").distinct()]
+        ),
     }
     return render(request, "list.html", context)
 

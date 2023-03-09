@@ -1,12 +1,15 @@
+from urllib.parse import urlencode
+
 import markdown
 from django import template
 from django.utils.safestring import mark_safe
-from urllib.parse import urlencode
+
 from web.helpers import default_query_params
 
 register = template.Library()
 
-@register.filter(name='colour')
+
+@register.filter(name="colour")
 def colour(value):
     levels = {
         1: "warning",
@@ -17,20 +20,23 @@ def colour(value):
     }
     return levels.get(value, "dark")
 
-@register.filter(name='markdown')
+
+@register.filter(name="markdown")
 def markdown_filter(text):
     md = markdown.Markdown()
     return mark_safe(md.convert(text))
 
-@register.simple_tag(name='qs')
+
+@register.simple_tag(name="qs")
 def qs(request, **overrides):
     """
     A tag that generates a query string based on the current request.
 
-    It assumes that the template that uses this, is from a view that has 
-    the `process_query_params` decorator applied to it. Because that 
+    It assumes that the template that uses this, is from a view that has
+    the `process_query_params` decorator applied to it. Because that
     decorator will format all these query params the right way.
     """
+
     def convert(v):
         if v in [True, False]:
             return "yes" if v else "no"
@@ -52,6 +58,6 @@ def qs(request, **overrides):
     for k, v in default_query_params.items():
         if v is not None:
             if qs[k] == v:
-                del qs[k] 
+                del qs[k]
 
     return "?" + urlencode(qs) if qs else ""
