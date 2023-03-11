@@ -2,6 +2,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.template.defaultfilters import slugify
 
+
 class Service(models.Model):
     """
     This is the core to the system, a service is an entity of whatever shape and
@@ -43,11 +44,13 @@ class Service(models.Model):
     def __str__(self):
         return self.name
 
+
 class Source(models.Model):
     """
-    The place that the service catalog data has came from. For example the GitHub repo 
+    The place that the service catalog data has came from. For example the GitHub repo
     containing the file.
     """
+
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100, unique=True)
     service = models.CharField(max_length=1, choices=(("G", "GitHub"),))
@@ -58,6 +61,7 @@ class Source(models.Model):
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
         super().save(*args, **kwargs)
+
 
 class Schema(models.Model):
     """

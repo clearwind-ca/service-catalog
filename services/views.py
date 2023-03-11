@@ -1,12 +1,15 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.shortcuts import get_object_or_404, render, redirect
-from django.views.decorators.http import require_POST
-from web.helpers import process_query_params
-from django.contrib import messages
-from .models import Service, Source
-from gh import fetch
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
+from django.views.decorators.http import require_POST
+
+from gh import fetch
+from web.helpers import process_query_params
+
+from .models import Service, Source
+
 
 @login_required
 @process_query_params
@@ -31,13 +34,19 @@ def service_list(request):
     }
     return render(request, "service-list.html", context)
 
+
 @require_POST
 @login_required
 def service_delete(request, slug):
     service = get_object_or_404(slug=slug, klass=Service)
     service.delete()
-    messages.add_message(request, messages.INFO, "Service successfully deleted",)
+    messages.add_message(
+        request,
+        messages.INFO,
+        "Service successfully deleted",
+    )
     return redirect("services:service_list")
+
 
 @login_required
 def service_detail(request, slug):
@@ -47,6 +56,7 @@ def service_detail(request, slug):
         "source": service.source,
     }
     return render(request, "service-detail.html", context)
+
 
 @login_required
 @process_query_params
@@ -62,6 +72,7 @@ def source_list(request):
         "sources": page_obj,
     }
     return render(request, "source-list.html", context)
+
 
 @login_required
 @process_query_params
@@ -88,5 +99,9 @@ def source_refresh(request, slug):
         service.service_level = data["service_level"]
         service.ownership = data["ownership"]
         service.save()
-        messages.add_message(request, messages.INFO, "Refreshed service successfully",)
+        messages.add_message(
+            request,
+            messages.INFO,
+            "Refreshed service successfully",
+        )
     return redirect("services:service_detail", slug=service.slug)

@@ -6,6 +6,7 @@ from github import Github, GithubException, UnknownObjectException
 logging.getLogger("github").setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
 
+
 def login_as_user(user):
     """Login as the user."""
     connection = user.oauth_connections.get(provider_key="github")
@@ -15,7 +16,14 @@ def login_as_user(user):
     gh = Github(connection.access_token)
     return gh.get_user()
 
-file_paths = ["catalog.json", "service.json", ".github/catalog.json", ".github/service.json"]
+
+file_paths = [
+    "catalog.json",
+    "service.json",
+    ".github/catalog.json",
+    ".github/service.json",
+]
+
 
 def get_file(repo):
     for path in file_paths:
@@ -27,8 +35,9 @@ def get_file(repo):
         except GithubException:
             logger.info(f"Error in: {path} from: {repo.full_name}")
             raise
-    
+
     raise GithubException("No file found")
+
 
 def get(user, source):
     gh_user = login_as_user(user)
