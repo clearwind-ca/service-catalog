@@ -1,7 +1,10 @@
-import os
+import json
+import logging
 
-from github import Github
+from github import Github, GithubException, UnknownObjectException
 
+logging.getLogger("github").setLevel(logging.ERROR)
+logger = logging.getLogger(__name__)
 
 def login_as_user(user):
     """Login as the user."""
@@ -9,18 +12,27 @@ def login_as_user(user):
     if connection.access_token_expired():
         connection.refresh_access_token()
 
-    return Github(connection.access_token)
+    gh = Github(connection.access_token)
+    return gh.get_user()
 
+file_paths = ["catalog.json", "service.json", ".github/catalog.json", ".github/service.json"]
 
-def login_as_app():
-    """Login as the app."""
-    return Github(app_id=os.environ["GITHUB_CLIENT_ID"])
+def get_file(repo):
+    for path in file_paths:
+        try:
+            return repo.get_contents("catalog.json").decoded_content.decode("utf-8")
+        except UnknownObjectException as error:
+            logger.info(f"File not found: {path} from: {repo.full_name}")
+            continue
+        except GithubException:
+            logger.info(f"Error in: {path} from: {repo.full_name}")
+            raise
+    
+    raise GithubException("No file found")
 
-
-def get_repo_list(user):
-    """Get the list of repos for the user."""
-    gh = login_as_app()
-    import pdb
-
-    pdb.set_trace()
-    return gh.get_repos()
+def get(user, source):
+    gh_user = login_as_user(user)
+    repo = gh_user.get_repo(source.name.split("/")[1])
+    entry = get_file(repo)
+    data = json.loads(entry)
+    return data

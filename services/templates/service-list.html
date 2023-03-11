@@ -39,7 +39,7 @@
             </ul>
         </div>
         <button type="button" class="btn btn-outline-secondary">
-            <a class="dropdown-item" href="{% url 'services:list' %}">Reset</a>
+            <a class="dropdown-item" href="{% url 'services:service_list' %}">Reset</a>
         </button>
     </div>
 
@@ -55,7 +55,7 @@
             <tbody>    
                 {% for service in services %}
                     <tr>
-                        <td><a href="{% url 'services:show' service.slug %}">{{ service.name }}</a></td>
+                        <td><a href="{% url 'services:service_detail' service.slug %}">{{ service.name }}</a></td>
                         <td>
                             {% include "level.html" with level=service.service_level %}
                             {% include "active.html" with active=service.is_active show_inactive_only=True %}

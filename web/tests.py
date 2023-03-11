@@ -1,7 +1,13 @@
 from django.test import RequestFactory, TestCase
 
 from .helpers import process_query_params
-from .templatetags.helpers import colour, markdown_filter, qs
+from .templatetags.helpers import (
+    apply_format,
+    colour,
+    markdown_filter,
+    qs,
+    strip_format,
+)
 
 
 class TestProcessQueryParams(TestCase):
@@ -82,3 +88,23 @@ class TestQs(TestCase):
         self.assertEqual(self._test_qs("active=no"), "?active=no")
         # Something that converts to None is ignored
         self.assertEqual(self._test_qs("page=10&active=whatever"), "?page=10")
+
+
+class TestFormat(TestCase):
+    def test_strip_format(self):
+        for value, expectation in (
+            ("foo", "foo"),
+            ("foo_url", "foo"),
+            ("foo_foo_md", "foo_foo"),
+            ("url", "url"),
+        ):
+            self.assertEqual(strip_format(value), expectation)
+
+    def test_apply_format(self):
+        for value, field, expectation in (
+            ("foo", "bar", "foo"),
+            ("http://f.com", "f_url", '<a href="http://f.com">http://f.com</a>'),
+            ("* foo", "foo_foo_md", "<ul>\n<li>foo</li>\n</ul>"),
+            ("http://foo.com", "url", '<a href="http://foo.com">http://foo.com</a>'),
+        ):
+            self.assertEqual(apply_format(value, field), expectation)

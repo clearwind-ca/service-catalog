@@ -6,6 +6,7 @@
     <h3>Repositories</h3>
     <p class="form-text">Returned from <code>.get_repos()</code>.</p>
     <pre>
+        {{ repos }}
         {% for repo in repos %}
             {{ repo.full_name }}
         {% endfor %}

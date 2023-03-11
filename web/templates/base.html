@@ -17,9 +17,24 @@
                 Service Catalog
             </a>
             <div class="collapse navbar-collapse">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <ul class="navbar-nav mb-2 mb-lg-0">
                     <li>
-                    <a class="nav-link fw-lighter" href="{% url 'services:list' %}">Services</a>
+                    <a class="nav-link" href="{% url 'services:service_list' %}">Services</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav mb-2 mb-lg-0">
+                    <li>
+                    <a class="nav-link" href="{% url 'services:source_list' %}">Sources</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav mb-2 mb-lg-0">
+                    <li>
+                    <a class="nav-link" href="">Health</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav mb-2 mb-lg-0">
+                    <li>
+                    <a class="nav-link" href="">Deployments</a>
                     </li>
                 </ul>
             </div>
@@ -61,6 +76,13 @@
                 </ol>
             </nav>
         </div>
+        {% endif %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-warning">
+                    <div class="container-lg">{{ message }}</div>
+                </div>
+            {% endfor %}
         {% endif %}
         <div class="container-lg py-3 mb-3">
             {% block content %}{% endblock %}

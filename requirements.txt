@@ -6,3 +6,4 @@ Faker==16.6.1
 octicons==2.1.0
 markdown==3.4.1
 python-dotenv==0.21.1
+coverage==7.2.1

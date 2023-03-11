@@ -59,7 +59,7 @@ class Views(TestCase):
 
     def test_not_logged_in(self):
         """Test the list services view when not logged in."""
-        response = self.client.get(reverse("services:list"))
+        response = self.client.get(reverse("services:service_list"))
         self.assertEqual(response.status_code, 302)
 
     def test_a_service(self):
@@ -67,9 +67,9 @@ class Views(TestCase):
         self.client.force_login(self.user)
         source = create_source()
         service = create_service(source)
-        response = self.client.get(reverse("services:list"))
+        response = self.client.get(reverse("services:service_list"))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "list.html")
+        self.assertTemplateUsed(response, "service-list.html")
         self.assertContains(response, service.name)
         self.assertContains(response, service.service_type)
 
@@ -78,7 +78,7 @@ class Views(TestCase):
         source = create_source()
         service = create_service(source)
         response = self.client.get(
-            reverse("services:show", kwargs={"slug": service.slug})
+            reverse("services:service_detail", kwargs={"slug": service.slug})
         )
         self.assertEqual(response.status_code, 302)
 
@@ -88,10 +88,10 @@ class Views(TestCase):
         source = create_source()
         service = create_service(source)
         response = self.client.get(
-            reverse("services:show", kwargs={"slug": service.slug})
+            reverse("services:service_detail", kwargs={"slug": service.slug})
         )
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "show.html")
+        self.assertTemplateUsed(response, "service-detail.html")
 
 
 class TestDependencies(TestCase):

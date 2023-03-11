@@ -8,10 +8,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python 3.9
@@ -24,4 +22,8 @@ jobs:
         pip install -r requirements.txt
     - name: Run Tests
       run: |
-        python manage.py test
+        coverage run --source='.' manage.py test >> $GITHUB_STEP_SUMMARY
+    - name: Coverage Report
+      run: |
+        coverage report >> $GITHUB_STEP_SUMMARY
+

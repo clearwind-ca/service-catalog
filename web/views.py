@@ -2,8 +2,6 @@ from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
-from gh.fetch import get_repo_list
-
 
 def home(request):
     return render(request, "home.html", {"breadcrumbs": False})
@@ -24,4 +22,4 @@ def logout(request):
 
 @login_required
 def debug(request):
-    return render(request, "debug.html", {"repos": get_repo_list(request.user)})
+    return render(request, "debug.html", {"user": request.user})

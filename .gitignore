@@ -1,0 +1,6 @@
+catalog/envs/development.env
+catalog/envs/production.env
+db.sqlite3
+*.pem
+.coverage
+.DS_Store

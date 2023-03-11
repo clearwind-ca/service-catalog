@@ -2,6 +2,7 @@ from urllib.parse import urlencode
 
 import markdown
 from django import template
+from django.utils.html import urlize
 from django.utils.safestring import mark_safe
 
 from web.helpers import default_query_params
@@ -61,3 +62,33 @@ def qs(request, **overrides):
                 del qs[k]
 
     return "?" + urlencode(qs) if qs else ""
+
+
+valid_formats = ("url", "md")
+
+
+@register.filter(name="strip")
+def strip_format(value):
+    if value.endswith(valid_formats):
+        return value.rsplit("_", 1)[0]
+    return value
+
+
+@register.simple_tag(name="apply")
+def apply_format(value, field):
+    _format = None
+    if field in valid_formats:
+        _format = value
+
+    possible_format = field.rsplit("_", 1)[-1]
+    if possible_format in valid_formats:
+        _format = possible_format
+
+    if not _format:
+        return value
+
+    if _format == "url":
+        return mark_safe(urlize(value))
+
+    if _format == "md":
+        return markdown_filter(value)

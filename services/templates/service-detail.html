@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load helpers %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item"><a href="{% url 'services:list' %}">Services</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'services:service_list' %}">Services</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{ service.name }}</li>
 {% endblock %}
 {% block content %}
@@ -21,7 +21,7 @@
                 <h5 class="card-title">This service depends on</h5>
                 <div class="card-text">
                     {% for dependency in service.dependencies.all %}
-                        <a href="{% url 'services:show' dependency.slug %}">{{ dependency.name }}</a> 
+                        <a href="{% url 'services:service_detail' dependency.slug %}">{{ dependency.name }}</a> 
                         {% include "level.html" with level=dependency.service_level %}
                         {% include "active.html" with active=dependency.is_active show_inactive_only=True %}
                         <br>
@@ -36,7 +36,7 @@
                 <h5 class="card-title">Depends on this service</h5>
                 <div class="card-text">
                     {% for dependency in service.service_set.all %}
-                        <a href="{% url 'services:show' dependency.slug %}">{{ dependency.name }}</a> 
+                        <a href="{% url 'services:service_detail' dependency.slug %}">{{ dependency.name }}</a> 
                         {% include "level.html" with level=dependency.service_level %}
                         {% include "active.html" with active=dependency.is_active show_inactive_only=True %}
                         <br>
@@ -53,11 +53,25 @@
     {% endif %}
     {% if service.ownership %}
         <h4>Ownership</h4>
-        <pre>{{ service.ownership }}</pre>
+        <dl>
+        {% for field, value in service.ownership.items %}
+            <dt>{{ field|strip }}</dt>
+            <dd>{% apply value field %}</dd>
+        {% endfor %}
+        </dl>
     {% endif %}
     {% if service.metrics %}
         <h4>Metrics</h4>
         <pre>{{ service.metrics }}</pre>
     {% endif %}
+    <h4>Source</h4>
+    <form method="post" action="{% url 'services:source_refresh' source.slug %}">
+        {% csrf_token %}
+        <input type="submit" class="btn btn-primary" value="Refresh" />
+    </form>
+    <form method="post" action="{% url 'services:service_delete' service.slug %}">
+        {% csrf_token %}
+        <input type="submit" class="btn btn-primary" value="Delete" />
+    </form>
 </div>
 {% endblock %}

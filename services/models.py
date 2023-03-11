@@ -2,7 +2,6 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.template.defaultfilters import slugify
 
-
 class Service(models.Model):
     """
     This is the core to the system, a service is an entity of whatever shape and
@@ -44,13 +43,35 @@ class Service(models.Model):
     def __str__(self):
         return self.name
 
-    def get_levels(self):
-        return self.objects.values("service_level").distinct().order_by("service_level")
-
-
 class Source(models.Model):
+    """
+    The place that the service catalog data has came from. For example the GitHub repo 
+    containing the file.
+    """
     name = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=100, unique=True)
     service = models.CharField(max_length=1, choices=(("G", "GitHub"),))
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+class Schema(models.Model):
+    """
+    A schema is a way of defining the structure of a service. It is a way of
+    defining the fields that are required and the types of those fields.
+    """
+
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=100, unique=True)
+    schema = models.TextField()
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
