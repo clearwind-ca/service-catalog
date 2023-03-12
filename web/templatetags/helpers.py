@@ -4,7 +4,7 @@ import markdown
 from django import template
 from django.utils.html import urlize
 from django.utils.safestring import mark_safe
-
+from django.urls import reverse 
 from web.helpers import default_query_params
 
 register = template.Library()
@@ -92,3 +92,9 @@ def apply_format(value, field):
 
     if _format == "md":
         return markdown_filter(value)
+
+@register.simple_tag(name="is_active")
+def is_active(request, url):
+    if request.path == reverse(url):
+        return "active"
+    return ""

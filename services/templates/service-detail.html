@@ -15,63 +15,107 @@
         <p>{{ service.description|markdown }}</p>
     {% endif %}
 
-    <div class="row">
-        <div class="card col m-3">
-            <div class="card-body">
-                <h5 class="card-title">This service depends on</h5>
-                <div class="card-text">
-                    {% for dependency in service.dependencies.all %}
-                        <a href="{% url 'services:service_detail' dependency.slug %}">{{ dependency.name }}</a> 
-                        {% include "level.html" with level=dependency.service_level %}
-                        {% include "active.html" with active=dependency.is_active show_inactive_only=True %}
-                        <br>
-                    {% empty %}
-                        Nothing
-                    {% endfor %}
+    <h4 id="dependencies" class="mt-3">Dependencies</h4>
+    {% if service.dependencies.exist %}
+    <table class="table">
+        {% for dependency in service.dependencies.all %}
+            <tr>
+                <td><a href="{% url 'services:service_detail' dependency.slug %}">{{ dependency.name }}</a></td>
+                <td>
+                    {% include "level.html" with level=dependency.service_level %}
+                    {% include "active.html" with active=dependency.is_active show_inactive_only=True %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        <p>No services defined as dependencies on this service.</p>
+    {% endif %}
+    {% if service.service_set.exist %}
+    <table class="table">
+        {% for dependency in service.service_set.all %}
+            <tr>
+                <td><a href="{% url 'services:service_detail' dependency.slug %}">{{ dependency.name }}</a></td>
+                <td>
+                    {% include "level.html" with level=dependency.service_level %}
+                    {% include "active.html" with active=dependency.is_active show_inactive_only=True %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        <p>No services are dependenent on this service.</p>
+    {% endif %}
+
+    <h4 id="oncall" class="mt-3">Oncall</h4>
+    {% if service.oncall %}
+    <table class="table">
+        {% for field, value in service.oncall.items %}
+            <tr>
+                <td>{{ field|strip }}</td>
+                <td>{% apply value field %}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        <p>No oncall items defined for this service.</p>
+    {% endif %}
+
+    <h4 id="ownership" class="mt-3">Ownership</h4>
+    {% if service.ownership %}
+    <table class="table">
+    {% for field, value in service.ownership.items %}
+        <tr>
+            <td>{{ field|strip }}</td>
+            <td>{% apply value field %}</td>
+        </tr>
+    {% endfor %}
+    </table>
+    {% else %}
+        <p>No ownership items defined for this service.</p>
+    {% endif %}
+
+    <h4 id="metrics" class="mt-3">Metrics</h4>
+    {% if service.metrics %}
+    <table class="table">
+        {% for field, value in service.oncall.items %}
+            <tr>
+                <td>{{ field|strip }}</td>
+                <td>{% apply value field %}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        <p>No metrics defined for this service.</p>
+    {% endif %}
+
+    <hr>
+    <p class="form-text mb-3">This data was pulled from <code>{{ source.name }}</code>.</p>
+
+    <div class="card">
+        <div id="admin" class="card-header fw-bold">Admin</div>
+        <div class="card-body">
+            <div class="form-group row mb-3">
+                <label for="refresh" class="col-sm-5 col-form-label">Refresh this data from its source <code>{{ source.name }}</code>.</label>
+                <div class="col-sm-3">
+                    <form method="post" action="{% url 'services:source_refresh' source.slug %}">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-primary" value="Refresh" />
+                    </form>
                 </div>
-            </div>        
-        </div>
-        <div class="card col m-3">
-            <div class="card-body">
-                <h5 class="card-title">Depends on this service</h5>
-                <div class="card-text">
-                    {% for dependency in service.service_set.all %}
-                        <a href="{% url 'services:service_detail' dependency.slug %}">{{ dependency.name }}</a> 
-                        {% include "level.html" with level=dependency.service_level %}
-                        {% include "active.html" with active=dependency.is_active show_inactive_only=True %}
-                        <br>
-                    {% empty %}
-                        Nothing
-                    {% endfor %}
-                </div>      
+            </div>
+            <div class="form-group row">
+                <label for="refresh" class="col-sm-5 col-form-label">Delete this from the catalog. It <b>will not delete from</b> <code>{{ source.name }}</code> that must be done manually.</label>
+                <div class="col-sm-3">
+                    <form method="post" action="{% url 'services:service_delete' service.slug %}">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-danger" value="Delete" />
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-    {% if service.oncall %}
-        <h4>Oncall</h4>
-        <pre>{{ service.oncall }}</pre>
-    {% endif %}
-    {% if service.ownership %}
-        <h4>Ownership</h4>
-        <dl>
-        {% for field, value in service.ownership.items %}
-            <dt>{{ field|strip }}</dt>
-            <dd>{% apply value field %}</dd>
-        {% endfor %}
-        </dl>
-    {% endif %}
-    {% if service.metrics %}
-        <h4>Metrics</h4>
-        <pre>{{ service.metrics }}</pre>
-    {% endif %}
-    <h4>Source</h4>
-    <form method="post" action="{% url 'services:source_refresh' source.slug %}">
-        {% csrf_token %}
-        <input type="submit" class="btn btn-primary" value="Refresh" />
-    </form>
-    <form method="post" action="{% url 'services:service_delete' service.slug %}">
-        {% csrf_token %}
-        <input type="submit" class="btn btn-primary" value="Delete" />
-    </form>
+
+
 </div>
 {% endblock %}

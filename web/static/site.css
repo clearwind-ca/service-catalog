@@ -2,6 +2,52 @@ nav.navbar svg {
     fill: white;
 }
 
-.btn-primary svg {
+#navbar-side svg {
     fill: white;
+}
+
+#navbar-top svg {
+    fill: white;
+}
+
+body {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+  
+html {
+    height: -webkit-fill-available;
+}
+
+main {
+    display: flex;
+    flex-wrap: nowrap;
+    height: 100vh;
+    height: -webkit-fill-available;
+    max-height: 100vh;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+#main-content {
+    width: 100%;
+}
+
+@media screen and (max-width: 767px) {
+    #navbar-side {
+        display: none;
+    }
+    #navbar-top {
+        display: block;
+    }
+
+}
+
+@media screen and (min-width: 765px) {
+    #navbar-top {
+        display: none;
+    }
+    #navbar-side {
+        display: block;
+    }
 }
