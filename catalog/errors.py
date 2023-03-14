@@ -11,4 +11,4 @@ class NoRepository(FetchError):
 
 
 class SchemaError(FetchError):
-    """The schema file to parse the catalog did not pass."""
+    """The JSON file doesn't match the schema"""

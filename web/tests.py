@@ -88,10 +88,10 @@ class TestQs(TestCase):
 class TestFormat(TestCase):
     def test_strip_format(self):
         for value, expectation in (
-            ("foo", "foo"),
-            ("foo_url", "foo"),
-            ("foo_foo_md", "foo_foo"),
-            ("url", "url"),
+            ("foo", "Foo"),
+            ("foo_url", "Foo"),
+            ("foo_foo_md", "Foo Foo"),
+            ("url", "Url"),
         ):
             self.assertEqual(strip_format(value), expectation)
 

@@ -14,7 +14,7 @@ fake = Faker("en_US")
 def create_source():
     """Create a source."""
     return forms.SourceForm(
-        {"name": f"{fake.user_name()}/{fake.user_name()}", "service": "G"}
+        {"name": f"{fake.user_name()}/{fake.user_name()}", "host": "G"}
     ).save()
 
 
@@ -37,12 +37,12 @@ class ServiceTestCase(TestCase):
 
     def test_source_validator(self):
         """Validate the source name validator."""
-        form = forms.SourceForm({"name": "ownername", "service": "G"})
+        form = forms.SourceForm({"name": "ownername", "host": "G"})
         self.assertFalse(form.is_valid())
         assert "name" in form.errors
 
-        form = forms.SourceForm({"name": "owner/name", "service": "G"})
-        self.assertTrue(form.is_valid())
+        form = forms.SourceForm({"name": "owner/name", "host": "G"})
+        self.assertTrue(form.is_valid(), form.errors)
 
 
 class Views(TestCase):
