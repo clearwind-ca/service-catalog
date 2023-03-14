@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="service",
-            name="service_level",
+            name="level",
             field=models.IntegerField(
                 default=10,
                 validators=[
@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name="service",
-            name="service_type",
+            name="type",
             field=models.CharField(max_length=100),
         ),
     ]

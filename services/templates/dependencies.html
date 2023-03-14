@@ -1,0 +1,19 @@
+{% load octicons %}
+<table class="table">
+    {% for dependency in items %}
+        <tr>
+            <td>
+                {% if type == "Dependent" %}
+                    {% octicon "arrow-up" %} Dependency of
+                {% else %}
+                    {% octicon "arrow-down" %} Depends on
+                {% endif %}
+            </td>
+            <td><a href="{% url 'services:service_detail' dependency.slug %}">{{ dependency.name }}</a></td>
+            <td>
+                {% include "level.html" with level=dependency.level %}
+                {% include "active.html" with active=dependency.active show_inactive_only=True %}
+            </td>
+        </tr>
+    {% endfor %}
+</table>

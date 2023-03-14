@@ -1,0 +1,28 @@
+{
+    "$id": "https://github.com/clearwind-ca/service-catalog/service.schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "level": {"type": "number", "minimum": 1, "maximum": 10},
+        "type": {"type": "string"},
+        "names": {"type": "string"},
+        "description": {"type": "string"},
+        "active": {"type": "boolean"},
+        "dependencies": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "meta": {
+            "type": "object",
+            "patternProperties": {
+                ".*": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "required": ["level", "type", "names"]
+}

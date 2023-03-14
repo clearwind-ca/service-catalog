@@ -3,6 +3,7 @@
 <head>
     {% load octicons %}
     {% load static %}
+    {% load helpers %}
     <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'site.css' %}">
     <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
@@ -94,8 +95,8 @@
                 {% endif %}
                 {% if messages %}
                     {% for message in messages %}
-                        <div class="alert alert-warning">
-                            <div>{{ message }}</div>
+                        <div class="alert alert-{{ message.tags }} mt-3">
+                            <div>{{ message.message|markdown }}</div>
                         </div>
                     {% endfor %}
                 {% endif %}

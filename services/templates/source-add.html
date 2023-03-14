@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load octicons %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'services:source_list' %}">Sources</a></li>
+    <li class="breadcrumb-item">Add</li>
+{% endblock %}
+{% load helpers %}
+{% block content %}
+
+<h4>Add a source</h4>
+<form method="post" action="{% url 'services:source_add' %}">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="source" class="form-label">Source</label>
+        <input name="name" class="form-control" placeholder="location" title="This value must be owner/repository for GitHub" pattern="^([\w.-]+)\/([\w.-]+)$" value="{{ request.POST.name }}">
+        <div class="form-text">The location for your catalog entry. For GitHub this is the <code>owner/repository</code>.</div>
+    </div>
+    <div class="mb-3">
+        <label for="host" class="form-label">Host</label>
+        <select name="host" class="form-control" readonly="True">
+            <option value="G">GitHub</option>
+        </select>
+        <div class="form-text">The source control for your service. Only GitHub is available at this time.</div>
+    </div>
+    <button type="submit" class="btn btn-primary">{% octicon 'plus' %} Add source</button>
+</form>
+
+{% endblock %}

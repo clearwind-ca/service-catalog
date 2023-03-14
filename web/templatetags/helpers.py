@@ -10,6 +10,8 @@ from web.helpers import default_query_params
 
 register = template.Library()
 
+import json
+
 
 @register.filter(name="colour")
 def colour(value):
@@ -71,8 +73,8 @@ valid_formats = ("url", "md")
 @register.filter(name="strip")
 def strip_format(value):
     if value.endswith(valid_formats):
-        return value.rsplit("_", 1)[0]
-    return value
+        value = value.rsplit("_", 1)[0]
+    return value.replace("_", " ").replace("-", " ").title()
 
 
 @register.simple_tag(name="apply")
@@ -95,8 +97,14 @@ def apply_format(value, field):
         return markdown_filter(value)
 
 
-@register.simple_tag(name="is_active")
-def is_active(request, url):
-    if request.path == reverse(url):
+@register.simple_tag(name="at_url")
+def at_url(request, url):
+    """A simple tag to detect if the user is at a certain url, useful for navigation"""
+    if request.path.startswith(reverse(url)):
         return "active"
     return ""
+
+
+@register.filter
+def pretty_json(value):
+    return json.dumps(value, indent=4)

@@ -1,12 +1,4 @@
-nav.navbar svg {
-    fill: white;
-}
-
-#navbar-side svg {
-    fill: white;
-}
-
-#navbar-top svg {
+#navbar-side svg, #navbar-top svg, .btn-primary svg {
     fill: white;
 }
 
@@ -31,6 +23,10 @@ main {
 
 #main-content {
     width: 100%;
+}
+
+.alert div p {
+    margin-bottom: 0;
 }
 
 @media screen and (max-width: 767px) {

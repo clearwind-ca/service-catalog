@@ -57,17 +57,17 @@
                     <tr>
                         <td><a href="{% url 'services:service_detail' service.slug %}">{{ service.name }}</a></td>
                         <td>
-                            {% include "level.html" with level=service.service_level %}
-                            {% include "active.html" with active=service.is_active show_inactive_only=True %}
+                            {% include "level.html" with level=service.level %}
+                            {% include "active.html" with active=service.active show_inactive_only=True %}
                         </td>
-                        <td>{{ service.service_type }}</td>
+                        <td>{{ service.type }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
     {% else %}
         <div class="blankslate my-3">
-            {% include "blankslate.html" with msg="No services matched those filters." %}
+            {% include "blankslate.html" with message="No services matched those filters." %}
         </div>
     {% endif %}
 

@@ -23,7 +23,7 @@ def create_service(source):
     return models.Service.objects.create(
         name=fake.user_name(),
         description=fake.text(),
-        service_type="application",
+        type="application",
         source=source,
     )
 
@@ -71,7 +71,7 @@ class Views(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "service-list.html")
         self.assertContains(response, service.name)
-        self.assertContains(response, service.service_type)
+        self.assertContains(response, service.type)
 
     def test_get_service_not_logged_in(self):
         """Test the page for viewing a service when not logged in."""

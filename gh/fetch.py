@@ -1,7 +1,12 @@
 import json
 import logging
+import os
 
+import jsonschema
+from django.conf import settings
 from github import Github, GithubException, UnknownObjectException
+
+from catalog.errors import NoEntryFound, NoRepository, SchemaError
 
 logging.getLogger("github").setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
@@ -13,15 +18,12 @@ def login_as_user(user):
     if connection.access_token_expired():
         connection.refresh_access_token()
 
-    gh = Github(connection.access_token)
-    return gh.get_user()
+    return Github(connection.access_token)
 
 
 file_paths = [
     "catalog.json",
-    "service.json",
     ".github/catalog.json",
-    ".github/service.json",
 ]
 
 
@@ -36,12 +38,47 @@ def get_file(repo):
             logger.info(f"Error in: {path} from: {repo.full_name}")
             raise
 
-    raise GithubException("No file found")
+    nice_paths = ", ".join([f"`{p}`" for p in file_paths])
+    raise NoEntryFound(
+        f"Fetching of service definition failed. No file found in: `{repo.full_name}`. Tried in these locations: {nice_paths}."
+    )
 
 
 def get(user, source):
-    gh_user = login_as_user(user)
-    repo = gh_user.get_repo(source.name.split("/")[1])
+    gh = login_as_user(user)
+    organization, repo = source.name.split("/")
+
+    try:
+        user = gh.get_user(organization)
+    except UnknownObjectException:
+        raise NoRepository(
+            f"Unable to access the user or organization: `{organization}`."
+        )
+
+    try:
+        repo = repo = user.get_repo(repo)
+    except UnknownObjectException:
+        raise NoRepository(f"Unable to access the repository at: `{repo}`.")
+
     entry = get_file(repo)
-    data = json.loads(entry)
+
+    try:
+        data = json.loads(entry)
+    except json.JSONDecodeError:
+        raise SchemaError(f"Unable to decode the JSON in: `{repo.full_name}`.")
+
     return data
+
+
+def get_schema():
+    if not os.path.exists(settings.SERVICE_SCHEMA):
+        raise ValueError(f"No schema file found at: {settings.SERVICE_SCHEMA}")
+
+    with open(settings.SERVICE_SCHEMA, "r") as schema_file:
+        return json.load(schema_file)
+
+
+def validate(user, source):
+    data = get(user, source)
+    schema = get_schema()
+    jsonschema.validate(data, schema)

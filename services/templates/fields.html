@@ -1,0 +1,9 @@
+{% load helpers %}
+<table class="table">
+    {% for key, value in items.items %}
+        <tr>
+            <td>{{ key|strip }}</td>
+            <td>{% apply value key %}</td>
+        </tr>
+    {% endfor %}
+</table>

@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
                 ("name", models.CharField(max_length=100)),
                 ("description", models.TextField()),
                 (
-                    "service_type",
+                    "type",
                     models.CharField(
                         choices=[
                             ("S", "Software"),

@@ -6,6 +6,7 @@
 {% load helpers %}
 {% block content %}
 <div>
+    <a class="btn btn-primary" href="{% url 'services:source_add' %}">{% octicon 'plus' %} Add in a new source</a>
     {% if sources %}
         <table class="table table-striped my-3">
             <thead>
@@ -17,15 +18,32 @@
             <tbody>    
                 {% for source in sources %}
                     <tr>
-                        <td>{{ source.name }}</td>
-                        <td><a href="{% url 'services:source_refresh' source.slug %}" class="btn btn-primary">Refresh</a></td>
+                        <td><code>{{ source.name }}</code></td>
+                        <td>
+                            <div class="dropdown">
+                                <span class="dropdown-toggle" data-bs-toggle="dropdown">{% octicon "hamburger" %}</span>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="{% url 'services:source_refresh' source.slug %}" class="dropdown-item">{% octicon "refresh" %} Refresh</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'services:source_validate' source.slug %}" class="dropdown-item">{% octicon "check" %} Validate</a>
+                                    </li>
+                                    <li>
+                                        <form method="POST" action="{% url 'services:source_delete' source.slug %}" class="dropdown-item">
+                                            {% csrf_token %}
+                                            <input class="dropdown-item" type="submit" value="Delete">
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
     {% else %}
         <div class="blankslate my-3">
-            {% include "blankslate.html" with msg="No services matched those filters." %}
+            {% include "blankslate.html" with message="No services matched those filters." %}
         </div>
     {% endif %}
 
@@ -48,5 +66,7 @@
             </span>
         </div>
     {% endif %}
+    <hr>
+    <p class="form-text">The data being pulled is validated using <a href="{% url 'services:schema_detail' %}">this schema.</p>
 </div>
 {% endblock %}
