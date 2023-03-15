@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "oauthlogin",
     "services",
     "octicons",
+    "systemlogs",
     "web",
     "gh",
 ]
@@ -81,7 +82,6 @@ ROOT_URLCONF = "catalog.urls"
 SERVICE_SCHEMA = os.environ.get(
     "SERVICE_SCHEMA", os.path.join(BASE_DIR, "services", "schema.json")
 )
-print(SERVICE_SCHEMA)
 SECRET_KEY = os.environ.get("SECRET_KEY")
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, "web", "static"))

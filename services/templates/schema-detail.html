@@ -8,5 +8,7 @@
 {% block content %}
 <div>
     <pre>{{ schema|pretty_json }}</pre>
+    <hr>
+    <p class="form-text">This schema is stored at: <code>{{ path }}</code>.</p>
 </div>
 {% endblock %}

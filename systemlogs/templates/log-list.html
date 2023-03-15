@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load octicons %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item">Sources</li>
+{% endblock %}
+{% load helpers %}
+{% block content %}
+<div>
+    {% if logs %}
+        <table class="table table-striped my-3">
+            <thead>
+                <tr>
+                    <th>About</th>
+                    <th>Created</th>
+                    
+                </tr>
+            </thead>
+            <tbody>    
+                {% for log in logs %}
+                    <tr>
+                        <td>{{ log.get_target.slug }}</td>
+                        <td>{{ log.created }}</td>
+                        <td>{{ log.message }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="blankslate my-3">
+            {% include "blankslate.html" with message="No logs." %}
+        </div>
+    {% endif %}
+
+    {% if logs %}
+        <div class="pagination">
+            <span class="step-links">
+                {% if logs.has_previous %}
+                    <a href="?page=1">&laquo; first</a>
+                    <a href="?page={{ logs.previous_page_number }}">previous</a>
+                {% endif %}
+        
+                <span class="current">
+                    Page {{ logs.number }} of {{ logs.paginator.num_pages }}.
+                </span>
+        
+                {% if logs.has_next %}
+                    <a href="?page={{ logs.next_page_number }}">next</a>
+                    <a href="?page={{ logs.paginator.num_pages }}">last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

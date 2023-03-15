@@ -1,8 +1,5 @@
 import json
 import logging
-import os
-
-from django.conf import settings
 from github import Github, GithubException, UnknownObjectException
 
 from catalog.errors import NoEntryFound, NoRepository, SchemaError
