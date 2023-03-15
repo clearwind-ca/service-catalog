@@ -11,10 +11,12 @@ from catalog.errors import NoEntryFound, NoRepository, SchemaError
 logging.getLogger("github").setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
 
+from oauthlogin.models import OAuthConnection
+
 
 def login_as_user(user):
     """Login as the user."""
-    connection = user.oauth_connections.get(provider_key="github")
+    connection = OAuthConnection.objects.get(user=user, provider_key="github")
     if connection.access_token_expired():
         connection.refresh_access_token()
 
@@ -30,8 +32,8 @@ file_paths = [
 def get_file(repo):
     for path in file_paths:
         try:
-            return repo.get_contents("catalog.json").decoded_content.decode("utf-8")
-        except UnknownObjectException as error:
+            return repo.get_contents(path).decoded_content.decode("utf-8")
+        except UnknownObjectException:
             logger.info(f"File not found: {path} from: {repo.full_name}")
             continue
         except GithubException:
@@ -47,7 +49,6 @@ def get_file(repo):
 def get(user, source):
     gh = login_as_user(user)
     organization, repo = source.name.split("/")
-
     try:
         user = gh.get_user(organization)
     except UnknownObjectException:
