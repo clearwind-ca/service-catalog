@@ -1,9 +1,11 @@
-from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.shortcuts import render
+
 from web.helpers import process_query_params
 
 from .models import SystemLog
-from django.core.paginator import Paginator
+
 
 @login_required
 @process_query_params

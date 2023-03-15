@@ -1,5 +1,6 @@
 import json
 import logging
+
 from github import Github, GithubException, UnknownObjectException
 
 from catalog.errors import NoEntryFound, NoRepository, SchemaError
