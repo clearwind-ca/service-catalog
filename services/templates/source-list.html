@@ -19,11 +19,13 @@
                 {% for source in sources %}
                     <tr>
                         <td><code>{{ source.name }}</code></td>
-                        <td><a href="{% url 'services:service_list' %}?source={{ source.slug }}">Services</a></td>
                         <td>
                             <div class="dropdown">
                                 <span class="dropdown-toggle" data-bs-toggle="dropdown">{% octicon "hamburger" %}</span>
                                 <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="{% url 'services:service_list' %}?source={{ source.slug }}" class="dropdown-item">{% octicon "filters" %} Services</a>
+                                    </li>
                                     <li>
                                         <a href="{% url 'services:source_refresh' source.slug %}" class="dropdown-item">{% octicon "refresh" %} Refresh</a>
                                     </li>

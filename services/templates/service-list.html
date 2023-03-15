@@ -60,7 +60,7 @@
             <tbody>    
                 {% for service in services %}
                     <tr>
-                        <td><a href="{% url 'services:service_detail' service.slug %}">{{ service.name }}</a></td>
+                        <td><a href="{% url 'services:service_detail' service.slug %}" class="stretched-link">{{ service.name }}</a></td>
                         <td>
                             {% include "level.html" with level=service.level %}
                             {% include "active.html" with active=service.active show_inactive_only=True %}

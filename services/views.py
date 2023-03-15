@@ -5,13 +5,12 @@ from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
 from django.views.decorators.http import require_POST
-from jsonschema import ValidationError
 
 from catalog.errors import FetchError
 from gh import fetch
 from web.helpers import process_query_params
 
-from .forms import SourceForm
+from .forms import ServiceForm, SourceForm, get_schema
 from .models import Service, Source
 
 
@@ -44,8 +43,8 @@ def service_list(request):
     return render(request, "service-list.html", context)
 
 
-@require_POST
 @login_required
+@require_POST
 def service_delete(request, slug):
     service = get_object_or_404(slug=slug, klass=Service)
     service.delete()
@@ -158,10 +157,15 @@ def source_delete(request, slug):
 def source_validate(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
     try:
-        data = fetch.validate(request.user, source)
-    except (ValidationError, FetchError) as error:
-        msg = "Source failed validation: {}".format(error.message)
-        messages.add_message(request, messages.ERROR, msg)
+        data = fetch.get(request.user, source)
+    except (FetchError) as error:
+        messages.add_message(request, messages.ERROR, error.message)
+        return redirect("services:source_list")
+
+    form = ServiceForm({"data": data})
+    if not form.is_valid():
+        message = f"Validation failed for: `{source.name}` error: {form.nice_errors()}"
+        messages.add_message(request, messages.ERROR, message)
         return redirect("services:source_list")
 
     messages.add_message(request, messages.INFO, "Source successfully validated")
@@ -173,5 +177,5 @@ def schema_detail(request):
     return render(
         request,
         "schema-detail.html",
-        {"path": settings.SERVICE_SCHEMA, "schema": fetch.get_schema()},
+        {"path": settings.SERVICE_SCHEMA, "schema": get_schema()},
     )

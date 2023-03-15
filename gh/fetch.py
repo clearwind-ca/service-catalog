@@ -2,10 +2,8 @@ import json
 import logging
 import os
 
-import jsonschema
 from django.conf import settings
 from github import Github, GithubException, UnknownObjectException
-from jsonschema import ValidationError
 
 from catalog.errors import NoEntryFound, NoRepository, SchemaError
 
@@ -69,26 +67,4 @@ def get(user, source):
     except json.JSONDecodeError:
         raise SchemaError(f"Unable to decode the JSON in: `{repo.full_name}`.")
 
-    schema = get_schema()
-    try:
-        jsonschema.validate(data, schema)
-    except ValidationError as error:
-        raise SchemaError(
-            f"Errors validating the schema in: `{repo.full_name}`. The error is: `{error.message}`."
-        )
-
     return data
-
-
-def get_schema():
-    if not os.path.exists(settings.SERVICE_SCHEMA):
-        raise ValueError(f"No schema file found at: {settings.SERVICE_SCHEMA}")
-
-    with open(settings.SERVICE_SCHEMA, "r") as schema_file:
-        return json.load(schema_file)
-
-
-def validate(user, source):
-    data = get(user, source)
-    schema = get_schema()
-    jsonschema.validate(data, schema)
