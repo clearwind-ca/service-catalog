@@ -20,9 +20,13 @@ from .models import Service, Source
 def service_list(request):
     filters = {}
     get = request.GET
-    for param in ("active", "level"):
-        if get[param] is not None:
-            filters[param] = get[param]
+    for param, lookup in (
+        ("active", "active"),
+        ("level", "level"),
+        ("source", "source__slug"),
+    ):
+        if get.get(param) is not None:
+            filters[lookup] = get[param]
 
     services = Service.objects.filter(**filters).order_by("name")
 
@@ -35,6 +39,7 @@ def service_list(request):
         "levels": sorted(
             [k[0] for k in Service.objects.values_list("level").distinct()]
         ),
+        "filters": filters,
     }
     return render(request, "service-list.html", context)
 

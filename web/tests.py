@@ -69,9 +69,9 @@ class TestQs(TestCase):
         return qs(request, **overrides)
 
     def test_qs(self):
-        self.assertEqual(self._test_qs(""), "")
+        self.assertEqual(self._test_qs(""), "?")
         # Irrelevant params are ignored.
-        self.assertEqual(self._test_qs("foo=bar"), "")
+        self.assertEqual(self._test_qs("foo=bar"), "?")
         self.assertEqual(self._test_qs("page=10"), "?page=10")
         # Override params works.
         self.assertEqual(self._test_qs("page=10", page=3), "?page=3")
@@ -79,6 +79,7 @@ class TestQs(TestCase):
         self.assertEqual(
             self._test_qs("page=10&active=yes", page=3), "?page=3&active=yes"
         )
+        self.assertEqual(self._test_qs("level=1"), "?level=1")
         # No is False and then converted back to no.
         self.assertEqual(self._test_qs("active=no"), "?active=no")
         # Something that converts to None is ignored

@@ -43,6 +43,11 @@
         </button>
     </div>
 
+    {% if filters %}
+        <p class="form-text">Filtered by: {% for k, v in filters.items %}<code>{{ k }}: {{ v }}</code>{% if not forloop.last %} and {% endif %}{% endfor %}.</p>
+    {% endif %}
+
+
     {% if services %}
         <table class="table table-striped my-3">
             <thead>

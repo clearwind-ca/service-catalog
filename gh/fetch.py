@@ -5,6 +5,7 @@ import os
 import jsonschema
 from django.conf import settings
 from github import Github, GithubException, UnknownObjectException
+from jsonschema import ValidationError
 
 from catalog.errors import NoEntryFound, NoRepository, SchemaError
 
@@ -67,6 +68,14 @@ def get(user, source):
         data = json.loads(entry)
     except json.JSONDecodeError:
         raise SchemaError(f"Unable to decode the JSON in: `{repo.full_name}`.")
+
+    schema = get_schema()
+    try:
+        jsonschema.validate(data, schema)
+    except ValidationError as error:
+        raise SchemaError(
+            f"Errors validating the schema in: `{repo.full_name}`. The error is: `{error.message}`."
+        )
 
     return data
 

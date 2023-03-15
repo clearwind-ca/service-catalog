@@ -29,6 +29,10 @@ main {
     margin-bottom: 0;
 }
 
+.dropdown-item svg {
+    width: 16px;
+}
+
 @media screen and (max-width: 767px) {
     #navbar-side {
         display: none;

@@ -18,7 +18,13 @@ def attempt_yesno(value):
     }.get(value)
 
 
-default_query_params = {"per_page": 10, "page": None, "active": None, "level": None}
+default_query_params = {
+    "per_page": 10,
+    "page": None,
+    "active": None,
+    "level": None,
+    "source": None,
+}
 
 
 def process_query_params(func):
@@ -31,6 +37,7 @@ def process_query_params(func):
         parsed["page"] = attempt_int(request.GET.get("page"))
         parsed["active"] = attempt_yesno(request.GET.get("active"))
         parsed["level"] = attempt_int(request.GET.get("level"))
+        parsed["source"] = request.GET.get("source")
 
         if request.GET.get("per_page"):
             try:

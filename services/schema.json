@@ -5,7 +5,7 @@
     "properties": {
         "level": {"type": "number", "minimum": 1, "maximum": 10},
         "type": {"type": "string"},
-        "names": {"type": "string"},
+        "name": {"type": "string"},
         "description": {"type": "string"},
         "active": {"type": "boolean"},
         "dependencies": {
@@ -24,5 +24,5 @@
             "additionalProperties": false
         }
     },
-    "required": ["level", "type", "names"]
+    "required": ["level", "type", "name"]
 }

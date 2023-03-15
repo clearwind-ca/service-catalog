@@ -78,7 +78,7 @@ class TestFetch(TestCase):
         """
         Test that if nothing goes wrong, we get back some data from the server.
         """
-        data = {"foo": "bar"}
+        data = {"level": 1, "name": "test", "type": "widget"}
         gh_mock.get_user.return_value = None
         get_file_mock.return_value = json.dumps(data)
         self.assertEquals(get(self.user, self.source), data)

@@ -42,7 +42,7 @@ def qs(request, **overrides):
     """
 
     def convert(v):
-        if v in [True, False]:
+        if isinstance(v, bool) and v in [True, False]:
             return "yes" if v else "no"
         return v
 
@@ -64,7 +64,7 @@ def qs(request, **overrides):
             if qs[k] == v:
                 del qs[k]
 
-    return "?" + urlencode(qs) if qs else ""
+    return "?" + urlencode(qs) if qs else "?"
 
 
 valid_formats = ("url", "md")
