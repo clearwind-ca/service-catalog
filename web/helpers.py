@@ -25,7 +25,7 @@ default_query_params = {
     "level": None,
     "source": None,
     "slug": None,
-    "target": None
+    "target": None,
 }
 
 

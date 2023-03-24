@@ -1,8 +1,9 @@
 import json
 import logging
+from urllib.parse import urlparse
 
 from github import Github, GithubException, UnknownObjectException
-from urllib.parse import urlparse
+
 from catalog.errors import NoEntryFound, NoRepository, SchemaError
 
 logging.getLogger("github").setLevel(logging.ERROR)
@@ -49,7 +50,7 @@ def get(user, source):
     # Remove the leading slash.
     if path.startswith("/"):
         path = path[1:]
-        
+
     organization, repo = path.split("/")
     try:
         user = gh.get_user(organization)

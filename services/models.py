@@ -1,8 +1,10 @@
+from urllib.parse import urlparse
+
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.urls import reverse
-from urllib.parse import urlparse
+
 
 class Service(models.Model):
     """
@@ -52,9 +54,11 @@ class Service(models.Model):
     def get_absolute_url(self):
         return reverse("services:service_detail", kwargs={"slug": self.slug})
 
+
 def slugify_source(url):
-    return slugify(urlparse(url).path.replace('/', '-'))
-    
+    return slugify(urlparse(url).path.replace("/", "-"))
+
+
 class Source(models.Model):
     """
     The place that the service catalog data has came from. For example the GitHub repo
@@ -76,21 +80,3 @@ class Source(models.Model):
 
     def get_absolute_url(self):
         return reverse("services:source_detail", kwargs={"slug": self.slug})
-
-
-class Schema(models.Model):
-    """
-    A schema is a way of defining the structure of a service. It is a way of
-    defining the fields that are required and the types of those fields.
-    """
-
-    name = models.CharField(max_length=100)
-    slug = models.SlugField(max_length=100, unique=True)
-    schema = models.TextField()
-
-    def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name

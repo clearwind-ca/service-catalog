@@ -190,7 +190,9 @@ def source_refresh(request, slug):
     try:
         data = fetch.get(request.user, source)
     except FetchError as error:
-        add_log(source, messages.ERROR, error.message, add_message=True, request=request)
+        add_log(
+            source, messages.ERROR, error.message, add_message=True, request=request
+        )
         return redirect("services:source_detail", slug=source.slug)
 
     service, msg = _refresh_source(data, source)
@@ -201,7 +203,9 @@ def source_refresh(request, slug):
 @login_required
 def source_add(request):
     if request.method == "GET":
-        return render(request, "source-add.html", context={'file_paths':fetch.file_paths})
+        return render(
+            request, "source-add.html", context={"file_paths": fetch.file_paths}
+        )
     else:
         form = SourceForm(request.POST)
         if form.is_valid():

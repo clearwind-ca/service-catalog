@@ -1,10 +1,11 @@
 import json
 import os
+from urllib.parse import urlparse
 
 import jsonschema
 from django import forms
 from django.conf import settings
-from urllib.parse import urlparse
+
 from . import models
 
 

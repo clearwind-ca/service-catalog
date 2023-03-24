@@ -293,7 +293,7 @@ class TestAdd(WithUser):
             "level": 1,
             "name": "test-gh",
             "type": "application",
-            "description": "test"
+            "description": "test",
         }
         response = self.client.post(self.url, {"url": "https://gh.com/andy/gh"})
         self.assertEqual(self.get_message(response).level, messages.INFO)
