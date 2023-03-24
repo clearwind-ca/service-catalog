@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load octicons %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item">Sources</li>
+    <li class="breadcrumb-item">{% octicon "verified" %} Sources</li>
 {% endblock %}
 {% load helpers %}
 {% block content %}
@@ -51,23 +51,7 @@
     {% endif %}
 
     {% if sources %}
-        <div class="pagination">
-            <span class="step-links">
-                {% if sources.has_previous %}
-                    <a href="?page=1">&laquo; first</a>
-                    <a href="?page={{ sources.previous_page_number }}">previous</a>
-                {% endif %}
-        
-                <span class="current">
-                    Page {{ sources.number }} of {{ sources.paginator.num_pages }}.
-                </span>
-        
-                {% if sources.has_next %}
-                    <a href="?page={{ sources.next_page_number }}">next</a>
-                    <a href="?page={{ sources.paginator.num_pages }}">last &raquo;</a>
-                {% endif %}
-            </span>
-        </div>
+        {% include "pagination.html" with objects=sources %}
     {% endif %}
     <hr>
     <p class="form-text">The data being pulled is validated using <a href="{% url 'services:schema_detail' %}">this schema.</p>

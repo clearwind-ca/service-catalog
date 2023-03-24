@@ -34,7 +34,7 @@ def process_query_params(func):
 
     def wrapper(request, *args, **kwargs):
         parsed = default_query_params.copy()
-        parsed["page"] = attempt_int(request.GET.get("page"))
+        parsed["page"] = attempt_int(request.GET.get("page", 1)) or 1
         parsed["active"] = attempt_yesno(request.GET.get("active"))
         parsed["level"] = attempt_int(request.GET.get("level"))
         parsed["source"] = request.GET.get("source")

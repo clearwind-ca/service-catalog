@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% load octicons %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item">Sources</li>
+    <li class="breadcrumb-item">{% octicon "scrum" %} Logs</li>
 {% endblock %}
 {% load helpers %}
+{% load humanize %}
 {% block content %}
 <div>
     {% if logs %}
@@ -11,15 +12,25 @@
             <thead>
                 <tr>
                     <th>About</th>
+                    <th>Level</th>
                     <th>Created</th>
-                    
+                    <th>Message</th>
                 </tr>
             </thead>
             <tbody>    
                 {% for log in logs %}
                     <tr>
-                        <td>{{ log.get_target.slug }}</td>
-                        <td>{{ log.created }}</td>
+                        <td>
+                        {% with log.get_target as target %}
+                            {% if target %}
+                                <a href="{{ target.get_absolute_url }}">{{ target.slug }}</a>
+                            {% else %}
+                                {{ log.target_slug }} (deleted)
+                            {% endif %}
+                        {% endwith %}
+                        </td>
+                        <td><span class="badge bg-{{ level|level_as_colour }}">{{ log.level|level_as_text }}</span></td>
+                        <td><span data-bs-toggle="tooltip" data-bs-title="{{ log.created }}">{{ log.created|naturaltime }}</span></td>
                         <td>{{ log.message }}</td>
                     </tr>
                 {% endfor %}
@@ -32,23 +43,7 @@
     {% endif %}
 
     {% if logs %}
-        <div class="pagination">
-            <span class="step-links">
-                {% if logs.has_previous %}
-                    <a href="?page=1">&laquo; first</a>
-                    <a href="?page={{ logs.previous_page_number }}">previous</a>
-                {% endif %}
-        
-                <span class="current">
-                    Page {{ logs.number }} of {{ logs.paginator.num_pages }}.
-                </span>
-        
-                {% if logs.has_next %}
-                    <a href="?page={{ logs.next_page_number }}">next</a>
-                    <a href="?page={{ logs.paginator.num_pages }}">last &raquo;</a>
-                {% endif %}
-            </span>
-        </div>
+        {% include "pagination.html" with objects=logs %}
     {% endif %}
 </div>
 {% endblock %}

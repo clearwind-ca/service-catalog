@@ -7,7 +7,9 @@ from django.test import TestCase
 from django.urls import reverse
 from faker import Faker
 
-from . import forms, models
+from systemlogs.models import get_logs
+
+from . import forms, models, views
 
 logging.getLogger("faker").setLevel(logging.ERROR)
 fake = Faker("en_US")
@@ -107,14 +109,74 @@ class TestServiceList(WithUser):
 
 
 class TestDependencies(TestCase):
+    def setUp(self):
+        self.source = create_source()
+        self.service_parent = create_service(self.source)
+
+    def get_service_stub(self):
+        return {
+            "name": fake.user_name(),
+            "description": fake.text(),
+            "level": 1,
+            "type": "application",
+        }
+
     def test_service_dependencies(self):
         """Test that dependencies are not symmetrical."""
-        source = create_source()
-        service_parent = create_service(source)
-        service_child = create_service(source)
-        service_parent.dependencies.add(service_child)
-        self.assertEqual(service_parent.dependencies.first(), service_child)
+        service_child = create_service(self.source)
+        self.service_parent.dependencies.add(service_child)
+        self.assertEqual(self.service_parent.dependencies.first(), service_child)
         self.assertEqual(service_child.dependencies.count(), 0)
+        self.assertEqual(service_child.dependents().count(), 1)
+
+    def test_create_service_adds_dependencies(self):
+        """Test that create services adds dependencies."""
+        service_stub = self.get_service_stub()
+        service_stub["dependencies"] = [self.service_parent.slug]
+        service = views._create_service(service_stub, self.source)
+        self.assertEqual(service.dependencies.first(), self.service_parent)
+
+    def test_update_service_adds_dependencies(self):
+        """Test that updating a service adds dependencies."""
+        service_stub = self.get_service_stub()
+        service = views._create_service(service_stub, self.source)
+        self.assertEqual(service.dependencies.first(), None)
+
+        service_stub["dependencies"] = [self.service_parent.slug]
+        service = views._update_service(service_stub, service)
+        self.assertEqual(service.dependencies.first(), self.service_parent)
+
+    def test_update_service_does_not_add_incorrect_dependencies(self):
+        """Test that updating a service adds dependencies."""
+        service_stub = self.get_service_stub()
+        service = views._create_service(service_stub, self.source)
+        self.assertEqual(service.dependencies.first(), None)
+
+        service_stub["dependencies"] = ["not-a-slug"]
+        service = views._update_service(service_stub, service)
+        self.assertEqual(service.dependencies.first(), None)
+        self.assertEqual(get_logs(service)[0].level, messages.ERROR)
+
+    def test_update_service_removes_dependencies(self):
+        """Test that updating a service removes dependencies."""
+        service_stub = self.get_service_stub()
+        service_stub["dependencies"] = [self.service_parent.slug]
+        service = views._create_service(service_stub, self.source)
+        self.assertEqual(service.dependencies.first(), self.service_parent)
+
+        service_stub["dependencies"] = []
+        service = views._update_service(service_stub, service)
+        self.assertEqual(service.dependencies.first(), None)
+
+    def test_update_service_keeps_dependencies(self):
+        """Test that updating a service keep dependencies."""
+        service_stub = self.get_service_stub()
+        service_stub["dependencies"] = [self.service_parent.slug]
+        service = views._create_service(service_stub, self.source)
+        self.assertEqual(service.dependencies.first(), self.service_parent)
+
+        service = views._update_service(service_stub, service)
+        self.assertEqual(service.dependencies.first(), self.service_parent)
 
 
 class TestSchema(WithUser):

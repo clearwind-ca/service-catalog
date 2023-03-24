@@ -10,7 +10,7 @@ from .models import SystemLog
 @login_required
 @process_query_params
 def log_list(request):
-    sources = SystemLog.objects.filter().order_by("created")
+    sources = SystemLog.objects.filter().order_by("-created")
     get = request.GET
 
     paginator = Paginator(sources, per_page=get["per_page"])
@@ -19,5 +19,6 @@ def log_list(request):
 
     context = {
         "logs": page_obj,
+        "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
     }
     return render(request, "log-list.html", context)

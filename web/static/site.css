@@ -2,6 +2,15 @@
     fill: white;
 }
 
+#navbar-top .dropdown-menu svg {
+    fill: black;
+}
+
+#navbar-top .dropdown-menu .active svg {
+    fill: white;
+}
+
+
 body {
     min-height: 100vh;
     min-height: -webkit-fill-available;
@@ -21,6 +30,12 @@ main {
     overflow-y: hidden;
 }
 
+.breadcrumb-item a {
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+}
+
 #main-content {
     width: 100%;
 }
@@ -29,7 +44,7 @@ main {
     margin-bottom: 0;
 }
 
-.dropdown-item svg {
+.page-link svg {
     width: 16px;
 }
 
@@ -41,6 +56,26 @@ main {
         display: block;
     }
 
+}
+
+svg {
+    vertical-align: -.15em;
+    pointer-events: none;
+    width: 16px;
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
+}
+
+.new-line {
+    display: block;
+    margin-top: 0.3em;
+    padding-bottom: 0.3em;
+    margin-bottom: 0.6em;
+    border-bottom: 1px solid gray;
+}
+
+table > tbody > tr:last-child > td {
+    border-bottom-width: 0;
 }
 
 @media screen and (min-width: 765px) {

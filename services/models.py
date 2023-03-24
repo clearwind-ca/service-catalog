@@ -1,6 +1,7 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.template.defaultfilters import slugify
+from django.urls import reverse
 
 
 class Service(models.Model):
@@ -35,12 +36,18 @@ class Service(models.Model):
     # This is a JSON object, or a Python dictionary of key/value pairs.
     meta = models.JSONField(blank=True, null=True)
 
+    def dependents(self):
+        return Service.objects.filter(dependencies__in=[self])
+
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse("services:service_detail", kwargs={"slug": self.slug})
 
 
 class Source(models.Model):
@@ -62,6 +69,9 @@ class Source(models.Model):
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name.replace("/", "-"))
         super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse("services:source_list")
 
 
 class Schema(models.Model):

@@ -1,0 +1,30 @@
+{% load octicons %}
+{% load helpers %}
+<div class="py-3">
+    <nav>
+        <ul class="pagination pagination-sm position-absolute start-50 translate-middle">
+                {% if objects.has_previous %}
+                    <li class="page-item"><a href="{% qs request page=objects.previous_page_number %}" class="page-link">{% octicon "arrow-left" %}</a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">{% octicon "arrow-left" %}</span></li>
+                {% endif %}
+
+                {% for page in page_range %} 
+                    <li class="page-item">
+                        {% if page == objects.paginator.ELLIPSIS %}
+                            <span class="page-link disabled">...</span>
+                        {% else %}
+                            <a href="{% qs request page=page %}" class="page-link {% if page == request.GET.page %}active{% endif %}">{{ page }}</a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+
+
+                {% if objects.has_next %}
+                    <li class="page-item"><a href="{% qs request page=objects.next_page_number %}" class="page-link m-3">{% octicon "arrow-right" %}</a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">{% octicon "arrow-right" %}</span></li>
+                {% endif %}
+        </ul>
+    </nav>
+</div>

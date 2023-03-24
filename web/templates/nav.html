@@ -1,17 +1,18 @@
 {% load helpers %}
+{% load octicons %}
 <li class="{{ li_class }}">
-    <a class="{{ a_class }} {% at_url request 'services:service_list' %}" href="{% url 'services:service_list' %}">Services</a>
+    <a class="{{ a_class }} {% at_url request 'services:service_list' %}" href="{% url 'services:service_list' %}">{% octicon "dashboard" class="bi me-2" %} Services</a>
 </li>
 <li class="{{ li_class }}">
-    <a class="{{ a_class }}" href="">Health</a>
+    <a class="{{ a_class }}" href="">{% octicon "heart" %} Health</a>
 </li>
 <li class="{{ li_class }}">
-    <a class="{{ a_class }}" href="">Deployments</a>
+    <a class="{{ a_class }}" href="">{% octicon "graph" %} Deployments</a>
 </li>
-<hr/>
+<li class="new-line"></li>
 <li class="{{ li_class }}">
-    <a class="{{ a_class }} {% at_url request 'services:source_list' %}" href="{% url 'services:source_list' %}">Sources</a>
+    <a class="{{ a_class }} {% at_url request 'services:source_list' %}" href="{% url 'services:source_list' %}">{% octicon "signed" %} Sources</a>
 </li>
 <li class="{{ li_class }}">
-    <a class="{{ a_class }} {% at_url request 'servicelogs:log_list' %}" href="{% url 'servicelogs:log_list' %}">Logs</a>
+    <a class="{{ a_class }} {% at_url request 'systemlogs:log_list' %}" href="{% url 'systemlogs:log_list' %}">{% octicon "scrum" %} Logs</a>
 </li>

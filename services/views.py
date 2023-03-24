@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
@@ -8,6 +9,7 @@ from django.views.decorators.http import require_POST
 
 from catalog.errors import FetchError
 from gh import fetch
+from systemlogs.models import SystemLog, add_log, get_target_filters
 from web.helpers import process_query_params
 
 from .forms import ServiceForm, SourceForm, get_schema
@@ -39,6 +41,7 @@ def service_list(request):
             [k[0] for k in Service.objects.values_list("level").distinct()]
         ),
         "filters": filters,
+        "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
     }
     return render(request, "service-list.html", context)
 
@@ -48,14 +51,26 @@ def service_list(request):
 def service_delete(request, slug):
     service = get_object_or_404(slug=slug, klass=Service)
     service.delete()
-    messages.add_message(request, messages.INFO, "Service successfully deleted")
+    add_log(
+        service,
+        messages.INFO,
+        "Service successfully deleted",
+        add_message=True,
+        request=request,
+    )
     return redirect("services:service_list")
 
 
 @login_required
 def service_detail(request, slug):
     service = get_object_or_404(slug=slug, klass=Service)
-    context = {"service": service, "source": service.source}
+    context = {
+        "service": service,
+        "source": service.source,
+        "logs": SystemLog.objects.filter(**get_target_filters(service)).order_by(
+            "-created"
+        )[:3],
+    }
     return render(request, "service-detail.html", context)
 
 
@@ -71,8 +86,66 @@ def source_list(request):
 
     context = {
         "sources": page_obj,
+        "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
     }
     return render(request, "source-list.html", context)
+
+
+def _create_service(data, source):
+    service = Service.objects.create(
+        name=data["name"],
+        description=data.get("description"),
+        type=data["type"],
+        level=data["level"],
+        meta=data.get("meta"),
+        source=source,
+    )
+    if "dependencies" in data:
+        for dependency in data["dependencies"]:
+            dependency = Service.objects.get(slug=dependency)
+            service.dependencies.add(dependency)
+
+    return service
+
+
+def _update_service(data, slug):
+    service = Service.objects.get(slug=slug)
+    service.name = data["name"]
+    service.description = data.get("description")
+    service.type = data["type"]
+    service.level = data["level"]
+    service.meta = data.get("meta")
+    service.save()
+
+    # Add in dependencies if they exist, otherwise log a message.
+    if "dependencies" in data:
+        for dependency in data["dependencies"]:
+            try:
+                dependency = Service.objects.get(slug=dependency)
+            except ObjectDoesNotExist:
+                add_log(
+                    service,
+                    messages.ERROR,
+                    "Dependency {} skipped because it does not exist when processing the catalog data".format(
+                        dependency
+                    ),
+                )
+                continue
+            service.dependencies.add(dependency)
+
+    # Remove any depenedencies that are not in the catalog data.
+    for dependency in service.dependencies.all():
+        if dependency.slug not in data["dependencies"]:
+            add_log(
+                service,
+                messages.INFO,
+                "Removed dependency {} because it is not in the catalog data".format(
+                    dependency
+                ),
+            )
+            service.dependencies.remove(dependency)
+
+    return service
 
 
 @login_required
@@ -88,37 +161,12 @@ def source_refresh(request, slug):
     slug = slugify(data["name"])
     exists = Service.objects.filter(slug=slug).exists()
     if not exists:
-        service = Service.objects.create(
-            name=data["name"],
-            description=data.get("description"),
-            type=data["type"],
-            level=data["level"],
-            meta=data.get("meta"),
-            source=source,
-        )
-        if "dependencies" in data:
-            for dependency in data["dependencies"]:
-                dependency = Service.objects.get(slug=dependency)
-                service.dependencies.add(dependency)
-        messages.add_message(request, messages.INFO, "Created service successfully")
+        service = _create_service(data, source)
+        msg = "Created service successfully"
     else:
-        service = Service.objects.get(slug=slug)
-        service.name = data["name"]
-        service.description = data.get("description")
-        service.type = data["type"]
-        service.level = data["level"]
-        service.meta = data.get("meta")
-        service.save()
-        if "dependencies" in data:
-            for dependency in data["dependencies"]:
-                print(dependency)
-                dependency = Service.objects.get(slug=dependency)
-                service.dependencies.add(dependency)
-        messages.add_message(
-            request,
-            messages.INFO,
-            "Refreshed service successfully",
-        )
+        service = _update_service(data, slug)
+        msg = "Refreshed service successfully"
+    add_log(service, messages.INFO, msg, add_message=True, request=request)
     return redirect("services:service_detail", slug=service.slug)
 
 
@@ -129,8 +177,8 @@ def source_add(request):
     else:
         form = SourceForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.add_message(request, messages.INFO, "Source successfully added")
+            source = form.save()
+            add_log(source, messages.INFO, "Source successfully added", add_message=True, request=request)
             return redirect("services:source_list")
         else:
             messages.add_message(request, messages.ERROR, form.nice_errors())
@@ -149,7 +197,7 @@ def source_delete(request, slug):
         )
         return redirect("services:source_list")
     source.delete()
-    messages.add_message(request, messages.INFO, "Source successfully deleted")
+    add_log(source, messages.INFO, "Source successfully deleted", add_message=True, request=request)
     return redirect("services:source_list")
 
 
@@ -159,16 +207,16 @@ def source_validate(request, slug):
     try:
         data = fetch.get(request.user, source)
     except (FetchError) as error:
-        messages.add_message(request, messages.ERROR, error.message)
+        add_log(source, messages.ERROR, error.message, add_message=True, request=request)
         return redirect("services:source_list")
 
     form = ServiceForm({"data": data})
     if not form.is_valid():
         message = f"Validation failed for: `{source.name}` error: {form.nice_errors()}"
-        messages.add_message(request, messages.ERROR, message)
+        add_log(source, messages.ERROR, message, add_message=True, request=request)
         return redirect("services:source_list")
 
-    messages.add_message(request, messages.INFO, "Source successfully validated")
+    add_log(source, messages.INFO, "Source successfully validated", add_message=True, request=request)
     return redirect("services:source_list")
 
 

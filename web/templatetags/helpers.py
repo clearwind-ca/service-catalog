@@ -5,6 +5,7 @@ from django import template
 from django.urls import reverse
 from django.utils.html import urlize
 from django.utils.safestring import mark_safe
+from django.contrib.messages import constants
 
 from web.helpers import default_query_params
 
@@ -13,8 +14,8 @@ register = template.Library()
 import json
 
 
-@register.filter(name="colour")
-def colour(value):
+@register.filter(name="level_as_colour")
+def level_as_colour(value):
     levels = {
         1: "warning",
         2: "primary",
@@ -23,6 +24,15 @@ def colour(value):
         5: "secondary",
     }
     return levels.get(value, "dark")
+
+@register.filter(name="level_as_text")
+def level_as_text(value):
+    levels = {
+        constants.DEBUG: "Debug",
+        constants.INFO: "Info",
+        constants.ERROR: "Error",
+    }
+    return levels.get(value, "Unknown")
 
 
 @register.filter(name="markdown")

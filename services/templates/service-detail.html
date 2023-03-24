@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% load helpers %}
+{% load humanize %}
+{% load octicons %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item"><a href="{% url 'services:service_list' %}">Services</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'services:service_list' %}">{% octicon "dashboard" %} Services</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{ service.name }}</li>
 {% endblock %}
 {% block content %}
@@ -9,7 +11,7 @@
     <h3>{{ service.name }}</h3>
     <p>
         {% include "level.html" with level=service.level %}
-        {% include "active.html" with active=service.is_active %}
+        {% include "active.html" with active=service.active %}
     </p>
     {% if service.description %}
         <p>{{ service.description|markdown }}</p>
@@ -23,7 +25,7 @@
                     {% include "dependencies.html" with items=service.dependencies.all type="Depends" %}
                 {% endif %}
                 {% if service.service_set.exists %}
-                    {% include "dependencies.html" with items=service.service_set.all type="Dependent" %}
+                    {% include "dependencies.html" with items=service.dependents.all type="Dependent" %}
                 {% endif %}
             {% else %}
                 {% include "blankslate.html" with message="No services define this service as a dependency and this service is not dependent upon another service." %}
@@ -38,6 +40,25 @@
                 {% include "fields.html" with items=service.meta %}
             {% else %}
                 {% include "blankslate.html" with message="No metadata has been defined for this service." %}
+            {% endif %}
+        </div>
+    </div>
+    <div class="card mt-3 mb-3">
+        <div class="card-header fw-bold">Logs</div>
+        <div class="card-body">
+            {% if logs %}
+                <table class="table">
+                    {% for log in logs %}
+                    <tr>
+                        <td><span data-bs-toggle="tooltip" data-bs-title="{{ log.created }}">{{ log.created|naturaltime }}</span></td>
+                        <td><span class="badge bg-{{ log.level|level_as_colour }}">{{ log.level|level_as_text }}</span></td>
+                        <td>{{ log.message }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                <p class="form-text">Limited to the last 3 logs. <a href="{% url 'systemlogs:log_list' %}">View more in logs</a>.</p>
+            {% else %}
+                {% include "blankslate.html" with message="No logs found for this service." %}
             {% endif %}
         </div>
     </div>
