@@ -81,7 +81,7 @@ OAUTH_LOGIN_PROVIDERS = {
 }
 ROOT_URLCONF = "catalog.urls"
 SERVICE_SCHEMA = os.environ.get(
-    "SERVICE_SCHEMA", os.path.join(BASE_DIR, "services", "schema.json")
+    "SERVICE_SCHEMA", os.path.join(BASE_DIR, "catalog", "schemas", "schema.json")
 )
 SECRET_KEY = os.environ.get("SECRET_KEY")
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

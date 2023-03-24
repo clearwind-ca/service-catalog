@@ -22,6 +22,12 @@
                 }
             },
             "additionalProperties": false
+        },
+        "files": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
         }
     },
     "required": ["level", "type", "name"]

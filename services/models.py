@@ -17,6 +17,7 @@ class Service(models.Model):
     slug = models.SlugField(max_length=100, unique=True)
     # A description of the service, used in the detail page. Markdown is supported.
     description = models.TextField()
+    path = models.CharField(max_length=255)
     # Up to the user to define this, some tag that makes sense within their organisation.
     type = models.CharField(max_length=100)
 

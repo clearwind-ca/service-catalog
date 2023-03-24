@@ -23,20 +23,45 @@ def login_as_user(user):
 
 file_paths = [
     "catalog.json",
-    ".github/catalog.json",
+    "service.json",
+    ".service-catalog/catalog.json",
 ]
 
 
-def get_file(repo):
-    for path in file_paths:
+def get_contents(repo, path):
+    """
+    Actually get the file contents.
+    """
+    return json.loads(repo.get_contents(path).decoded_content.decode("utf-8"))
+
+def get_file(repo, path):
+    """
+    Get a file from a single path.
+    """
+    try:
+        return {
+            "path": path,
+            "contents": get_contents(repo, path)
+        }
+    except UnknownObjectException:
+        logger.info(f"File not found: {path} from: {repo.full_name}")
+        raise
+    except GithubException:
+        logger.info(f"Error in: {path} from: {repo.full_name}")
+        raise
+    except json.JSONDecodeError:
+        raise SchemaError(f"Unable to decode the JSON in: `{repo.full_name}`.")
+
+
+def get_file_from_list(repo, paths):
+    """
+    Get a file from a list of possible paths, useful for the first lookup.
+    """
+    for path in paths:
         try:
-            return repo.get_contents(path).decoded_content.decode("utf-8")
+            return get_file(repo, path)
         except UnknownObjectException:
-            logger.info(f"File not found: {path} from: {repo.full_name}")
             continue
-        except GithubException:
-            logger.info(f"Error in: {path} from: {repo.full_name}")
-            raise
 
     nice_paths = ", ".join([f"`{p}`" for p in file_paths])
     raise NoEntryFound(
@@ -64,11 +89,21 @@ def get(user, source):
     except UnknownObjectException:
         raise NoRepository(f"Unable to access the repository at: `{repo}`.")
 
-    entry = get_file(repo)
+    results = []
+    already_fetched = []
+    
+    def recursive_get_files(paths):
+        for file in paths:
+            # Try and prevent recursion, just silently skip.
+            if file in already_fetched:
+                continue
+            already_fetched.append(file)
+            result = get_file(repo, file)
+            results.append(result)
+            recursive_get_files(result["contents"].get("files", []))
 
-    try:
-        data = json.loads(entry)
-    except json.JSONDecodeError:
-        raise SchemaError(f"Unable to decode the JSON in: `{repo.full_name}`.")
-
-    return data
+    result = get_file_from_list(repo, file_paths)
+    already_fetched.append(result["path"])
+    results.append(result)
+    recursive_get_files(result["contents"].get("files", []))
+    return results

@@ -10,7 +10,7 @@ from github import GithubException, UnknownObjectException
 from catalog import errors
 from services.models import Source
 
-from .fetch import file_paths, get, get_file, login_as_user
+from .fetch import file_paths, get, get_file, get_file_from_list, login_as_user
 
 logging.getLogger("faker").setLevel(logging.ERROR)
 logging.getLogger("gh.fetch").setLevel(logging.ERROR)
@@ -29,6 +29,7 @@ class TestFetch(TestCase):
             refresh_token=fake.password(),
         )
         self.source = Source.objects.create(url="https://gh.com/andy/gh")
+        self.simple_data = {"level": 1, "name": "test", "type": "widget"}
         return super().setUp()
 
     @patch("gh.fetch.Github")
@@ -42,35 +43,39 @@ class TestFetch(TestCase):
         assert gh_mock.called
 
     @patch("gh.fetch.Github")
-    def test_get_file_errors(self, gh_mock):
+    @patch("gh.fetch.get_contents")
+    def test_get_file_errors(self, get_contents_mock, gh_mock):
         """
         Test the get_file function and catch the UnknownObjectException error
         and turn into a NoEntryFound error.
         """
         repo = gh_mock.get_repo("andy/gh")
-        repo.get_contents.side_effect = UnknownObjectException(404, "Not Found", {})
-        self.assertRaises(errors.NoEntryFound, get_file, repo)
-        assert repo.get_contents.call_count == len(file_paths)
+        get_contents_mock.side_effect = UnknownObjectException(404, "Not Found", {})
+        self.assertRaises(errors.NoEntryFound, get_file_from_list, repo, file_paths)
+        assert get_contents_mock.call_count == len(file_paths)
 
     @patch("gh.fetch.Github")
-    def test_get_file_other_error(self, gh_mock):
+    @patch("gh.fetch.get_contents")
+    def test_get_file_other_error(self, get_contents_mock, gh_mock):
         """
         Test the get_file function and catch the GithubException error.
         """
         repo = gh_mock.get_repo("andy/gh")
-        repo.get_contents.side_effect = GithubException(404, "Not Found", {})
-        self.assertRaises(GithubException, get_file, repo)
-        assert repo.get_contents.call_count == 1
+        get_contents_mock.side_effect = GithubException(404, "Not Found", {})
+        self.assertRaises(GithubException, get_file, repo, "catalog.json")
+        assert get_contents_mock.call_count == 1
 
     @patch("gh.fetch.Github")
-    def test_get_file_works(self, gh_mock):
+    @patch("gh.fetch.get_contents")
+    def test_get_file_works(self, get_contents_mock, gh_mock):
         """
         Test that get_contents gets called if nothing goes wrong. This could
         probably be better since it doesn't test much.
         """
         repo = gh_mock.get_repo("andy/gh")
-        get_file(repo)
-        assert repo.get_contents.call_count
+        get_contents_mock.return_value = {"contents": self.simple_data, "path": "catalog.json"}
+        get_file(repo, "catalog.json")
+        assert get_contents_mock.call_count
 
     @patch("gh.fetch.Github")
     @patch("gh.fetch.get_file")
@@ -78,7 +83,18 @@ class TestFetch(TestCase):
         """
         Test that if nothing goes wrong, we get back some data from the server.
         """
-        data = {"level": 1, "name": "test", "type": "widget"}
+        data = {"contents": self.simple_data, "path": "catalog.json"}
         gh_mock.get_user.return_value = None
-        get_file_mock.return_value = json.dumps(data)
-        self.assertEquals(get(self.user, self.source), data)
+        get_file_mock.return_value = data
+        self.assertEquals(get(self.user, self.source), [data,])
+
+    @patch("gh.fetch.Github")
+    @patch("gh.fetch.get_file")
+    def test_get_data_more_files(self, get_file_mock, gh_mock):
+        """
+        Test that it looks up file contents for all the files.
+        """
+        data = {"contents": {"level": 1, "name": "test", "type": "widget", "files": ["catalog2.json"]}, "path": "catalog.json"}
+        gh_mock.get_user.return_value = None
+        get_file_mock.return_value = data
+        self.assertEquals(get(self.user, self.source), [data, data])

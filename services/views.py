@@ -121,7 +121,7 @@ def _create_service(data, source):
                 add_log(
                     service,
                     messages.WARNING,
-                    "Dependency {} skipped because it does not exist when processing the catalog data".format(
+                    "Dependency `{}` skipped because it does not exist when processing the catalog data".format(
                         dependency
                     ),
                 )
@@ -149,7 +149,7 @@ def _update_service(data, slug):
                 add_log(
                     service,
                     messages.WARNING,
-                    "Dependency {} skipped because it does not exist when processing the catalog data".format(
+                    "Dependency `{}` skipped because it does not exist when processing the catalog data".format(
                         dependency
                     ),
                 )
@@ -188,15 +188,16 @@ def _refresh_source(data, source):
 def source_refresh(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
     try:
-        data = fetch.get(request.user, source)
+        results = fetch.get(request.user, source)
     except FetchError as error:
         add_log(
             source, messages.ERROR, error.message, add_message=True, request=request
         )
         return redirect("services:source_detail", slug=source.slug)
 
-    service, msg = _refresh_source(data, source)
-    add_log(service, messages.INFO, msg, add_message=True, request=request)
+    for data in results:
+        service, msg = _refresh_source(data["contents"], source)
+        add_log(service, messages.INFO, msg, add_message=True, request=request)
     return redirect("services:source_detail", slug=source.slug)
 
 
