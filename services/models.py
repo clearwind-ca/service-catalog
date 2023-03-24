@@ -2,7 +2,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.urls import reverse
-
+from urllib.parse import urlparse
 
 class Service(models.Model):
     """
@@ -36,6 +36,9 @@ class Service(models.Model):
     # This is a JSON object, or a Python dictionary of key/value pairs.
     meta = models.JSONField(blank=True, null=True)
 
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
     def dependents(self):
         return Service.objects.filter(dependencies__in=[self])
 
@@ -49,29 +52,30 @@ class Service(models.Model):
     def get_absolute_url(self):
         return reverse("services:service_detail", kwargs={"slug": self.slug})
 
-
+def slugify_source(url):
+    return slugify(urlparse(url).path.replace('/', '-'))
+    
 class Source(models.Model):
     """
     The place that the service catalog data has came from. For example the GitHub repo
     containing the file.
     """
 
-    HOSTS = {"G": "GitHub"}
-    HOSTS_INVERTED = {v: k for k, v in HOSTS.items()}
-
-    name = models.CharField(max_length=100)
+    url = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100, unique=True)
-    host = models.CharField(max_length=1, choices=[(k, v) for k, v in HOSTS.items()])
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return self.url
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.name.replace("/", "-"))
+        self.slug = slugify_source(self.url)
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse("services:source_list")
+        return reverse("services:source_detail", kwargs={"slug": self.slug})
 
 
 class Schema(models.Model):

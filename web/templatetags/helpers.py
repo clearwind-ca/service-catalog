@@ -26,11 +26,25 @@ def level_as_colour(value):
     return levels.get(value, "dark")
 
 
-@register.filter(name="level_as_text")
-def level_as_text(value):
+@register.filter(name="log_level_as_colour")
+def log_level_as_colour(value):
+    levels = {
+        10: "secondary",
+        20: "secondary",
+        25: "primary",
+        30: "warning",
+        40: "danger",
+    }
+    return levels.get(value, "dark")
+
+
+@register.filter(name="log_level_as_text")
+def log_level_as_text(value):
     levels = {
         constants.DEBUG: "Debug",
         constants.INFO: "Info",
+        constants.SUCCESS: "Success",
+        constants.WARNING: "Warning",
         constants.ERROR: "Error",
     }
     return levels.get(value, "Unknown")
@@ -111,8 +125,11 @@ def apply_format(value, field):
 @register.simple_tag(name="at_url")
 def at_url(request, url):
     """A simple tag to detect if the user is at a certain url, useful for navigation"""
-    if request.path.startswith(reverse(url)):
-        return "active"
+    try:
+        if request.path.startswith(reverse(url)):
+            return "active"
+    except AttributeError:
+        return ""
     return ""
 
 

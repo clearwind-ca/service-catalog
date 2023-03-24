@@ -77,7 +77,7 @@ def service_detail(request, slug):
 @login_required
 @process_query_params
 def source_list(request):
-    sources = Source.objects.filter().order_by("name")
+    sources = Source.objects.filter().order_by("url")
     get = request.GET
 
     paginator = Paginator(sources, per_page=get["per_page"])
@@ -91,6 +91,19 @@ def source_list(request):
     return render(request, "source-list.html", context)
 
 
+@login_required
+def source_detail(request, slug):
+    source = get_object_or_404(slug=slug, klass=Source)
+    context = {
+        "services": source.services.all(),
+        "source": source,
+        "logs": SystemLog.objects.filter(**get_target_filters(source)).order_by(
+            "-created"
+        )[:3],
+    }
+    return render(request, "source-detail.html", context)
+
+
 def _create_service(data, source):
     service = Service.objects.create(
         name=data["name"],
@@ -102,7 +115,17 @@ def _create_service(data, source):
     )
     if "dependencies" in data:
         for dependency in data["dependencies"]:
-            dependency = Service.objects.get(slug=dependency)
+            try:
+                dependency = Service.objects.get(slug=dependency)
+            except ObjectDoesNotExist:
+                add_log(
+                    service,
+                    messages.WARNING,
+                    "Dependency {} skipped because it does not exist when processing the catalog data".format(
+                        dependency
+                    ),
+                )
+                continue
             service.dependencies.add(dependency)
 
     return service
@@ -125,7 +148,7 @@ def _update_service(data, slug):
             except ObjectDoesNotExist:
                 add_log(
                     service,
-                    messages.ERROR,
+                    messages.WARNING,
                     "Dependency {} skipped because it does not exist when processing the catalog data".format(
                         dependency
                     ),
@@ -148,6 +171,18 @@ def _update_service(data, slug):
     return service
 
 
+def _refresh_source(data, source):
+    slug = slugify(data["name"])
+    exists = Service.objects.filter(slug=slug).exists()
+    if not exists:
+        service = _create_service(data, source)
+        msg = f"Created service `{service.slug}` successfully."
+    else:
+        service = _update_service(data, slug)
+        msg = f"Refreshed service `{service.slug}` successfully."
+    return (service, msg)
+
+
 @login_required
 @process_query_params
 def source_refresh(request, slug):
@@ -155,25 +190,18 @@ def source_refresh(request, slug):
     try:
         data = fetch.get(request.user, source)
     except FetchError as error:
-        messages.add_message(request, messages.ERROR, error.message)
-        return redirect("services:source_list")
+        add_log(source, messages.ERROR, error.message, add_message=True, request=request)
+        return redirect("services:source_detail", slug=source.slug)
 
-    slug = slugify(data["name"])
-    exists = Service.objects.filter(slug=slug).exists()
-    if not exists:
-        service = _create_service(data, source)
-        msg = "Created service successfully"
-    else:
-        service = _update_service(data, slug)
-        msg = "Refreshed service successfully"
+    service, msg = _refresh_source(data, source)
     add_log(service, messages.INFO, msg, add_message=True, request=request)
-    return redirect("services:service_detail", slug=service.slug)
+    return redirect("services:source_detail", slug=source.slug)
 
 
 @login_required
 def source_add(request):
     if request.method == "GET":
-        return render(request, "source-add.html")
+        return render(request, "source-add.html", context={'file_paths':fetch.file_paths})
     else:
         form = SourceForm(request.POST)
         if form.is_valid():
@@ -185,6 +213,14 @@ def source_add(request):
                 add_message=True,
                 request=request,
             )
+            try:
+                data = fetch.get(request.user, source)
+            except FetchError as error:
+                messages.add_message(request, messages.ERROR, error.message)
+                return redirect("services:source_list")
+
+            service, msg = _refresh_source(data, source)
+            add_log(service, messages.INFO, msg, add_message=True, request=request)
             return redirect("services:source_list")
         else:
             messages.add_message(request, messages.ERROR, form.nice_errors())
@@ -222,13 +258,13 @@ def source_validate(request, slug):
         add_log(
             source, messages.ERROR, error.message, add_message=True, request=request
         )
-        return redirect("services:source_list")
+        return redirect("services:source_detail", slug=source.slug)
 
     form = ServiceForm({"data": data})
     if not form.is_valid():
-        message = f"Validation failed for: `{source.name}` error: {form.nice_errors()}"
+        message = f"Validation failed for: `{source.url}`."
         add_log(source, messages.ERROR, message, add_message=True, request=request)
-        return redirect("services:source_list")
+        return redirect("services:source_detail", slug=source.slug)
 
     add_log(
         source,
@@ -237,7 +273,7 @@ def source_validate(request, slug):
         add_message=True,
         request=request,
     )
-    return redirect("services:source_list")
+    return redirect("services:source_detail", slug=source.slug)
 
 
 @login_required

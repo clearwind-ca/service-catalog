@@ -7,6 +7,32 @@
 {% load humanize %}
 {% block content %}
 <div>
+
+    <div class="btn-group" role="group">
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-secondary dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="#">
+                {% octicon "filters" %} Level
+            </button>
+            <ul class="dropdown-menu">
+                {% for level in levels %}
+                <li>
+                    <a class="dropdown-item {% if level == request.GET.level %}active{% endif %}" href="{% qs request level=level %}">{{ level|log_level_as_text }} only</a>
+                </li>
+                {% endfor %}
+                <li>
+                    <a class="dropdown-item" href="{% qs request level=None %}">All</a>
+                </li>
+            </ul>
+        </div>
+        <button type="button" class="btn btn-outline-secondary">
+            <a class="dropdown-item" href="{% url 'systemlogs:log_list' %}">Reset</a>
+        </button>
+    </div>
+
+    {% if filters %}
+        <p class="form-text">Filtered by: {% for k, v in filters.items %}<code>{{ k }}: {{ v }}</code>{% if not forloop.last %} and {% endif %}{% endfor %}.</p>
+    {% endif %}
+
     {% if logs %}
         <table class="table table-striped my-3">
             <thead>
@@ -29,9 +55,9 @@
                             {% endif %}
                         {% endwith %}
                         </td>
-                        <td><span class="badge bg-{{ level|level_as_colour }}">{{ log.level|level_as_text }}</span></td>
-                        <td><span data-bs-toggle="tooltip" data-bs-title="{{ log.created }}">{{ log.created|naturaltime }}</span></td>
-                        <td>{{ log.message }}</td>
+                        <td><span class="badge bg-{{ log.level|log_level_as_colour }}">{{ log.level|log_level_as_text }}</span></td>
+                        <td>{% include "since.html" with since=log.created %}</td>
+                        <td>{{ log.message|markdown }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

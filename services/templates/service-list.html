@@ -53,8 +53,9 @@
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th></th>
+                    <th>Level</th>
                     <th>Type</th>
+                    <th>Updated</th>
                 </tr>
             </thead>
             <tbody>    
@@ -66,6 +67,7 @@
                             {% include "active.html" with active=service.active show_inactive_only=True %}
                         </td>
                         <td>{{ service.type }}</td>
+                        <td>{% include "since.html" with since=service.updated %}</td>
                     </tr>
                 {% endfor %}
             </tbody>

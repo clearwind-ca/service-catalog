@@ -18,7 +18,7 @@ fake = Faker("en_US")
 def create_source():
     """Create a source."""
     return forms.SourceForm(
-        {"name": f"{fake.user_name()}/{fake.user_name()}", "host": "G"}
+        {"url": f"https://github.com/{fake.user_name()}/{fake.user_name()}"}
     ).save()
 
 
@@ -55,11 +55,11 @@ class ServiceTestCase(TestCase):
 
     def test_source_validator(self):
         """Validate the source name validator."""
-        form = forms.SourceForm({"name": "ownername", "host": "G"})
+        form = forms.SourceForm({"url": "something"})
         self.assertFalse(form.is_valid())
-        assert "name" in form.errors
+        assert "url" in form.errors
 
-        form = forms.SourceForm({"name": "owner/name", "host": "G"})
+        form = forms.SourceForm({"url": "https://github.com/gh/gh"})
         self.assertTrue(form.is_valid(), form.errors)
 
 
@@ -155,7 +155,7 @@ class TestDependencies(TestCase):
         service_stub["dependencies"] = ["not-a-slug"]
         service = views._update_service(service_stub, service)
         self.assertEqual(service.dependencies.first(), None)
-        self.assertEqual(get_logs(service)[0].level, messages.ERROR)
+        self.assertEqual(get_logs(service)[0].level, messages.WARNING)
 
     def test_update_service_removes_dependencies(self):
         """Test that updating a service removes dependencies."""
@@ -285,17 +285,24 @@ class TestAdd(WithUser):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "source-add.html")
 
-    def test_post(self):
+    @patch("services.views.fetch")
+    def test_post(self, mock_fetch):
         """Test the source add view with a POST."""
         self.client.force_login(self.user)
-        response = self.client.post(self.url, {"host": "G", "name": "andy/gh"})
+        mock_fetch.get.return_value = {
+            "level": 1,
+            "name": "test-gh",
+            "type": "application",
+            "description": "test"
+        }
+        response = self.client.post(self.url, {"url": "https://gh.com/andy/gh"})
         self.assertEqual(self.get_message(response).level, messages.INFO)
         assert models.Source.objects.filter(slug="andy-gh").exists()
 
     def test_post_errors(self):
         """Test the source add view with a POST that errors"""
         self.client.force_login(self.user)
-        response = self.client.post(self.url, {"host": "G", "name": "andy"})
+        response = self.client.post(self.url, {"url": "sort-of-failure"})
         self.assertEqual(self.get_message(response).level, messages.ERROR)
         assert not models.Source.objects.filter(slug="andy-gh").exists()
 

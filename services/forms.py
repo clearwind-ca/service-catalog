@@ -4,7 +4,7 @@ import os
 import jsonschema
 from django import forms
 from django.conf import settings
-
+from urllib.parse import urlparse
 from . import models
 
 
@@ -16,17 +16,19 @@ class BaseForm:
 class SourceForm(forms.ModelForm, BaseForm):
     class Meta:
         model = models.Source
-        fields = ("name", "host")
+        fields = ("url",)
 
-    def clean_name(self):
-        name = self.cleaned_data["name"]
-        if not self.data.get("host"):
-            raise forms.ValidationError("A host must be selected.")
-        if models.Source.objects.filter(name=name, host=self.data["host"]).exists():
-            raise forms.ValidationError("A source with this name already exists.")
-        if "/" not in name and self.data["host"] == "G":
-            raise forms.ValidationError("Name must be GitHub owner/repository.")
-        return name
+    def clean_url(self):
+        url = self.data["url"]
+        parsed = urlparse(url)
+        if parsed.scheme not in ("http", "https"):
+            raise forms.ValidationError("URL must be HTTP or HTTPS.")
+        if not parsed.path:
+            raise forms.ValidationError("URL must include a path to the repository.")
+        if models.Source.objects.filter(slug=models.slugify_source(url)).count():
+            raise forms.ValidationError(f"Source: `{url}` already exists.")
+
+        return url
 
 
 def get_schema():

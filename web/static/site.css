@@ -86,3 +86,8 @@ table > tbody > tr:last-child > td {
         display: block;
     }
 }
+
+td p {
+    margin: 0;
+    padding: 0;
+  }

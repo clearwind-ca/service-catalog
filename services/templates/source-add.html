@@ -8,19 +8,16 @@
 {% block content %}
 
 <h4>Add a source</h4>
+<p>A source is a GitHub repository containing a entry for the service catalog in one of the following file paths:
+    {% for path in file_paths %}<code>{{ path }}</code>{% if not forloop.last %}, {% endif %}{% endfor %}. Once added
+    it will be updated from the source regularly.
+</p>
 <form method="post" action="{% url 'services:source_add' %}">
     {% csrf_token %}
     <div class="mb-3">
         <label for="source" class="form-label">Source</label>
-        <input name="name" class="form-control" placeholder="location" title="This value must be owner/repository for GitHub" pattern="^([\w.-]+)\/([\w.-]+)$" value="{{ request.POST.name }}">
-        <div class="form-text">The location for your catalog entry. For GitHub this is the <code>owner/repository</code>.</div>
-    </div>
-    <div class="mb-3">
-        <label for="host" class="form-label">Host</label>
-        <select name="host" class="form-control" readonly="True">
-            <option value="G">GitHub</option>
-        </select>
-        <div class="form-text">The source control for your service. Only GitHub is available at this time.</div>
+        <input name="url" class="form-control" placeholder="location" value="{{ request.POST.url }}">
+        <div class="form-text">The repository containing your catalog entry. For GitHub this is the URL to the repository</code>.</div>
     </div>
     <button type="submit" class="btn btn-primary">{% octicon 'plus' %} Add source</button>
 </form>

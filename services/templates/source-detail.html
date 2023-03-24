@@ -3,44 +3,28 @@
 {% load humanize %}
 {% load octicons %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item"><a href="{% url 'services:service_list' %}">{% octicon "dashboard" %} Services</a></li>
-    <li class="breadcrumb-item active" aria-current="page">{{ service.name }}</li>
+    <li class="breadcrumb-item"><a href="{% url 'services:service_list' %}">{% octicon "verified" %} Sources</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ source.slug }}</li>
 {% endblock %}
 {% block content %}
 <div>
-    <h3>{{ service.name }}</h3>
-    <p>
-        {% include "level.html" with level=service.level %}
-        {% include "active.html" with active=service.active %}
-    </p>
-    <p class="form-text mb-3">This data was pulled from <code>{{ source.name }}</code> and validated using <a href="{% url 'services:schema_detail' %}">this schema</a>. It has a slug of <code>{{ service.slug }}</code>.</p>
-    {% if service.description %}
-        <p>{{ service.description|markdown }}</p>
-    {% endif %}
-
+    <h3>{{ source.slug }}</h3>
+    <p class="form-text">This source is pulling data from <a href="{{ source.url }}">{{ source.url }}</a> and has a slug of <code>{{ source.slug }}</code>.</p>
     <div class="card mt-3 mb-3">
-        <div class="card-header fw-bold">Dependencies</div>
+        <div class="card-header fw-bold">Services</div>
         <div class="card-body">
-            {% if service.dependencies.exists or service.service_set.exists  %}
-                {% if service.dependencies.exists %}
-                    {% include "dependencies.html" with items=service.dependencies.all type="Depends" %}
-                {% endif %}
-                {% if service.service_set.exists %}
-                    {% include "dependencies.html" with items=service.dependents.all type="Dependent" %}
-                {% endif %}
+            {% if services %}
+                <table class="table">
+                    {% for service in services %}
+                    <tr>
+                        <td><a href="{{ service.get_absolute_url }}">{{ service.name }}</a></td>
+                        <td>{% include "level.html" with level=service.level %}</td>
+                        <td>{% include "active.html" with active=service.active %}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
             {% else %}
-                {% include "blankslate.html" with message="No services define this service as a dependency and this service is not dependent upon another service." %}
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="card mt-3 mb-3">
-        <div class="card-header fw-bold">Metadata</div>
-        <div class="card-body">
-            {% if service.meta %}
-                {% include "fields.html" with items=service.meta %}
-            {% else %}
-                {% include "blankslate.html" with message="No metadata has been defined for this service." %}
+                {% include "blankslate.html" with message="No services found for this source." %}
             {% endif %}
         </div>
     </div>
@@ -58,13 +42,12 @@
                     </tr>
                     {% endfor %}
                 </table>
-                <p class="form-text">Limited to the last 3 logs. <a href="{% url 'systemlogs:log_list' %}?slug={{ service.slug }}&target=service">View more in logs</a>.</p>
+                <p class="form-text">Limited to the last 3 logs. <a href="{% url 'systemlogs:log_list' %}?slug={{ source.slug }}&target=source">View more in logs</a>.</p>
             {% else %}
-                {% include "blankslate.html" with message="No logs found for this service." %}
+                {% include "blankslate.html" with message="No logs found for this source." %}
             {% endif %}
         </div>
     </div>
-
 
     <div class="card">
         <div id="admin" class="card-header fw-bold">Admin</div>
@@ -78,10 +61,21 @@
                     </form>
                 </div>
             </div>
+            
+            <div class="form-group row mb-3">
+                <label for="refresh" class="col-sm-5 col-form-label">Validate this <code>{{ source.name }}</code> without updating.</label>
+                <div class="col-sm-3">
+                    <form method="post" action="{% url 'services:source_validate' source.slug %}">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-primary" value="Validate" />
+                    </form>
+                </div>
+            </div>
+
             <div class="form-group row">
                 <label for="refresh" class="col-sm-5 col-form-label">Delete this from the catalog. It <b>will not delete from</b> <code>{{ source.name }}</code> that must be done manually.</label>
                 <div class="col-sm-3">
-                    <form method="post" action="{% url 'services:service_delete' service.slug %}">
+                    <form method="post" action="{% url 'services:source_delete' source.slug %}">
                         {% csrf_token %}
                         <input type="submit" class="btn btn-danger" value="Delete" />
                     </form>
@@ -89,7 +83,6 @@
             </div>
         </div>
     </div>
-
 
 </div>
 {% endblock %}

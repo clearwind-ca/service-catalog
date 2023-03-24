@@ -1,7 +1,8 @@
 from django.test import RequestFactory, TestCase
 
 from .helpers import process_query_params
-from .templatetags.helpers import (apply_format, level_as_colour, level_as_text, markdown_filter, qs,
+from .templatetags.helpers import (apply_format, level_as_colour,
+                                   log_level_as_text, markdown_filter, qs,
                                    strip_format)
 
 
@@ -48,8 +49,9 @@ class TestColour(TestCase):
         self.assertEqual(level_as_colour(1), "warning")
         self.assertEqual(level_as_colour("foo"), "dark")
 
-    def test_colour_filter(self):
-        self.assertEqual(level_as_text(20), "Info")
+    def test_log_level_filter(self):
+        self.assertEqual(log_level_as_text(20), "Info")
+
 
 class TestMarkdown(TestCase):
     def test_markdown_filter(self):

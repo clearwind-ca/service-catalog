@@ -28,7 +28,7 @@ class TestFetch(TestCase):
             access_token=fake.password(),
             refresh_token=fake.password(),
         )
-        self.source = Source.objects.create(name="andy/gh", host="G")
+        self.source = Source.objects.create(url="https://gh.com/andy/gh")
         return super().setUp()
 
     @patch("gh.fetch.Github")

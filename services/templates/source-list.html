@@ -12,41 +12,23 @@
             <thead>
                 <tr>
                     <th>Source</th>
-                    <th>Actions</th>
+                    <th>Services</th>
+                    <th>Updated</th>
                 </tr>
             </thead>
             <tbody>    
                 {% for source in sources %}
                     <tr>
-                        <td><code>{{ source.name }}</code></td>
-                        <td>
-                            <div class="dropdown">
-                                <span class="dropdown-toggle" data-bs-toggle="dropdown">{% octicon "hamburger" %}</span>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a href="{% url 'services:service_list' %}?source={{ source.slug }}" class="dropdown-item">{% octicon "filters" %} Services</a>
-                                    </li>
-                                    <li>
-                                        <a href="{% url 'services:source_refresh' source.slug %}" class="dropdown-item">{% octicon "refresh" %} Refresh</a>
-                                    </li>
-                                    <li>
-                                        <a href="{% url 'services:source_validate' source.slug %}" class="dropdown-item">{% octicon "check" %} Validate</a>
-                                    </li>
-                                    <li>
-                                        <form method="POST" action="{% url 'services:source_delete' source.slug %}" class="dropdown-item">
-                                            {% csrf_token %}
-                                            <input class="dropdown-item" type="submit" value="Delete">
-                                        </form>
-                                    </li>
-                                </ul>
-                            </div>
+                        <td><a href="{% url 'services:source_detail' source.slug %}">{{ source.slug }}</a></td>
+                        <td>{{ source.services.count }}</td>
+                        <td>{% include "since.html" with since=source.updated %}</td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
     {% else %}
         <div class="blankslate my-3">
-            {% include "blankslate.html" with message="No services matched those filters." %}
+            {% include "blankslate.html" with message="No sources matched those filters." %}
         </div>
     {% endif %}
 

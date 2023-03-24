@@ -2,7 +2,7 @@ import json
 import logging
 
 from github import Github, GithubException, UnknownObjectException
-
+from urllib.parse import urlparse
 from catalog.errors import NoEntryFound, NoRepository, SchemaError
 
 logging.getLogger("github").setLevel(logging.ERROR)
@@ -45,7 +45,12 @@ def get_file(repo):
 
 def get(user, source):
     gh = login_as_user(user)
-    organization, repo = source.name.split("/")
+    path = urlparse(source.url).path
+    # Remove the leading slash.
+    if path.startswith("/"):
+        path = path[1:]
+        
+    organization, repo = path.split("/")
     try:
         user = gh.get_user(organization)
     except UnknownObjectException:
