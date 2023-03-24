@@ -21,7 +21,7 @@
 
 
                 {% if objects.has_next %}
-                    <li class="page-item"><a href="{% qs request page=objects.next_page_number %}" class="page-link m-3">{% octicon "arrow-right" %}</a></li>
+                    <li class="page-item"><a href="{% qs request page=objects.next_page_number %}" class="page-link">{% octicon "arrow-right" %}</a></li>
                 {% else %}
                     <li class="page-item disabled"><span class="page-link">{% octicon "arrow-right" %}</span></li>
                 {% endif %}

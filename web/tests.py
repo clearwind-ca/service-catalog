@@ -1,7 +1,7 @@
 from django.test import RequestFactory, TestCase
 
 from .helpers import process_query_params
-from .templatetags.helpers import (apply_format, colour, markdown_filter, qs,
+from .templatetags.helpers import (apply_format, level_as_colour, level_as_text, markdown_filter, qs,
                                    strip_format)
 
 
@@ -24,10 +24,10 @@ class TestProcessQueryParams(TestCase):
 
     def test_process_query_params(self):
         """Test the process query params decorator works."""
-        self._test_decorator("", {"per_page": 10, "page": None})
+        self._test_decorator("", {"per_page": 10, "page": 1})
         self._test_decorator("per_page=89&page=2", {"per_page": 89, "page": 2})
         self._test_decorator("per_page=102&page=3", {"per_page": 100, "page": 3})
-        self._test_decorator("per_page=foo&page=bar", {"per_page": 10, "page": None})
+        self._test_decorator("per_page=foo&page=bar", {"per_page": 10, "page": 1})
         self._test_decorator("active=yes", {"active": True})
         self._test_decorator("active=no", {"active": False})
         self._test_decorator("active=whatever", {"active": None})
@@ -45,9 +45,11 @@ class TestHomePage(TestCase):
 
 class TestColour(TestCase):
     def test_colour_filter(self):
-        self.assertEqual(colour(1), "warning")
-        self.assertEqual(colour("foo"), "dark")
+        self.assertEqual(level_as_colour(1), "warning")
+        self.assertEqual(level_as_colour("foo"), "dark")
 
+    def test_colour_filter(self):
+        self.assertEqual(level_as_text(20), "Info")
 
 class TestMarkdown(TestCase):
     def test_markdown_filter(self):

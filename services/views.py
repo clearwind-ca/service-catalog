@@ -178,7 +178,13 @@ def source_add(request):
         form = SourceForm(request.POST)
         if form.is_valid():
             source = form.save()
-            add_log(source, messages.INFO, "Source successfully added", add_message=True, request=request)
+            add_log(
+                source,
+                messages.INFO,
+                "Source successfully added",
+                add_message=True,
+                request=request,
+            )
             return redirect("services:source_list")
         else:
             messages.add_message(request, messages.ERROR, form.nice_errors())
@@ -197,7 +203,13 @@ def source_delete(request, slug):
         )
         return redirect("services:source_list")
     source.delete()
-    add_log(source, messages.INFO, "Source successfully deleted", add_message=True, request=request)
+    add_log(
+        source,
+        messages.INFO,
+        "Source successfully deleted",
+        add_message=True,
+        request=request,
+    )
     return redirect("services:source_list")
 
 
@@ -207,7 +219,9 @@ def source_validate(request, slug):
     try:
         data = fetch.get(request.user, source)
     except (FetchError) as error:
-        add_log(source, messages.ERROR, error.message, add_message=True, request=request)
+        add_log(
+            source, messages.ERROR, error.message, add_message=True, request=request
+        )
         return redirect("services:source_list")
 
     form = ServiceForm({"data": data})
@@ -216,7 +230,13 @@ def source_validate(request, slug):
         add_log(source, messages.ERROR, message, add_message=True, request=request)
         return redirect("services:source_list")
 
-    add_log(source, messages.INFO, "Source successfully validated", add_message=True, request=request)
+    add_log(
+        source,
+        messages.INFO,
+        "Source successfully validated",
+        add_message=True,
+        request=request,
+    )
     return redirect("services:source_list")
 
 

@@ -20,7 +20,7 @@ def attempt_yesno(value):
 
 default_query_params = {
     "per_page": 10,
-    "page": None,
+    "page": 1,
     "active": None,
     "level": None,
     "source": None,

@@ -2,10 +2,10 @@ from urllib.parse import urlencode
 
 import markdown
 from django import template
+from django.contrib.messages import constants
 from django.urls import reverse
 from django.utils.html import urlize
 from django.utils.safestring import mark_safe
-from django.contrib.messages import constants
 
 from web.helpers import default_query_params
 
@@ -24,6 +24,7 @@ def level_as_colour(value):
         5: "secondary",
     }
     return levels.get(value, "dark")
+
 
 @register.filter(name="level_as_text")
 def level_as_text(value):
