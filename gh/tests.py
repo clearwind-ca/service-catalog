@@ -73,28 +73,40 @@ class TestFetch(TestCase):
         probably be better since it doesn't test much.
         """
         repo = gh_mock.get_repo("andy/gh")
-        get_contents_mock.return_value = {"contents": self.simple_data, "path": "catalog.json"}
+        get_contents_mock.return_value = {
+            "contents": self.simple_data,
+            "path": "catalog.json",
+        }
         get_file(repo, "catalog.json")
         assert get_contents_mock.call_count
 
     @patch("gh.fetch.Github")
-    @patch("gh.fetch.get_file")
-    def test_get_data(self, get_file_mock, gh_mock):
+    @patch("gh.fetch.get_contents")
+    def test_get_data(self, get_contents_mock, gh_mock):
         """
         Test that if nothing goes wrong, we get back some data from the server.
         """
         data = {"contents": self.simple_data, "path": "catalog.json"}
         gh_mock.get_user.return_value = None
-        get_file_mock.return_value = data
-        self.assertEquals(get(self.user, self.source), [data,])
+        get_contents_mock.return_value = self.simple_data
+        result = get(self.user, self.source)
+        self.assertEquals(len(result), 1)
+        self.assertEquals(result[0], data)
 
     @patch("gh.fetch.Github")
-    @patch("gh.fetch.get_file")
-    def test_get_data_more_files(self, get_file_mock, gh_mock):
+    @patch("gh.fetch.get_contents")
+    def test_get_data_more_files(self, get_contents_mock, gh_mock):
         """
         Test that it looks up file contents for all the files.
         """
-        data = {"contents": {"level": 1, "name": "test", "type": "widget", "files": ["catalog2.json"]}, "path": "catalog.json"}
+        data = {
+            "level": 1,
+            "name": "test",
+            "type": "widget",
+            "files": ["catalog2.json"],
+        }
         gh_mock.get_user.return_value = None
-        get_file_mock.return_value = data
-        self.assertEquals(get(self.user, self.source), [data, data])
+        get_contents_mock.return_value = data
+        result = get(self.user, self.source)
+        self.assertEquals(len(result), 2)
+        self.assertEquals(result[1], {"contents": data, "path": "catalog2.json"})

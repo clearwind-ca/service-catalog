@@ -34,15 +34,13 @@ def get_contents(repo, path):
     """
     return json.loads(repo.get_contents(path).decoded_content.decode("utf-8"))
 
+
 def get_file(repo, path):
     """
     Get a file from a single path.
     """
     try:
-        return {
-            "path": path,
-            "contents": get_contents(repo, path)
-        }
+        return {"path": path, "contents": get_contents(repo, path)}
     except UnknownObjectException:
         logger.info(f"File not found: {path} from: {repo.full_name}")
         raise
@@ -61,11 +59,12 @@ def get_file_from_list(repo, paths):
         try:
             return get_file(repo, path)
         except UnknownObjectException:
+            # This means the file is not found in the repo and we go onto the next one.
             continue
 
     nice_paths = ", ".join([f"`{p}`" for p in file_paths])
     raise NoEntryFound(
-        f"Fetching of service definition failed. No file found in: `{repo.full_name}`. Tried in these locations: {nice_paths}."
+        f"Fetching of service JSON file failed. No file in: `{repo.full_name}`. Tried in these locations: {nice_paths}."
     )
 
 
@@ -91,7 +90,7 @@ def get(user, source):
 
     results = []
     already_fetched = []
-    
+
     def recursive_get_files(paths):
         for file in paths:
             # Try and prevent recursion, just silently skip.
