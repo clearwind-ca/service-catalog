@@ -6,7 +6,8 @@ from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
 from django.views.decorators.http import require_POST
-
+from itertools import chain
+from django.db.models import CharField, Value
 from catalog.errors import FetchError
 from gh import fetch
 from systemlogs.models import SystemLog, add_log, get_target_filters
@@ -67,6 +68,10 @@ def service_detail(request, slug):
     context = {
         "service": service,
         "source": service.source,
+        "related": list(chain(
+            service.dependencies.annotate(relation=Value("dependency", output_field=CharField())),
+            service.dependents().annotate(relation=Value("dependent", output_field=CharField()))
+        )),
         "logs": SystemLog.objects.filter(**get_target_filters(service)).order_by(
             "-created"
         )[:3],
@@ -219,13 +224,14 @@ def source_add(request):
                 request=request,
             )
             try:
-                data = fetch.get(request.user, source)
+                results = fetch.get(request.user, source)
             except FetchError as error:
                 messages.add_message(request, messages.ERROR, error.message)
                 return redirect("services:source_list")
 
-            service, msg = _refresh_source(data, source)
-            add_log(service, messages.INFO, msg, add_message=True, request=request)
+            for data in results:
+                service, msg = _refresh_source(data["contents"], source)
+                add_log(service, messages.INFO, msg, add_message=True, request=request)
             return redirect("services:source_list")
         else:
             messages.add_message(request, messages.ERROR, form.nice_errors())
@@ -258,18 +264,19 @@ def source_delete(request, slug):
 def source_validate(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
     try:
-        data = fetch.get(request.user, source)
+        results = fetch.get(request.user, source)
     except (FetchError) as error:
         add_log(
             source, messages.ERROR, error.message, add_message=True, request=request
         )
         return redirect("services:source_detail", slug=source.slug)
 
-    form = ServiceForm({"data": data})
-    if not form.is_valid():
-        message = f"Validation failed for: `{source.url}`."
-        add_log(source, messages.ERROR, message, add_message=True, request=request)
-        return redirect("services:source_detail", slug=source.slug)
+    for data in results:
+        form = ServiceForm({"data": data["contents"]})
+        if not form.is_valid():
+            message = f"Validation failed for: `{source.url}`."
+            add_log(source, messages.ERROR, message, add_message=True, request=request)
+            return redirect("services:source_detail", slug=source.slug)
 
     add_log(
         source,

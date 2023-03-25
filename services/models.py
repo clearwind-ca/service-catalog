@@ -43,7 +43,7 @@ class Service(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     def dependents(self):
-        return Service.objects.filter(dependencies__in=[self])
+        return Service.objects.filter(dependencies=self)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)

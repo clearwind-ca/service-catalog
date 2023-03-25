@@ -3,7 +3,7 @@
     {% for dependency in items %}
         <tr>
             <td>
-                {% if type == "Dependent" %}
+                {% if dependency.relation == "dependency" %}
                     {% octicon "arrow-up" %} Dependency of
                 {% else %}
                     {% octicon "arrow-down" %} Depends on

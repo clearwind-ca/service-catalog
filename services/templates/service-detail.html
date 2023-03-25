@@ -21,13 +21,8 @@
     <div class="card mt-3 mb-3">
         <div class="card-header fw-bold">Dependencies</div>
         <div class="card-body">
-            {% if service.dependencies.exists or service.service_set.exists  %}
-                {% if service.dependencies.exists %}
-                    {% include "dependencies.html" with items=service.dependencies.all type="Depends" %}
-                {% endif %}
-                {% if service.service_set.exists %}
-                    {% include "dependencies.html" with items=service.dependents.all type="Dependent" %}
-                {% endif %}
+            {% if related  %}
+                {% include "dependencies.html" with items=related %}
             {% else %}
                 {% include "blankslate.html" with message="No services define this service as a dependency and this service is not dependent upon another service." %}
             {% endif %}
