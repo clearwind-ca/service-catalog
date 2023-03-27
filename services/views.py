@@ -10,9 +10,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
 from django.views.decorators.http import require_POST
 
-from catalog.errors import FetchError
+from catalog.errors import FetchError, SchemaError
 from gh import fetch
-from systemlogs.models import SystemLog, add_log, get_target_filters
+from systemlogs.models import add_log
 from web.helpers import process_query_params
 
 from .forms import ServiceForm, SourceForm, get_schema
@@ -53,14 +53,14 @@ def service_list(request):
 @require_POST
 def service_delete(request, slug):
     service = get_object_or_404(slug=slug, klass=Service)
-    service.delete()
     add_log(
         service,
         messages.INFO,
-        "Service successfully deleted",
+        f"Service `{service.slug}` successfully deleted",
         add_message=True,
         request=request,
     )
+    service.delete()
     return redirect("services:service_list")
 
 
@@ -80,9 +80,7 @@ def service_detail(request, slug):
                 ),
             )
         ),
-        "logs": SystemLog.objects.filter(**get_target_filters(service)).order_by(
-            "-created"
-        )[:3],
+        "logs": service.logs().order_by("-created")[:3],
     }
     return render(request, "service-detail.html", context)
 
@@ -110,13 +108,11 @@ def source_detail(request, slug):
     context = {
         "services": source.services.all(),
         "source": source,
-        "logs": SystemLog.objects.filter(**get_target_filters(source)).order_by(
-            "-created"
-        )[:3],
+        "logs": source.logs().order_by("-created")[:3]
     }
     return render(request, "source-detail.html", context)
 
-
+# TODO: this is messy and needs cleaning up, probably all moving to forms.
 def _create_service(data, source):
     service = Service.objects.create(
         name=data["name"],
@@ -144,7 +140,8 @@ def _create_service(data, source):
     return service
 
 
-def _update_service(data, slug):
+def _update_service(data, slug, source):
+    _validate_schema(data, source)
     service = Service.objects.get(slug=slug)
     service.name = data["name"]
     service.description = data.get("description")
@@ -183,15 +180,22 @@ def _update_service(data, slug):
 
     return service
 
+def _validate_schema(data, source):
+    form = ServiceForm({"data": data})
+    if not form.is_valid():
+        message = f"Validation against the schema failed: {form.nice_errors()}"
+        raise SchemaError(message)
+
 
 def _refresh_source(data, source):
+    _validate_schema(data, source)
     slug = slugify(data["name"])
     exists = Service.objects.filter(slug=slug).exists()
     if not exists:
         service = _create_service(data, source)
         msg = f"Created service `{service.slug}` successfully."
     else:
-        service = _update_service(data, slug)
+        service = _update_service(data, slug, source)
         msg = f"Refreshed service `{service.slug}` successfully."
     return (service, msg)
 
@@ -208,9 +212,16 @@ def source_refresh(request, slug):
         )
         return redirect("services:source_detail", slug=source.slug)
 
-    for data in results:
-        service, msg = _refresh_source(data["contents"], source)
-        add_log(service, messages.INFO, msg, add_message=True, request=request)
+    try:
+        for data in results:
+            service, msg = _refresh_source(data["contents"], source)
+            add_log(service, messages.INFO, msg, add_message=True, request=request)
+            add_log(source, messages.INFO, f"Service `{service.slug}` refreshed successfully.", request=request)
+    except SchemaError as error:
+        add_log(
+            source, messages.ERROR, error.message, add_message=True, request=request
+        )
+        return redirect("services:source_detail", slug=source.slug)
     return redirect("services:source_detail", slug=source.slug)
 
 
@@ -257,7 +268,6 @@ def source_delete(request, slug):
             "Source cannot be deleted because it is associated with at least one service. Delete the services first.",
         )
         return redirect("services:source_list")
-    source.delete()
     add_log(
         source,
         messages.INFO,
@@ -265,6 +275,7 @@ def source_delete(request, slug):
         add_message=True,
         request=request,
     )
+    source.delete()
     return redirect("services:source_list")
 
 

@@ -4,7 +4,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.urls import reverse
-
+from django.contrib.contenttypes.fields import GenericRelation
+from systemlogs.models import SystemLog
 
 class Service(models.Model):
     """
@@ -42,6 +43,9 @@ class Service(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    def logs(self):
+        return SystemLog.objects.filter(content_type__model="service", object_id=self.id)
+    
     def dependents(self):
         return Service.objects.filter(dependencies=self)
 
@@ -72,6 +76,9 @@ class Source(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    def logs(self):
+        return SystemLog.objects.filter(content_type__model="source", object_id=self.id)
+    
     def __str__(self):
         return self.url
 

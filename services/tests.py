@@ -7,8 +7,6 @@ from django.test import TestCase
 from django.urls import reverse
 from faker import Faker
 
-from systemlogs.models import get_logs
-
 from . import forms, models, views
 
 logging.getLogger("faker").setLevel(logging.ERROR)
@@ -143,7 +141,7 @@ class TestDependencies(TestCase):
         self.assertEqual(service.dependencies.first(), None)
 
         service_stub["dependencies"] = [self.service_parent.slug]
-        service = views._update_service(service_stub, service)
+        service = views._update_service(service_stub, service, self.source)
         self.assertEqual(service.dependencies.first(), self.service_parent)
 
     def test_update_service_does_not_add_incorrect_dependencies(self):
@@ -153,9 +151,9 @@ class TestDependencies(TestCase):
         self.assertEqual(service.dependencies.first(), None)
 
         service_stub["dependencies"] = ["not-a-slug"]
-        service = views._update_service(service_stub, service)
+        service = views._update_service(service_stub, service, self.source)
         self.assertEqual(service.dependencies.first(), None)
-        self.assertEqual(get_logs(service)[0].level, messages.WARNING)
+        self.assertEqual(service.logs().all()[0].level, messages.WARNING)
 
     def test_update_service_removes_dependencies(self):
         """Test that updating a service removes dependencies."""
@@ -165,7 +163,7 @@ class TestDependencies(TestCase):
         self.assertEqual(service.dependencies.first(), self.service_parent)
 
         service_stub["dependencies"] = []
-        service = views._update_service(service_stub, service)
+        service = views._update_service(service_stub, service, self.source)
         self.assertEqual(service.dependencies.first(), None)
 
     def test_update_service_keeps_dependencies(self):
@@ -175,7 +173,7 @@ class TestDependencies(TestCase):
         service = views._create_service(service_stub, self.source)
         self.assertEqual(service.dependencies.first(), self.service_parent)
 
-        service = views._update_service(service_stub, service)
+        service = views._update_service(service_stub, service, self.source)
         self.assertEqual(service.dependencies.first(), self.service_parent)
 
 
@@ -271,6 +269,14 @@ class TestDelete(WithUser):
         response = self.client.post(self.url)
         self.assertEqual(self.get_message(response).level, messages.ERROR)
         assert models.Source.objects.filter(slug=self.source.slug).exists()
+
+    def test_delete_still_has_log(self):
+        """Test that we've still got the system log entries."""
+        self.client.force_login(self.user)
+        response = self.client.post(self.url)
+        self.assertEqual(self.get_message(response).level, messages.INFO)
+        # Assert that we still have the system log entries for that object.
+        assert self.source.logs().count() > 0
 
 
 class TestAdd(WithUser):

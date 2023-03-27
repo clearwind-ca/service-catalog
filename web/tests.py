@@ -1,8 +1,8 @@
 from django.test import RequestFactory, TestCase
 
 from .helpers import process_query_params
-from .templatetags.helpers import (apply_format, priority_as_colour,
-                                   log_level_as_text, markdown_filter, qs,
+from .templatetags.helpers import (apply_format, log_level_as_text,
+                                   markdown_filter, priority_as_colour, qs,
                                    strip_format)
 
 
