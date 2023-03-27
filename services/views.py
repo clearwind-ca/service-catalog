@@ -108,9 +108,10 @@ def source_detail(request, slug):
     context = {
         "services": source.services.all(),
         "source": source,
-        "logs": source.logs().order_by("-created")[:3]
+        "logs": source.logs().order_by("-created")[:3],
     }
     return render(request, "source-detail.html", context)
+
 
 # TODO: this is messy and needs cleaning up, probably all moving to forms.
 def _create_service(data, source):
@@ -180,6 +181,7 @@ def _update_service(data, slug, source):
 
     return service
 
+
 def _validate_schema(data, source):
     form = ServiceForm({"data": data})
     if not form.is_valid():
@@ -216,7 +218,12 @@ def source_refresh(request, slug):
         for data in results:
             service, msg = _refresh_source(data["contents"], source)
             add_log(service, messages.INFO, msg, add_message=True, request=request)
-            add_log(source, messages.INFO, f"Service `{service.slug}` refreshed successfully.", request=request)
+            add_log(
+                source,
+                messages.INFO,
+                f"Service `{service.slug}` refreshed successfully.",
+                request=request,
+            )
     except SchemaError as error:
         add_log(
             source, messages.ERROR, error.message, add_message=True, request=request

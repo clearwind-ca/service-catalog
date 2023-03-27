@@ -1,13 +1,15 @@
 from django.apps import apps
+from django.conf import settings
 from django.contrib import messages
-from django.contrib.messages import constants
-from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.conf import settings
+from django.contrib.messages import constants
+from django.db import models
+
+
 class SystemLog(models.Model):
     object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey("content_type", "object_id")
     content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True)
 
     level = models.IntegerField(
@@ -15,13 +17,15 @@ class SystemLog(models.Model):
     )
     created = models.DateTimeField(auto_now_add=True)
     message = models.TextField()
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
+    )
 
 
 def add_log(target, level, message, add_message=False, request=None, **kwargs):
     """
     Add a log into the system log
-    
+
     :param target: The target object
     :param level: The level of the log, using the constants from django.contrib.messages
     :param message: The message to log, markdown accepted.

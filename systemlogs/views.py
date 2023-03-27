@@ -1,9 +1,10 @@
+from django.apps import apps
 from django.contrib.auth.decorators import login_required
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages import constants
 from django.core.paginator import Paginator
 from django.shortcuts import render
-from django.apps import apps
-from django.contrib.contenttypes.models import ContentType
+
 from web.helpers import process_query_params
 
 from .models import SystemLog
@@ -33,8 +34,8 @@ def log_list(request):
         filters["content_type__pk"] = ContentType.objects.get_for_model(_model).pk
         filters["object_id"] = _object.pk
 
-        display_filters['target'] = _object.slug
-        display_filters['type'] = target.lower()
+        display_filters["target"] = _object.slug
+        display_filters["type"] = target.lower()
 
     sources = SystemLog.objects.filter(**filters).order_by("-created")
     paginator = Paginator(sources, per_page=get["per_page"])
