@@ -117,7 +117,7 @@ class TestDependencies(TestCase):
         return {
             "name": fake.user_name(),
             "description": fake.text(),
-            "level": 1,
+            "priority": 1,
             "type": "application",
         }
 
@@ -226,14 +226,16 @@ class TestValidate(WithUser):
     def test_validate_good_json(self, mock_fetch):
         """Test the validate sources view."""
         self.client.force_login(self.user)
-        mock_fetch.get.return_value = [{
-            "contents": {
-                "level": 1,
-                "name": "test",
-                "type": "application",
-                "description": "test",
+        mock_fetch.get.return_value = [
+            {
+                "contents": {
+                    "priority": 1,
+                    "name": "test",
+                    "type": "application",
+                    "description": "test",
+                }
             }
-        }]
+        ]
         response = self.client.get(self.url)
         self.assertEqual(self.get_message(response).level, messages.INFO)
 
@@ -292,14 +294,16 @@ class TestAdd(WithUser):
     def test_post(self, mock_fetch):
         """Test the source add view with a POST."""
         self.client.force_login(self.user)
-        mock_fetch.get.return_value = [{
-            "contents": {
-                "level": 1,
-                "name": "test-gh",
-                "type": "application",
-                "description": "test",
+        mock_fetch.get.return_value = [
+            {
+                "contents": {
+                    "priority": 1,
+                    "name": "test-gh",
+                    "type": "application",
+                    "description": "test",
+                }
             }
-        }]
+        ]
         response = self.client.post(self.url, {"url": "https://gh.com/andy/gh"})
         self.assertEqual(self.get_message(response).level, messages.INFO)
         assert models.Source.objects.filter(slug="andy-gh").exists()

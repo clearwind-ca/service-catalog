@@ -1,14 +1,16 @@
 {% load helpers %}
 {% load octicons %}
 <li class="{{ li_class }}">
-    <a class="{{ a_class }} {% at_url request 'services:service_list' %}" href="{% url 'services:service_list' %}">{% octicon "dashboard" class="bi me-2" %} Services</a>
+    <a class="{{ a_class }} {% at_url request 'services:service_list' %}" href="{% url 'services:service_list' %}">{% octicon "dashboard" %} Services</a>
+</li>
+{% if False %}
+<li class="{{ li_class }}">
+    <a class="{{ a_class }} {% at_url request 'health:health' %}" href="{% url 'health:health' %}">{% octicon "heart" %} Health</a>
 </li>
 <li class="{{ li_class }}">
-    <a class="{{ a_class }}" href="">{% octicon "heart" %} Health</a>
+    <a class="{{ a_class }} {% at_url request 'deployments:deployments' %}" href="{% url 'deployments:deployments' %}">{% octicon "graph" %} Deployments</a>
 </li>
-<li class="{{ li_class }}">
-    <a class="{{ a_class }}" href="">{% octicon "graph" %} Deployments</a>
-</li>
+{% endif %}
 <li class="new-line"></li>
 <li class="{{ li_class }}">
     <a class="{{ a_class }} {% at_url request 'services:source_list' %}" href="{% url 'services:source_list' %}">{% octicon "signed" %} Sources</a>

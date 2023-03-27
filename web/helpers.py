@@ -26,6 +26,7 @@ default_query_params = {
     "source": None,
     "slug": None,
     "target": None,
+    "priority": None,
 }
 
 
@@ -39,6 +40,7 @@ def process_query_params(func):
         parsed["page"] = attempt_int(request.GET.get("page", 1)) or 1
         parsed["active"] = attempt_yesno(request.GET.get("active"))
         parsed["level"] = attempt_int(request.GET.get("level"))
+        parsed["priority"] = attempt_int(request.GET.get("priority"))
         for key in ("source", "slug", "target"):
             if request.GET.get(key):
                 parsed[key] = request.GET[key]

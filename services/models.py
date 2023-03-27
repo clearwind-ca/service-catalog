@@ -22,7 +22,7 @@ class Service(models.Model):
     type = models.CharField(max_length=100)
 
     # From 1 to 10, where 1 is the highest priority and 10 is the lowest.
-    level = models.IntegerField(
+    priority = models.IntegerField(
         default=10, validators=[MinValueValidator(1), MaxValueValidator(10)]
     )
     active = models.BooleanField(default=True)

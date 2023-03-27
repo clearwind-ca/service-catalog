@@ -11,7 +11,7 @@
             </td>
             <td><a href="{% url 'services:service_detail' dependency.slug %}">{{ dependency.name }}</a></td>
             <td>
-                {% include "level.html" with level=dependency.level %}
+                {% include "priority.html" with priority=dependency.priority %}
                 {% include "active.html" with active=dependency.active show_inactive_only=True %}
             </td>
         </tr>

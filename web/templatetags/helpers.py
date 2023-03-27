@@ -14,8 +14,8 @@ register = template.Library()
 import json
 
 
-@register.filter(name="level_as_colour")
-def level_as_colour(value):
+@register.filter(name="priority_as_colour")
+def priority_as_colour(value):
     levels = {
         1: "warning",
         2: "primary",

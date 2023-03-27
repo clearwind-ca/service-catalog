@@ -1,13 +1,15 @@
+from itertools import chain
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
+from django.db.models import CharField, Value
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
 from django.views.decorators.http import require_POST
-from itertools import chain
-from django.db.models import CharField, Value
+
 from catalog.errors import FetchError
 from gh import fetch
 from systemlogs.models import SystemLog, add_log, get_target_filters
@@ -24,7 +26,7 @@ def service_list(request):
     get = request.GET
     for param, lookup in (
         ("active", "active"),
-        ("level", "level"),
+        ("priority", "priority"),
         ("source", "source__slug"),
     ):
         if get.get(param) is not None:
@@ -38,8 +40,8 @@ def service_list(request):
 
     context = {
         "services": page_obj,
-        "levels": sorted(
-            [k[0] for k in Service.objects.values_list("level").distinct()]
+        "prorities": sorted(
+            [k[0] for k in Service.objects.values_list("priority").distinct()]
         ),
         "filters": filters,
         "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
@@ -68,10 +70,16 @@ def service_detail(request, slug):
     context = {
         "service": service,
         "source": service.source,
-        "related": list(chain(
-            service.dependencies.annotate(relation=Value("dependency", output_field=CharField())),
-            service.dependents().annotate(relation=Value("dependent", output_field=CharField()))
-        )),
+        "related": list(
+            chain(
+                service.dependencies.annotate(
+                    relation=Value("dependency", output_field=CharField())
+                ),
+                service.dependents().annotate(
+                    relation=Value("dependent", output_field=CharField())
+                ),
+            )
+        ),
         "logs": SystemLog.objects.filter(**get_target_filters(service)).order_by(
             "-created"
         )[:3],
@@ -114,7 +122,7 @@ def _create_service(data, source):
         name=data["name"],
         description=data.get("description"),
         type=data["type"],
-        level=data["level"],
+        priority=data["priority"],
         meta=data.get("meta"),
         source=source,
     )
@@ -141,7 +149,7 @@ def _update_service(data, slug):
     service.name = data["name"]
     service.description = data.get("description")
     service.type = data["type"]
-    service.level = data["level"]
+    service.priority = data["priority"]
     service.meta = data.get("meta")
     service.save()
 

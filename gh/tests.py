@@ -29,7 +29,7 @@ class TestFetch(TestCase):
             refresh_token=fake.password(),
         )
         self.source = Source.objects.create(url="https://gh.com/andy/gh")
-        self.simple_data = {"level": 1, "name": "test", "type": "widget"}
+        self.simple_data = {"priority": 1, "name": "test", "type": "widget"}
         return super().setUp()
 
     @patch("gh.fetch.Github")
@@ -100,7 +100,7 @@ class TestFetch(TestCase):
         Test that it looks up file contents for all the files.
         """
         data = {
-            "level": 1,
+            "priority": 1,
             "name": "test",
             "type": "widget",
             "files": ["catalog2.json"],

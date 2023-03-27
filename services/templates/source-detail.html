@@ -18,7 +18,7 @@
                     {% for service in services %}
                     <tr>
                         <td><a href="{{ service.get_absolute_url }}">{{ service.name }}</a></td>
-                        <td>{% include "level.html" with level=service.level %}</td>
+                        <td>{% include "priority.html" with priority=service.priority %}</td>
                         <td>{% include "active.html" with active=service.active %}</td>
                     </tr>
                     {% endfor %}

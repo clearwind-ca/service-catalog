@@ -23,8 +23,12 @@ DEBUG = os.environ.get("DEBUG")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR.joinpath("db.sqlite3"),
+        "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.environ.get("DB_NAME", BASE_DIR.joinpath("db.sqlite3")),
+        "USER": os.environ.get("DB_USER", ""),
+        "PASSWORD": os.environ.get("DB_PASSWORD", ""),
+        "HOST": os.environ.get("DB_HOST", ""),
+        "PORT": os.environ.get("DB_PORT", ""),
     }
 }
 INSTALLED_APPS = [
@@ -37,6 +41,8 @@ INSTALLED_APPS = [
     "django.contrib.humanize",
     "oauthlogin",
     "services",
+    "health",
+    "deployments",
     "octicons",
     "systemlogs",
     "web",
@@ -56,6 +62,7 @@ LOGGING = {
         "level": "DEBUG",
     },
 }
+LOGIN_URL = "/"
 LOGIN_REDIRECT_URL = "/"
 MESSAGE_TAGS = {
     messages.ERROR: "danger",

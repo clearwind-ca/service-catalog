@@ -1,7 +1,7 @@
 from django.test import RequestFactory, TestCase
 
 from .helpers import process_query_params
-from .templatetags.helpers import (apply_format, level_as_colour,
+from .templatetags.helpers import (apply_format, priority_as_colour,
                                    log_level_as_text, markdown_filter, qs,
                                    strip_format)
 
@@ -46,8 +46,8 @@ class TestHomePage(TestCase):
 
 class TestColour(TestCase):
     def test_colour_filter(self):
-        self.assertEqual(level_as_colour(1), "warning")
-        self.assertEqual(level_as_colour("foo"), "dark")
+        self.assertEqual(priority_as_colour(1), "warning")
+        self.assertEqual(priority_as_colour("foo"), "dark")
 
     def test_log_level_filter(self):
         self.assertEqual(log_level_as_text(20), "Info")
@@ -83,7 +83,8 @@ class TestQs(TestCase):
         self.assertEqual(
             self._test_qs("page=10&active=yes", page=3), "?page=3&active=yes"
         )
-        self.assertEqual(self._test_qs("level=1"), "?level=1")
+        self.assertEqual(self._test_qs("priority=1"), "?priority=1")
+        self.assertEqual(self._test_qs("level=10"), "?level=10")
         # No is False and then converted back to no.
         self.assertEqual(self._test_qs("active=no"), "?active=no")
         # Something that converts to None is ignored

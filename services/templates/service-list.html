@@ -25,16 +25,16 @@
         </div>
         <div class="btn-group" role="group">
             <button type="button" class="btn btn-outline-secondary dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="#">
-                Level
+                Priority
             </button>
             <ul class="dropdown-menu">
-                {% for level in levels %}
+                {% for priority in priorities %}
                 <li>
-                    <a class="dropdown-item {% if level == request.GET.level %}active{% endif %}" href="{% qs request level=level %}">Level {{ level }} only</a>
+                    <a class="dropdown-item {% if level == request.GET.priority %}active{% endif %}" href="{% qs request priority=priority %}">Priority {{ priority }} only</a>
                 </li>
                 {% endfor %}
                 <li>
-                    <a class="dropdown-item" href="{% qs request level=None %}">All</a>
+                    <a class="dropdown-item" href="{% qs request priority=None %}">All</a>
                 </li>
             </ul>
         </div>
@@ -53,7 +53,7 @@
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>Level</th>
+                    <th>Priority</th>
                     <th>Type</th>
                     <th>Updated</th>
                 </tr>
@@ -63,7 +63,7 @@
                     <tr>
                         <td><a href="{% url 'services:service_detail' service.slug %}">{{ service.name }}</a></td>
                         <td>
-                            {% include "level.html" with level=service.level %}
+                            {% include "priority.html" with priority=service.priority %}
                             {% include "active.html" with active=service.active show_inactive_only=True %}
                         </td>
                         <td>{{ service.type }}</td>
