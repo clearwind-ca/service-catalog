@@ -40,7 +40,7 @@ def service_list(request):
 
     context = {
         "services": page_obj,
-        "prorities": sorted(
+        "priorities": sorted(
             [k[0] for k in Service.objects.values_list("priority").distinct()]
         ),
         "filters": filters,

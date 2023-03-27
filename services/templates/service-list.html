@@ -30,7 +30,7 @@
             <ul class="dropdown-menu">
                 {% for priority in priorities %}
                 <li>
-                    <a class="dropdown-item {% if level == request.GET.priority %}active{% endif %}" href="{% qs request priority=priority %}">Priority {{ priority }} only</a>
+                    <a class="dropdown-item {% if priority == request.GET.priority %}active{% endif %}" href="{% qs request priority=priority %}">Priority {{ priority }} only</a>
                 </li>
                 {% endfor %}
                 <li>
@@ -55,7 +55,7 @@
                     <th>Name</th>
                     <th>Priority</th>
                     <th>Type</th>
-                    <th>Updated</th>
+                    <th>{% octicon "past" %} Updated</th>
                 </tr>
             </thead>
             <tbody>    
