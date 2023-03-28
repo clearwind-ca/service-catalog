@@ -127,54 +127,69 @@ class TestDependencies(TestCase):
         self.assertEqual(service_child.dependencies.count(), 0)
         self.assertEqual(service_child.dependents().count(), 1)
 
+    def process_form(self, service_stub):
+        form = forms.ServiceForm({"data":service_stub})
+        form.source = self.source
+        assert form.is_valid(), form.errors
+        return form.save()
+
     def test_create_service_adds_dependencies(self):
         """Test that create services adds dependencies."""
         service_stub = self.get_service_stub()
         service_stub["dependencies"] = [self.service_parent.slug]
-        service = views._create_service(service_stub, self.source)
-        self.assertEqual(service.dependencies.first(), self.service_parent)
+        result = self.process_form(service_stub)
+        assert result["created"]
+        self.assertEqual(result["service"].dependencies.first(), self.service_parent)
 
     def test_update_service_adds_dependencies(self):
         """Test that updating a service adds dependencies."""
         service_stub = self.get_service_stub()
-        service = views._create_service(service_stub, self.source)
-        self.assertEqual(service.dependencies.first(), None)
+        result = self.process_form(service_stub)
+        assert result["created"]
+        self.assertEqual(result["service"].dependencies.first(), None)
 
         service_stub["dependencies"] = [self.service_parent.slug]
-        service = views._update_service(service_stub, service, self.source)
-        self.assertEqual(service.dependencies.first(), self.service_parent)
+        result = self.process_form(service_stub)
+        assert result["created"] == False
+        self.assertEqual(result["service"].dependencies.first(), self.service_parent)
 
     def test_update_service_does_not_add_incorrect_dependencies(self):
         """Test that updating a service adds dependencies."""
         service_stub = self.get_service_stub()
-        service = views._create_service(service_stub, self.source)
-        self.assertEqual(service.dependencies.first(), None)
+        result = self.process_form(service_stub)
+        assert result["created"]
+        self.assertEqual(result["service"].dependencies.first(), None)
 
         service_stub["dependencies"] = ["not-a-slug"]
-        service = views._update_service(service_stub, service, self.source)
-        self.assertEqual(service.dependencies.first(), None)
-        self.assertEqual(service.logs().all()[0].level, messages.WARNING)
+        result = self.process_form(service_stub)
+        assert result["created"] == False
+        self.assertEqual(result["service"].dependencies.first(), None)
+        assert result["logs"][0].startswith("Updated service"), result["logs"][0]
 
     def test_update_service_removes_dependencies(self):
         """Test that updating a service removes dependencies."""
         service_stub = self.get_service_stub()
         service_stub["dependencies"] = [self.service_parent.slug]
-        service = views._create_service(service_stub, self.source)
-        self.assertEqual(service.dependencies.first(), self.service_parent)
+        result = self.process_form(service_stub)
+        assert result["created"]
+        self.assertEqual(result["service"].dependencies.first(), self.service_parent)
 
         service_stub["dependencies"] = []
-        service = views._update_service(service_stub, service, self.source)
-        self.assertEqual(service.dependencies.first(), None)
+        result = self.process_form(service_stub)
+        assert result["created"] == False
+        self.assertEqual(result["service"].dependencies.first(), None)
 
     def test_update_service_keeps_dependencies(self):
         """Test that updating a service keep dependencies."""
         service_stub = self.get_service_stub()
         service_stub["dependencies"] = [self.service_parent.slug]
-        service = views._create_service(service_stub, self.source)
-        self.assertEqual(service.dependencies.first(), self.service_parent)
+        result = self.process_form(service_stub)
+        assert result["created"]
+        self.assertEqual(result["service"].dependencies.first(), self.service_parent)
 
-        service = views._update_service(service_stub, service, self.source)
-        self.assertEqual(service.dependencies.first(), self.service_parent)
+        result = self.process_form(service_stub)
+        assert result["created"] == False
+        self.assertEqual(result["service"].dependencies.first(), self.service_parent)
 
 
 class TestSchema(WithUser):

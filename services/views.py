@@ -52,13 +52,8 @@ def service_list(request):
 @require_POST
 def service_delete(request, slug):
     service = get_object_or_404(slug=slug, klass=Service)
-    add_log(
-        service,
-        messages.INFO,
-        f"Service `{service.slug}` successfully deleted",
-        web=True,
-        request=request,
-    )
+    msg = f"Service `{service.slug}` successfully deleted"
+    add_info(service, msg, web=True, request=request)
     service.delete()
     return redirect("services:service_list")
 
@@ -160,6 +155,8 @@ def source_add(request):
                 return redirect("services:source_list")
 
             refresh_results(results, source, request)
+        else:
+            messages.add_message(request, messages.ERROR, form.nice_errors())
 
         return render(request, "source-add.html")
 
@@ -170,7 +167,7 @@ def source_delete(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
     if source.services.exists():
         err = "Source cannot be deleted because it is associated with at least one service. Delete the services first."
-        messages.msg(request, messages.ERROR, err)
+        messages.add_message(request, messages.ERROR, err)
         return redirect("services:source_list")
 
     add_info(
