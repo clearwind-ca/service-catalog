@@ -112,7 +112,6 @@ def source_detail(request, slug):
     return render(request, "source-detail.html", context)
 
 
-
 @login_required
 @process_query_params
 def source_refresh(request, slug):
@@ -126,9 +125,10 @@ def source_refresh(request, slug):
     refresh_results(results, source, request)
     return redirect("services:source_detail", slug=source.slug)
 
+
 def refresh_results(results, source, request):
     """
-    A helper that takes the list of results from gh fetch and runs 
+    A helper that takes the list of results from gh fetch and runs
     them through the service form, logging any output.
     """
     for data in results:
@@ -141,6 +141,7 @@ def refresh_results(results, source, request):
 
         else:
             add_error(source, form.nice_errors(), web=True, request=request)
+
 
 @login_required
 def source_add(request):
@@ -157,7 +158,7 @@ def source_add(request):
             except FetchError as error:
                 messages.add_message(request, messages.ERROR, error.message)
                 return redirect("services:source_list")
-            
+
             refresh_results(results, source, request)
 
         return render(request, "source-add.html")
@@ -172,7 +173,12 @@ def source_delete(request, slug):
         messages.msg(request, messages.ERROR, err)
         return redirect("services:source_list")
 
-    add_info(source, f"Source {source.slug} successfully deleted", web=True, request=request,)
+    add_info(
+        source,
+        f"Source {source.slug} successfully deleted",
+        web=True,
+        request=request,
+    )
     source.delete()
     return redirect("services:source_list")
 
@@ -193,7 +199,12 @@ def source_validate(request, slug):
             add_error(source, message, web=True, request=request)
             return redirect("services:source_detail", slug=source.slug)
 
-    add_info(source, f"Source `{source.slug} successfully validated", web=True, request=request)
+    add_info(
+        source,
+        f"Source `{source.slug} successfully validated",
+        web=True,
+        request=request,
+    )
     return redirect("services:source_detail", slug=source.slug)
 
 

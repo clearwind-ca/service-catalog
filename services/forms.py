@@ -52,12 +52,11 @@ class ServiceForm(forms.Form, BaseForm):
 
         self.data["slug"] = models.slugify_service(self.data["data"]["name"])
         return self.data["data"]
-    
 
     def save(self):
         """
-        This does all the heavy lifting for saving a service. 
-        It will create a new service if it does not exist, or update an existing service if it does exist. 
+        This does all the heavy lifting for saving a service.
+        It will create a new service if it does not exist, or update an existing service if it does exist.
         It will also add and remove dependencies as needed.
 
         It will require the source to be set on the form before calling save.
@@ -85,12 +84,12 @@ class ServiceForm(forms.Form, BaseForm):
 
         except models.Service.DoesNotExist:
             service = models.Service.objects.create(
-                name = data["name"],
-                description = data.get("description"),
-                type = data["type"],
-                priority = data["priority"],
-                meta = data.get("meta"),
-                source = self.source
+                name=data["name"],
+                description=data.get("description"),
+                type=data["type"],
+                priority=data["priority"],
+                meta=data.get("meta"),
+                source=self.source,
             )
             created = True
             logs.append(f"Created service: `{service}`.")
@@ -103,15 +102,11 @@ class ServiceForm(forms.Form, BaseForm):
                     logs.append(f"Dependency: `{dependency}` does not exist.")
                     continue
                 service.dependencies.add(dependency)
-            
+
         # Remove any depenedencies that are not in the catalog data.
         for dependency in service.dependencies.all():
             if dependency.slug not in data["dependencies"]:
                 logs.append(f"Removed dependency `{dependency}`.")
                 service.dependencies.remove(dependency)
 
-        return {
-            "created": created,
-            "service": service,
-            "logs": logs
-        }
+        return {"created": created, "service": service, "logs": logs}

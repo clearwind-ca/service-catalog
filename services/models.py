@@ -63,6 +63,7 @@ class Service(models.Model):
     def get_absolute_url(self):
         return reverse("services:service_detail", kwargs={"slug": self.slug})
 
+
 class Source(models.Model):
     """
     The place that the service catalog data has came from. For example the GitHub repo
@@ -88,8 +89,10 @@ class Source(models.Model):
     def get_absolute_url(self):
         return reverse("services:source_detail", kwargs={"slug": self.slug})
 
+
 def slugify_service(name):
     return slugify(name)
+
 
 def slugify_source(url):
     return slugify(urlparse(url).path.replace("/", "-"))
