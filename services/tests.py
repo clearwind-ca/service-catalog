@@ -128,7 +128,7 @@ class TestDependencies(TestCase):
         self.assertEqual(service_child.dependents().count(), 1)
 
     def process_form(self, service_stub):
-        form = forms.ServiceForm({"data":service_stub})
+        form = forms.ServiceForm({"data": service_stub})
         form.source = self.source
         assert form.is_valid(), form.errors
         return form.save()

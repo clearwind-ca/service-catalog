@@ -7,7 +7,11 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 ENV_DIR = BASE_DIR.joinpath("catalog").joinpath("envs")
 
-env = os.environ.get("CATALOG_ENV", "development")
+if os.environ.get("CI"):
+    env = os.environ.get("CATALOG_ENV", "testing")
+else:
+    env = os.environ.get("CATALOG_ENV", "development")
+
 print(f"✅ Loading {env}.env environment variables")
 load_dotenv(ENV_DIR.joinpath(f"{env}.env"))
 
