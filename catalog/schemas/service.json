@@ -21,7 +21,8 @@
                     "type": "string"
                 }
             },
-            "additionalProperties": false
+            "additionalProperties": false,
+            "required": ["slack_channeal"]
         },
         "files": {
             "type": "array",

@@ -114,7 +114,8 @@ def source_refresh(request, slug):
     try:
         results = fetch.get(request.user, source)
     except FetchError as error:
-        add_error(source, error.message, web=True, request=request)
+        msg = f"Error refreshing `{source.slug}`: {error.message}"
+        add_error(source, msg, web=True, request=request)
         return redirect("services:source_detail", slug=source.slug)
 
     refresh_results(results, source, request)
@@ -132,10 +133,12 @@ def refresh_results(results, source, request):
         if form.is_valid():
             result = form.save()
             for log in result["logs"]:
-                add_info(result["service"], log, web=True, request=request)
+                msg = f"Refreshed `{source.slug}` successfully."
+                add_info(result["service"], msg, web=True, request=request)
 
         else:
-            add_error(source, form.nice_errors(), web=True, request=request)
+            msg = f"Refresh error on `{source.slug}`: {form.nice_errors()}."
+            add_error(source, msg, web=True, request=request)
 
 
 @login_required
@@ -192,13 +195,13 @@ def source_validate(request, slug):
     for data in results:
         form = ServiceForm({"data": data["contents"]})
         if not form.is_valid():
-            message = f"Validation failed for: `{source.url}`."
+            message = f"Validation failed for: `{source.url}`. Error: {form.nice_errors()}."
             add_error(source, message, web=True, request=request)
             return redirect("services:source_detail", slug=source.slug)
 
     add_info(
         source,
-        f"Source `{source.slug} successfully validated",
+        f"Source `{source.slug}` successfully validated.",
         web=True,
         request=request,
     )

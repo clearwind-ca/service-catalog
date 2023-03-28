@@ -1,9 +1,9 @@
 import os
 from pathlib import Path
 
+import dj_database_url
 from django.contrib.messages import constants as messages
 from dotenv import load_dotenv
-import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ENV_DIR = BASE_DIR.joinpath("catalog").joinpath("envs")

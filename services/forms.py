@@ -47,6 +47,8 @@ class ServiceForm(forms.Form, BaseForm):
         schema = get_schema()
         try:
             jsonschema.validate(self.data["data"], schema)
+        except json.JSONDecodeError:
+            raise forms.ValidationError("Unable to decode the JSON.")
         except jsonschema.ValidationError as error:
             raise forms.ValidationError(error.message)
 

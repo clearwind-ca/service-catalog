@@ -17,7 +17,7 @@ You will also need a Postgres container to persist your data.
 
 ## Environment variables
 
-Where possible configuration is done through environment variables which alter the settings files.
+Where possible configuration is done through environment variables which alter the settings files. Some of these settings are specific to the Service Catalog, but some are [common to all Django projects and the documentation](https://docs.djangoproject.com/en/4.1/ref/settings/) covers those.
 
 The key environment variable `CATALOG_ENV` determines which environment file to load.
 
@@ -41,4 +41,24 @@ If no other environment variable is set then it will use the file `envs/developm
 
 To interact with GitHub you will need to create a GitHub App. This will allow you to login to the catalog, read information from GitHub and so on.
 
-This is done using the [app manifest flow](https://docs.github.com/en/apps/creating-github-apps/creating-github-apps/creating-a-github-app-from-a-manifest).
+To create an app, follow the documentation on the [GitHub website](https://docs.github.com/en/apps/creating-github-apps/creating-github-apps/creating-a-github-app).
+
+Key settings:
+
+* `GitHub App name`: whatever makes sense for you.
+* `Homepage URL`: absolute URL to the Service Catalog that is accessible to the user.
+* `Callback URL`: same as above, with the following appended to the URL `/oauth/github/callback`.
+
+Under `Permissions & events`:
+
+* `Repository permissions` 👉 `Contents` 👉 `Access: Read-only`
+* `Repository permissions` 👉 `Metadata` 👉 `Access: Read-only`
+* `Account permissions` 👉 `Email addresses` 👉 `Access: Read-only`
+
+Once complete, `Generate a new client secret` and the copy the following settings into the environment variables:
+
+* `App ID` into `GITHUB_APP_ID`
+* `Client ID` into `GITHUB_CLIENT_ID`
+* `Client secret` into `GITHUB_CLIENT_SECRET`
+
+Restart your Service Catalog for the settings to take effect.

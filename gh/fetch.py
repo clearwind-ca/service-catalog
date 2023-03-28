@@ -25,6 +25,7 @@ file_paths = [
     "catalog.json",
     "service.json",
     ".service-catalog/catalog.json",
+    ".github/catalog.json",
 ]
 
 
