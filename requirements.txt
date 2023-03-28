@@ -8,3 +8,4 @@ markdown==3.4.1
 python-dotenv==0.21.1
 coverage==7.2.1
 jsonschema==4.17.3
+gunicorn==20.1.0

@@ -1,7 +1,7 @@
-Service Catalog is a service to manage services in organisations with multiple teams and services.
+[![Tests](https://github.com/clearwind-ca/service-catalog/actions/workflows/django.yml/badge.svg)](https://github.com/clearwind-ca/service-catalog/actions/workflows/django.yml)
 
-### Installing
+Service Catalog is an open source tool for tracking teams, applications and tools across an organisation. It's goal is to provide clarity on how your organisation engineering teams are interconnected, reduce time to mitigate in incidents and more.
 
-### Documentation
+Service Catalog is under the [MIT License](LICENSE.md) and originally built by [Clearwind Consulting][https://clearwind.ca].
 
-### Contributing
+All the information you need to know is in [the documentation](docs).
