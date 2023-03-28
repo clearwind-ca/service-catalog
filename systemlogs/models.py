@@ -21,18 +21,18 @@ class SystemLog(models.Model):
     )
 
 
-def add_log(target, level, message, add_message=False, request=None, **kwargs):
+def add_log(target, level, message, web=False, request=None, **kwargs):
     """
     Add a log into the system log
 
     :param target: The target object
     :param level: The level of the log, using the constants from django.contrib.messages
     :param message: The message to log, markdown accepted.
-    :param add_message: Whether to add the message to the request messages and show in the browser.
-    :param request: The request object, required if add_message is True. Will add in the user who made the change.
+    :param web: Whether to add the message to the request messages and show in the browser.
+    :param request: The request object, required if msg is True. Will add in the user who made the change.
     """
-    if add_message:
-        assert request, "Request is required if add_message is True"
+    if web:
+        assert request, "Request is required if web is True"
         messages.add_message(request, level, message)
 
     kwargs.update(
@@ -46,3 +46,9 @@ def add_log(target, level, message, add_message=False, request=None, **kwargs):
     entry = SystemLog.objects.create(**kwargs)
     entry.save()
     return entry
+
+def add_info(target, message, web, request, **kwargs):
+    return add_log(target, constants.INFO, message, web, request, **kwargs)
+
+def add_error(target, message, web, request, **kwargs):
+    return add_log(target, constants.ERROR, message, web, request, **kwargs)

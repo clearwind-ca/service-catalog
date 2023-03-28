@@ -54,7 +54,7 @@ class Service(models.Model):
         return Service.objects.filter(dependencies=self)
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
+        self.slug = slugify_service(self.name)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -62,11 +62,6 @@ class Service(models.Model):
 
     def get_absolute_url(self):
         return reverse("services:service_detail", kwargs={"slug": self.slug})
-
-
-def slugify_source(url):
-    return slugify(urlparse(url).path.replace("/", "-"))
-
 
 class Source(models.Model):
     """
@@ -92,3 +87,9 @@ class Source(models.Model):
 
     def get_absolute_url(self):
         return reverse("services:source_detail", kwargs={"slug": self.slug})
+
+def slugify_service(name):
+    return slugify(name)
+
+def slugify_source(url):
+    return slugify(urlparse(url).path.replace("/", "-"))
