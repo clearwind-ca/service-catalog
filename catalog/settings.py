@@ -3,6 +3,7 @@ from pathlib import Path
 
 from django.contrib.messages import constants as messages
 from dotenv import load_dotenv
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ENV_DIR = BASE_DIR.joinpath("catalog").joinpath("envs")
@@ -34,15 +35,9 @@ if os.environ.get("CI"):
     }
 else:
     DATABASES = {
-        "default": {
-            "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.sqlite3"),
-            "NAME": os.environ.get("DB_NAME", BASE_DIR.joinpath("db.sqlite3")),
-            "USER": os.environ.get("DB_USER", ""),
-            "PASSWORD": os.environ.get("DB_PASSWORD", ""),
-            "HOST": os.environ.get("DB_HOST", ""),
-            "PORT": os.environ.get("DB_PORT", ""),
-        }
+        "default": dj_database_url.config(conn_max_age=600, conn_health_checks=True)
     }
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -100,7 +95,7 @@ OAUTH_LOGIN_PROVIDERS = {
 }
 ROOT_URLCONF = "catalog.urls"
 SERVICE_SCHEMA = os.environ.get(
-    "SERVICE_SCHEMA", os.path.join(BASE_DIR, "catalog", "schemas", "schema.json")
+    "SERVICE_SCHEMA", os.path.join(BASE_DIR, "catalog", "schemas", "service.json")
 )
 SECRET_KEY = os.environ.get("SECRET_KEY")
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
