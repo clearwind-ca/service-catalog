@@ -1,15 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="row pt-5">
-    <h2>Debug page</h2>
-    <p class="form-text">Full of useful debugging information.</p>
-    <h3>Repositories</h3>
-    <p class="form-text">Returned from <code>.get_repos()</code>.</p>
-    <pre>
-        {{ repos }}
-        {% for repo in repos %}
-            {{ repo.full_name }}
+<h2>Debug</h2>
+<p>This page is intended to help with debug and setup of the service catalog instance. For more help, <a href="https://github.com/clearwind-ca/service-catalog/tree/main/docs">refer to the documentation</a>.</p>
+<div>
+    <h3>Environment Variables</h3>
+    <p class="form-text text-muted">
+        Some select environment variables. If the environment variable could be sensitive, then its truncated and only the first 2 characters are shown. If it's not set at all, it will show up as <code>Empty</code>.
+    </p>
+    <dl>
+        {% for key, value in envs.items %}
+        <dt>{{ key }}</dt>
+        <dd><code>{{ value }}</code></dd>
         {% endfor %}
-    </pre>
+    </dl>
+    <h3>Settings</h3>
+    <p class="form-text text-muted">
+        Some selected settings. The settings will alter depending upon environment variables set above 👆. If the setting could be sensitive, then its truncated and only the first 2 characters are shown. If it's not set at all, it will show up as <code>Empty</code>.
+    </p>
+    <dl>
+        {% for key, value in settings.items %}
+        <dt>{{ key }}</dt>
+        <dd><code>{{ value }}</code></dd>
+        {% endfor %}
+    </dl>
 </div>
 {% endblock %}

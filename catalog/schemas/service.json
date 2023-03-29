@@ -22,7 +22,7 @@
                 }
             },
             "additionalProperties": false,
-            "required": ["slack_channeal"]
+            "required": ["slack_channel"]
         },
         "files": {
             "type": "array",
