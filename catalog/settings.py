@@ -16,6 +16,8 @@ else:
 print(f"✅ Loading {env}.env environment variables")
 load_dotenv(ENV_DIR.joinpath(f"{env}.env"))
 
+# Doing this so that it shows up in the debug page for clarity.
+CATALOG_ENV = env
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(" ")
 auth_pwd = "django.contrib.auth.password_validation"
 AUTH_PASSWORD_VALIDATORS = [
@@ -88,8 +90,8 @@ OAUTH_LOGIN_PROVIDERS = {
     "github": {
         "class": "web.oauth.GitHubOAuthProvider",
         "kwargs": {
-            "client_id": os.environ["GITHUB_CLIENT_ID"],
-            "client_secret": os.environ["GITHUB_CLIENT_SECRET"],
+            "client_id": os.environ.get("GITHUB_CLIENT_ID", ""),
+            "client_secret": os.environ.get("GITHUB_CLIENT_SECRET", ""),
         },
     },
 }

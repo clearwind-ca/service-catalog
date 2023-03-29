@@ -195,7 +195,9 @@ def source_validate(request, slug):
     for data in results:
         form = ServiceForm({"data": data["contents"]})
         if not form.is_valid():
-            message = f"Validation failed for: `{source.url}`. Error: {form.nice_errors()}."
+            message = (
+                f"Validation failed for: `{source.url}`. Error: {form.nice_errors()}."
+            )
             add_error(source, message, web=True, request=request)
             return redirect("services:source_detail", slug=source.slug)
 

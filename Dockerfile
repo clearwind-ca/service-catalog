@@ -4,6 +4,10 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV DOCKER 1
 
+# Allow catalog_env to be altered at build time and then passed through to the container.
+ARG CATALOG_ENV=production
+ENV CATALOG_ENV=$CATALOG_ENV
+
 RUN mkdir -p /code
 COPY requirements.txt /tmp/requirements.txt
 WORKDIR /code
