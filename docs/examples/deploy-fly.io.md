@@ -1,6 +1,8 @@
-Fly.io is a service that can deploy Docker containers. For more information on Fly.io, visit [their website](https://fly.io).
+Fly.io is a service that can deploy Docker containers. For more information on Fly.io, visit [their website](https://fly.io). You'll need to create a Fly.io account to be able to deploy services.
 
-You'll need a `fly.toml` file and it will look something like this:
+## Installing on Fly.io
+
+You'll need a `fly.toml` file. The command `fly launch` will generate a file for you, but it will end up looking something like this:
 
 ```toml
 app = "service-catalog"
@@ -65,3 +67,6 @@ Then quit out of the postgres console and connect up your database like this:
 
 ```bash
 DATABASE_URL="postgres://catalog_user:YOUR-PASSWORD-HERE@YOUR-POSTGRES-APP.internal/catalog"
+```
+
+That's it. You should now be able to do a new deploy using `fly launch` and view your service catalog instance.
