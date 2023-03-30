@@ -78,7 +78,7 @@ LOGGING = {
     },
 }
 LOGIN_URL = "/"
-LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = "/services/"
 MESSAGE_TAGS = {
     messages.ERROR: "danger",
     messages.INFO: "primary",
