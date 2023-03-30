@@ -133,6 +133,8 @@ def refresh_results(results, source, request):
             result = form.save()
             msg = f"Refreshed `{source.slug}` successfully."
             add_info(result["service"], msg, web=True, request=request)
+            for log in result["logs"]:
+                add_info(result["service"], log, web=True, request=request)
 
         else:
             msg = f"Refresh error on `{source.slug}`: {form.nice_errors()}."

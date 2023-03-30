@@ -1,13 +1,16 @@
 import logging
+import os
 from unittest.mock import patch
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 from faker import Faker
 
-from . import forms, models, views
+from . import forms, models
+from .management.commands.refresh import Command, UserError
 
 logging.getLogger("faker").setLevel(logging.ERROR)
 fake = Faker("en_US")
@@ -28,6 +31,19 @@ def create_service(source):
         type="application",
         source=source,
     )
+
+
+def sample_response():
+    return [
+        {
+            "contents": {
+                "priority": 1,
+                "name": "test-gh",
+                "type": "application",
+                "description": "test",
+            }
+        }
+    ]
 
 
 class WithUser(TestCase):
@@ -315,16 +331,7 @@ class TestAdd(WithUser):
     def test_post(self, mock_fetch):
         """Test the source add view with a POST."""
         self.client.force_login(self.user)
-        mock_fetch.get.return_value = [
-            {
-                "contents": {
-                    "priority": 1,
-                    "name": "test-gh",
-                    "type": "application",
-                    "description": "test",
-                }
-            }
-        ]
+        mock_fetch.get.return_value = sample_response()
         response = self.client.post(self.url, {"url": "https://gh.com/andy/gh"})
         self.assertEqual(self.get_message(response).level, messages.INFO)
         assert models.Source.objects.filter(slug="andy-gh").exists()
@@ -414,3 +421,47 @@ class TestServiceDelete(WithUser):
         response = self.client.post(self.url)
         self.assertEqual(self.get_message(response).level, messages.INFO)
         assert not models.Service.objects.filter(slug=self.service.slug).exists()
+
+
+class TestManagementRefresh(WithUser):
+    def setUp(self):
+        super().setUp()
+        self.command = Command()
+
+    def test_refresh_fails_with_no_user(self):
+        """Test the refresh command fails with no user"""
+        self.assertRaises(UserError, self.command.handle)
+
+    def test_refresh_fails_with_wrong_cron_user(self):
+        """Takes the username from the environment, and checks it fails"""
+        os.environ["CRON_USER"] = "nope"
+        self.assertRaises(User.DoesNotExist, self.command.handle)
+        del os.environ["CRON_USER"]
+
+    def test_refresh_fails_with_wrong_command_user(self):
+        """Test the username from the command, and checks it fails"""
+        self.assertRaises(User.DoesNotExist, self.command.handle, user="nope")
+
+    def test_refresh_fails_with_no_source(self):
+        """Test fails if no source"""
+        self.assertRaises(ValueError, self.command.handle, user=self.user.username)
+
+    @patch("services.management.commands.refresh.fetch")
+    def test_refresh_all(self, mock_fetch):
+        """Test refreshes all"""
+        create_source()
+        create_source()
+        mock_fetch.get.return_value = sample_response()
+        sources = self.command.handle(user=self.user.username, all=True)
+        assert len(sources["queryset"]) == 2
+        assert sources["outputs"][0]["created"]
+
+    @patch("services.management.commands.refresh.fetch")
+    def test_refresh_some(self, mock_fetch):
+        """Test refreshes some"""
+        create_source()  # Will not be refreshed.
+        second = create_source()  # Will be refreshed.
+        mock_fetch.get.return_value = sample_response()
+        sources = self.command.handle(user=self.user.username, source=second.slug)
+        assert len(sources["queryset"]) == 1
+        assert sources["queryset"][0] == second

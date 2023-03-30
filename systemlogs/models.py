@@ -48,9 +48,9 @@ def add_log(target, level, message, web=False, request=None, **kwargs):
     return entry
 
 
-def add_info(target, message, web, request, **kwargs):
-    return add_log(target, constants.INFO, message, web, request, **kwargs)
+def add_info(target, message, web=None, request=None, **kwargs):
+    return add_log(target, constants.INFO, message, web=web, request=request, **kwargs)
 
 
-def add_error(target, message, web, request, **kwargs):
-    return add_log(target, constants.ERROR, message, web, request, **kwargs)
+def add_error(target, message, web=None, request=None, **kwargs):
+    return add_log(target, constants.ERROR, message, web=web, request=request, **kwargs)
