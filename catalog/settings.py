@@ -14,7 +14,13 @@ else:
     env = os.environ.get("CATALOG_ENV", "development")
 
 print(f"✅ Loading {env}.env environment variables")
-load_dotenv(ENV_DIR.joinpath(f"{env}.env"))
+if env in ["testing", "staging", "development", "production"]:
+    env = ENV_DIR.joinpath(f"{env}.env")
+
+if not os.path.exists(env):
+    raise FileNotFoundError(f"Unable to find {env} file.")
+
+load_dotenv(dotenv_path=env)
 
 # Doing this so that it shows up in the debug page for clarity.
 CATALOG_ENV = env

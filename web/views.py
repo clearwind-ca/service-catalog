@@ -1,8 +1,10 @@
+import os
+
+from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
-import os
-from django.conf import settings
+
 
 def home(request):
     return render(request, "home.html", {"breadcrumbs": False})
@@ -23,10 +25,13 @@ def logout(request):
 
 def debug(request):
     get = os.environ.get
+
     def truncate(key):
         value = get(key)
-        if not value: return "Empty"
+        if not value:
+            return "Empty"
         return value[:2] + "..."
+
     selected_envs = {
         "CATALOG_ENV": get("CATALOG_ENV"),
         "DEBUG": get("DEBUG"),
@@ -35,12 +40,11 @@ def debug(request):
         "GITHUB_APP_ID": truncate("GITHUB_APP_ID"),
         "GITHUB_CLIENT_ID": truncate("GITHUB_CLIENT_ID"),
         "GITHUB_CLIENT_SECRET": truncate("GITLAB_CLIENT_SECRET"),
-    } 
+    }
     selected_settings = {
         "CATALOG_ENV": settings.CATALOG_ENV,
         "DEBUG": settings.DEBUG,
     }
-    return render(request, "debug.html", {
-        "envs": selected_envs, 
-        "settings": selected_settings
-    })
+    return render(
+        request, "debug.html", {"envs": selected_envs, "settings": selected_settings}
+    )
