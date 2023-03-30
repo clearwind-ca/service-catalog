@@ -1,6 +1,5 @@
 from urllib.parse import urlparse
 
-from django.contrib.contenttypes.fields import GenericRelation
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.template.defaultfilters import slugify

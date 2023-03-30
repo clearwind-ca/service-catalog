@@ -3,13 +3,12 @@ from itertools import chain
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.db.models import CharField, Value
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from catalog.errors import FetchError, SchemaError
+from catalog.errors import FetchError
 from gh import fetch
 from systemlogs.models import add_error, add_info
 from web.helpers import process_query_params
@@ -132,9 +131,8 @@ def refresh_results(results, source, request):
         form.source = source
         if form.is_valid():
             result = form.save()
-            for log in result["logs"]:
-                msg = f"Refreshed `{source.slug}` successfully."
-                add_info(result["service"], msg, web=True, request=request)
+            msg = f"Refreshed `{source.slug}` successfully."
+            add_info(result["service"], msg, web=True, request=request)
 
         else:
             msg = f"Refresh error on `{source.slug}`: {form.nice_errors()}."

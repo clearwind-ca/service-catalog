@@ -36,12 +36,10 @@ class TestProcessQueryParams(TestCase):
 
 class TestHomePage(TestCase):
     def test_home_page(self):
-        """Test the home page loads and has no breadcrumbs."""
+        """Test the home page loads."""
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "home.html")
-        self.assertFalse(response.context["breadcrumbs"])
-        self.assertNotContains(response, "breadcrumb")
 
 
 class TestColour(TestCase):

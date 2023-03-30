@@ -1,4 +1,3 @@
-import pprint
 from urllib.parse import urlencode
 
 import markdown
