@@ -9,4 +9,7 @@ At the center of this is, configuration through code. Rather than providing an i
 
 The Service Catalog is available under the [MIT license](../license.md).
 
-* [Installing and Configuring](installing.md)
+* [Installing](installing.md)
+* [Getting started](getting-started.md)
+* [Configuration](configuring.md)
+* [Examples](examples/readme.md)
