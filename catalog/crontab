@@ -1,0 +1,1 @@
+12 3 * * * python /code/manage.py refresh --all

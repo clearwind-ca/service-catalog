@@ -8,6 +8,8 @@ ENV DOCKER 1
 ARG CATALOG_ENV=production
 ENV CATALOG_ENV=$CATALOG_ENV
 
+EXPOSE 8000
+
 RUN mkdir -p /code
 COPY requirements.txt /tmp/requirements.txt
 WORKDIR /code
@@ -19,12 +21,17 @@ RUN set -ex && \
 RUN apt-get update && \
     apt-get install -y \
         postgresql-client \
-        supervisor
+        supervisor \
+        cron
+
 
 COPY . /code/
 
-EXPOSE 8000
+# Copy the crontab into place and set permissions.
+COPY catalog/crontab /etc/cron.d/catalog-cron
+RUN chmod 0644 /etc/cron.d/catalog-cron
+
 # Run the migrations.
-RUN ["python", "/code/manage.py", "migrate"]
+RUN python /code/manage.py migrate
 # Then run the server.
 CMD supervisord -c /code/catalog/supervisord.conf
