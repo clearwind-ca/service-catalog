@@ -7,7 +7,7 @@ from django.shortcuts import redirect, render
 
 
 def home(request):
-    return render(request, "home.html", {"breadcrumbs": False})
+    return render(request, "home.html")
 
 
 def handler404(request, exception):
