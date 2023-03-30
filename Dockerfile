@@ -31,7 +31,5 @@ COPY . /code/
 COPY catalog/crontab /etc/cron.d/catalog-cron
 RUN chmod 0644 /etc/cron.d/catalog-cron
 
-# Run the migrations.
-RUN python /code/manage.py migrate
 # Then run the server.
 CMD supervisord -c /code/catalog/supervisord.conf
