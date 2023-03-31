@@ -140,11 +140,6 @@ def refresh_results(results, source, request):
             msg = f"Refresh error on `{source.slug}`: {form.nice_errors()}."
             add_error(source, msg, web=True, request=request)
 
-@login_required
-def service_add(request, slug):
-    source = get_object_or_404(slug=slug, klass=Source)
-    url = f"{source.url}/new/main?filename=catalog.json"
-    return redirect(url)
 
 @login_required
 def source_add(request):

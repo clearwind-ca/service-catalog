@@ -10,7 +10,6 @@
 <div>
     <h3>{{ source.slug }}</h3>
     <p class="form-text">This source is pulling data from <a href="{{ source.url }}">{{ source.url }}</a> and has a slug of <code>{{ source.slug }}</code>.</p>
-    <a href="{% url 'services:service_add' slug=source.slug %}" target="github" class="btn btn-primary">{% octicon 'plus' %} Add catalog entry</a>
     <div class="card mt-3 mb-3">
         <div class="card-header fw-bold">Services</div>
         <div class="card-body">

@@ -12,7 +12,6 @@ urlpatterns = [
     path("sources/", views.source_list, name="source_list"),
     path("sources/add", views.source_add, name="source_add"),
     path("sources/<str:slug>", views.source_detail, name="source_detail"),
-    path("sources/<str:slug>/add", views.service_add, name="service_add"),
     path("sources/<str:slug>/validate", views.source_validate, name="source_validate"),
     path("sources/<str:slug>/refresh", views.source_refresh, name="source_refresh"),
     path("sources/<str:slug>/delete", views.source_delete, name="source_delete"),
