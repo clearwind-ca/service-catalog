@@ -180,7 +180,7 @@ class TestDependencies(TestCase):
         result = self.process_form(service_stub)
         assert result["created"] == False
         self.assertEqual(result["service"].dependencies.first(), None)
-        assert result["logs"][0].startswith("Updated service"), result["logs"][0]
+        assert result["logs"][0][0].startswith("Updated service"), result["logs"][0]
 
     def test_update_service_removes_dependencies(self):
         """Test that updating a service removes dependencies."""
@@ -452,9 +452,9 @@ class TestManagementRefresh(WithUser):
         create_source()
         create_source()
         mock_fetch.get.return_value = sample_response()
-        sources = self.command.handle(user=self.user.username, all=True)
-        assert len(sources["queryset"]) == 2
-        assert sources["outputs"][0]["created"]
+        self.command.handle(user=self.user.username, all=True)
+        self.assertEquals(models.Service.objects.all().count(), 1)
+        self.assertEquals(mock_fetch.get.call_count, 2)
 
     @patch("services.management.commands.refresh.fetch")
     def test_refresh_some(self, mock_fetch):
@@ -463,5 +463,5 @@ class TestManagementRefresh(WithUser):
         second = create_source()  # Will be refreshed.
         mock_fetch.get.return_value = sample_response()
         sources = self.command.handle(user=self.user.username, source=second.slug)
-        assert len(sources["queryset"]) == 1
-        assert sources["queryset"][0] == second
+        self.assertEquals(models.Service.objects.all().count(), 1)
+        self.assertEquals(mock_fetch.get.call_count, 1)

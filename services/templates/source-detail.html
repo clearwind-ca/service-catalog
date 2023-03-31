@@ -10,6 +10,7 @@
 <div>
     <h3>{{ source.slug }}</h3>
     <p class="form-text">This source is pulling data from <a href="{{ source.url }}">{{ source.url }}</a> and has a slug of <code>{{ source.slug }}</code>.</p>
+    <a href="{% url 'services:service_add' slug=source.slug %}" target="github" class="btn btn-primary">{% octicon 'plus' %} Add catalog entry</a>
     <div class="card mt-3 mb-3">
         <div class="card-header fw-bold">Services</div>
         <div class="card-body">
@@ -53,7 +54,7 @@
         <div id="admin" class="card-header fw-bold">Admin</div>
         <div class="card-body">
             <div class="form-group row mb-3">
-                <label for="refresh">Refresh this data from its source <code>{{ source.url }}</code>.</label>
+                <label for="refresh">Refresh this data from its source <a href="{{ source.url }}">{{ source.url }}</a>.</label>
                 <form method="post" class="mt-3" action="{% url 'services:source_refresh' source.slug %}">
                     {% csrf_token %}
                     <input type="submit" class="btn btn-primary" value="Refresh" />

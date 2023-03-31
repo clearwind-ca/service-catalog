@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 from catalog.errors import FetchError
 from gh import fetch
 from services import forms, models
-from systemlogs.models import add_error, add_info
+from systemlogs.models import add_error, add_log
 
 
 class UserError(Exception):
@@ -72,8 +72,8 @@ class Command(BaseCommand):
                     continue
 
                 output = form.save()
-                for log in output["logs"]:
-                    add_info(source, log, request=request)
+                for msg, level in output["logs"]:
+                    add_log(source, level, msg, request=request)
                 outputs.append(output)
 
-        return {"queryset": queryset, "outputs": outputs}
+        print(f"Processed {queryset.count()} sources.")

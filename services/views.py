@@ -10,7 +10,7 @@ from django.views.decorators.http import require_POST
 
 from catalog.errors import FetchError
 from gh import fetch
-from systemlogs.models import add_error, add_info
+from systemlogs.models import add_log, add_error, add_info
 from web.helpers import process_query_params
 
 from .forms import ServiceForm, SourceForm, get_schema
@@ -133,13 +133,18 @@ def refresh_results(results, source, request):
             result = form.save()
             msg = f"Refreshed `{source.slug}` successfully."
             add_info(result["service"], msg, web=True, request=request)
-            for log in result["logs"]:
-                add_info(result["service"], log, web=True, request=request)
+            for log, level in result["logs"]:
+                add_log(result["service"], level, log, web=True, request=request)
 
         else:
             msg = f"Refresh error on `{source.slug}`: {form.nice_errors()}."
             add_error(source, msg, web=True, request=request)
 
+@login_required
+def service_add(request, slug):
+    source = get_object_or_404(slug=slug, klass=Source)
+    url = f"{source.url}/new/main?filename=catalog.json"
+    return redirect(url)
 
 @login_required
 def source_add(request):
@@ -169,13 +174,13 @@ def source_add(request):
 def source_delete(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
     if source.services.exists():
-        err = "Source cannot be deleted because it is associated with at least one service. Delete the services first."
+        err = f"Source `{source.slug}` cannot be deleted because it is associated with at least one service. Delete the services first."
         messages.add_message(request, messages.ERROR, err)
         return redirect("services:source_list")
 
     add_info(
         source,
-        f"Source {source.slug} successfully deleted",
+        f"Source `{source.slug}` successfully deleted",
         web=True,
         request=request,
     )

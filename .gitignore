@@ -1,3 +1,4 @@
+__pycache__
 catalog/envs/development.env
 catalog/envs/production.env
 db.sqlite3

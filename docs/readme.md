@@ -13,3 +13,7 @@ The Service Catalog is available under the [MIT license](../license.md).
 * [Getting started](getting-started.md)
 * [Configuration](configuring.md)
 * [Examples](examples/readme.md)
+
+---
+
+* [Design notes](design-notes.md)

@@ -21,8 +21,9 @@ Where possible configuration is done through environment variables which alter t
 
 |Variable|Effect|Required|Default if not set|
 |-|-|-|-|
-|CATALOG_ENV|The path to a file of enviroment variables to load. Environment variables loaded from this file will override variables loaded elsewhere.|No|(see notes below)|
 |ALLOWED_HOSTS|Override the Django `ALLOWED_HOSTS` setting.|Yes, for browser access if not in `DEBUG` mode.|Empty|
+|CATALOG_ENV|The path to a file of enviroment variables to load. Environment variables loaded from this file will override variables loaded elsewhere.|No|(see notes below)|
+|CRON_USER|The username for a user logged into the Catalog to run background updates against GitHub.|No, however background updates will fail without it|Empty|
 |DATABASE_URL|The connection string to the [database using dj-database-url](https://pypi.org/project/dj-database-url/#url-schema)|Yes|Empty|
 |DEBUG|Set the Django `DEBUG` mode.|No|False|
 |GITHUB_APP_ID|The GitHub app configuration.|Yes|Empty|
@@ -78,3 +79,27 @@ Restart your Service Catalog for the settings to take effect.
 To check that your settings are good, a page at `/debug` [^1] is provided that will help you understand what the values of key settings and environment variables are.
 
 [^1]: See [example](https://service-catalog.fly.dev/debug/)
+
+## Background jobs
+
+There are multiple background jobs in the system. If you are using the Dockerfile, then these are set up automatically for you, by installing the `catalog/crontab`.
+
+If you are not using the Dockerfile, then you will need to create these manually.
+
+### Refresh
+
+Command: `python manage.py refresh`
+
+Runs through all the sources in the Catalog and re-fetches the data from GitHub and updates it in the Catalog. It's the same process as hitting the `Refresh` button on the `Source` page.
+
+By default run once per day.
+
+Arguments:
+
+* `--all`: runs through all the sources and refreshes them all from GitHub.
+* `--source [SOURCE_SLUG]`: just refreshes the source matching the `SOURCE_SLUG` given.
+* `--user`: the username of a user to connect to GitHub, this is the GitHub handle for that user.
+
+Environment variables:
+
+* `CRON_USER`: If `--user` is not specified, then the command will check to see if the environment variable `CRON_USER` is set and use that.

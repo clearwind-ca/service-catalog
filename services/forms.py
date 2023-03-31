@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 import jsonschema
 from django import forms
 from django.conf import settings
-
+from django.contrib import messages
 from . import models
 
 
@@ -82,7 +82,7 @@ class ServiceForm(forms.Form, BaseForm):
             service.priority = data["priority"]
             service.meta = data.get("meta")
             service.save()
-            logs.append(f"Updated service: `{service}`.")
+            logs.append([f"Updated service: `{service}`.", messages.INFO])
 
         except models.Service.DoesNotExist:
             service = models.Service.objects.create(
@@ -94,21 +94,21 @@ class ServiceForm(forms.Form, BaseForm):
                 source=self.source,
             )
             created = True
-            logs.append(f"Created service: `{service}`.")
+            logs.append([f"Created service: `{service}`.", messages.INFO])
 
         if "dependencies" in data:
             for dependency in data["dependencies"]:
                 try:
                     dependency = models.Service.objects.get(slug=dependency)
                 except models.Service.DoesNotExist:
-                    logs.append(f"Dependency: `{dependency}` does not exist.")
+                    logs.append([f"Dependency: `{dependency}` does not exist in the catalog and was not connected.", messages.WARNING])
                     continue
                 service.dependencies.add(dependency)
 
         # Remove any depenedencies that are not in the catalog data.
         for dependency in service.dependencies.all():
             if dependency.slug not in data["dependencies"]:
-                logs.append(f"Removed dependency `{dependency}`.")
+                logs.append([f"Removed dependency `{dependency}`.", messages.INFO])
                 service.dependencies.remove(dependency)
 
         return {"created": created, "service": service, "logs": logs}
