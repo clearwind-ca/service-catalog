@@ -7,8 +7,11 @@ from django.shortcuts import render
 
 from web.helpers import process_query_params
 from web.templatetags.helpers import log_level_as_text
-
+from rest_framework import viewsets
+from rest_framework import permissions
 from .models import SystemLog
+from .serializers import SystemLogSerializer
+
 
 model_map = {
     "service": "services",
@@ -51,3 +54,9 @@ def log_list(request):
         "filters": display_filters,
     }
     return render(request, "log-list.html", context)
+
+
+class SystemLogViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = SystemLog.objects.all().order_by("-created")
+    serializer_class = SystemLogSerializer
+    permission_classes = [permissions.IsAuthenticated]

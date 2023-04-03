@@ -50,9 +50,9 @@
                         <td>
                         {% with log.content_object as target %}
                             {% if target %}
-                                <a href="{{ target.get_absolute_url }}">{{ target.slug }}</a>
+                                <a href="{{ target.get_absolute_url }}">{{ target }}</a>
                             {% else %}
-                                {{ log.target_slug }} (deleted)
+                                (object deleted)
                             {% endif %}
                         {% endwith %}
                         </td>
