@@ -29,12 +29,7 @@
                         {% octicon "person" %}
                         {{ user|truncatechars:10 }}
                         </a>
-                        <ul class="dropdown-menu">
-                            {% if user.is_superuser %}
-                            <li><a class="dropdown-item" href="{% url 'admin:index' %}"> Admin</a></li>
-                            {% endif %}
-                            <li><a class="dropdown-item" href="{% url 'web:logout' %}"> Logout</a></li>
-                        </ul>
+                        {% include "user.html" %}
                     {% else %}
                         <form action="/oauth/github/login/" method="post">
                             {% csrf_token %}
@@ -61,14 +56,10 @@
                                 {% if user.is_authenticated %}
                                     <li class="nav-item dropdown">
                                         <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        {% octicon "person" %} {{ user}}
+                                        {% octicon "person" %} 
+                                        {{ user|truncatechars:10 }}
                                         </a>
-                                        <ul class="dropdown-menu">
-                                            {% if user.is_superuser %}
-                                            <li><a class="dropdown-item" href="{% url 'admin:index' %}"> Admin</a></li>
-                                            {% endif %}
-                                            <li><a class="dropdown-item" href="{% url 'web:logout' %}"> Logout</a></li>
-                                        </ul>
+                                        {% include "user.html" %}
                                     </li>
                                 {% else %}
                                     <form action="/oauth/github/login/" method="post">

@@ -79,7 +79,7 @@ class Source(models.Model):
         return SystemLog.objects.filter(content_type__model="source", object_id=self.id)
 
     def __str__(self):
-        return self.url
+        return self.slug
 
     def save(self, *args, **kwargs):
         self.slug = slugify_source(self.url)

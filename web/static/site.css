@@ -10,6 +10,9 @@
     fill: white;
 }
 
+#navbar-side .dropdown-menu svg {
+    fill: black;
+}
 
 body {
     min-height: 100vh;

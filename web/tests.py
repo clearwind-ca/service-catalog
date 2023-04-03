@@ -1,10 +1,13 @@
 from django.test import RequestFactory, TestCase
+from django.urls import reverse
 
 from .helpers import process_query_params
 from .templatetags.helpers import (apply_format, log_level_as_text,
                                    markdown_filter, priority_as_colour, qs,
                                    strip_format)
-
+from django.contrib.auth import get_user_model
+from rest_framework.authtoken.models import Token
+from systemlogs.models import SystemLog
 
 class TestProcessQueryParams(TestCase):
     def setUp(self):
@@ -107,3 +110,47 @@ class TestFormat(TestCase):
             ("http://foo.com", "url", '<a href="http://foo.com">http://foo.com</a>'),
         ):
             self.assertEqual(apply_format(value, field), expectation)
+
+
+from django.contrib.auth import get_user_model
+class TestAPIToken(TestCase):
+    def test_api_token(self):
+        """Test the API token pages require login."""
+        response = self.client.get(reverse("web:api"))
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.post(reverse("web:api-delete"))
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.post(reverse("web:api-create"))
+        self.assertEqual(response.status_code, 302)
+
+    def add_user(self):
+        self.user = get_user_model().objects.create_user(username="andy")
+
+    def test_api_token(self):
+        """Test the API token page loads."""
+        self.add_user()
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("web:api"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "api.html")
+
+    def test_api_token_create(self):
+        """Test that hitting the API token endpoint creates a token."""
+        self.add_user()
+        self.client.force_login(self.user)
+        response = self.client.post(reverse("web:api-create"))
+        token = Token.objects.get(user=self.user)
+        self.assertContains(response, token.key)
+        self.assertEqual(SystemLog.objects.filter(user=self.user).count(), 1)
+
+    def test_api_token_delete(self):
+        """Test that hitting the API token endpoint creates a token."""
+        self.add_user()
+        self.client.force_login(self.user)
+        Token.objects.create(user=self.user)
+        assert Token.objects.filter(user=self.user).exists()
+        response = self.client.post(reverse("web:api-delete"))
+        self.assertEquals(Token.objects.filter(user=self.user).exists(), False)
+        self.assertEqual(SystemLog.objects.filter(user=self.user).count(), 1)

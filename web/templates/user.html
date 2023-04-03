@@ -1,0 +1,8 @@
+{% load octicons %}
+<ul class="dropdown-menu">
+    {% if user.is_superuser %}
+    <li><a class="dropdown-item" href="{% url 'admin:index' %}">{% octicon "book" %} Admin</a></li>
+    {% endif %}
+    <li><a class="dropdown-item" href="{% url 'web:api' %}">{% octicon "blast" %} API</a></li>
+    <li><a class="dropdown-item" href="{% url 'web:logout' %}">{% octicon "link-external" %} Logout</a></li>
+</ul>
