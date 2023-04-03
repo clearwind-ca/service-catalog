@@ -10,7 +10,7 @@ from django.views.decorators.http import require_POST
 
 from catalog.errors import FetchError
 from gh import fetch
-from systemlogs.models import add_log, add_error, add_info
+from systemlogs.models import add_error, add_info, add_log
 from web.helpers import process_query_params
 
 from .forms import ServiceForm, SourceForm, get_schema

@@ -103,3 +103,13 @@ Arguments:
 Environment variables:
 
 * `CRON_USER`: If `--user` is not specified, then the command will check to see if the environment variable `CRON_USER` is set and use that.
+
+### Truncate
+
+Command: `python manage.py truncate`
+
+Removes old `Log` entries in the `SystemLog` table. The default is to remove all logs older than 30 days.
+
+Arguments:
+
+* `--ago`: the number of days to truncate logs too. For example `--ago 30` removes all `Log` entries older than 30 days.

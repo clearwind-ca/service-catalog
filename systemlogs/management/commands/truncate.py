@@ -1,12 +1,10 @@
-import os
+from datetime import timedelta
 
-from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 
-from catalog.errors import FetchError
-from gh import fetch
 from systemlogs import models
-from datetime import datetime, timedelta
+
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
@@ -23,7 +21,9 @@ class Command(BaseCommand):
                 "You must specify `--ago` as the number of days to delete logs older than."
             )
 
-        queryset = models.SystemLog.objects.filter(created__lt=datetime.today() - timedelta(days=ago))
+        queryset = models.SystemLog.objects.filter(
+            created__lt=timezone.now() - timedelta(days=ago)
+        )
         count = queryset.count()
         queryset.delete()
         print(f"Deleted {count} logs.")

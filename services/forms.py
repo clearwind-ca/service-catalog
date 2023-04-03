@@ -6,6 +6,7 @@ import jsonschema
 from django import forms
 from django.conf import settings
 from django.contrib import messages
+
 from . import models
 
 
@@ -101,7 +102,12 @@ class ServiceForm(forms.Form, BaseForm):
                 try:
                     dependency = models.Service.objects.get(slug=dependency)
                 except models.Service.DoesNotExist:
-                    logs.append([f"Dependency: `{dependency}` does not exist in the catalog and was not connected.", messages.WARNING])
+                    logs.append(
+                        [
+                            f"Dependency: `{dependency}` does not exist in the catalog and was not connected.",
+                            messages.WARNING,
+                        ]
+                    )
                     continue
                 service.dependencies.add(dependency)
 
