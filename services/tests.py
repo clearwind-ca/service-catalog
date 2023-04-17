@@ -2,10 +2,10 @@ import logging
 import os
 from unittest.mock import patch
 
-from django.forms.models import model_to_dict
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
+from django.forms.models import model_to_dict
 from django.test import TestCase
 from django.urls import reverse
 from faker import Faker
@@ -483,7 +483,7 @@ class TestServiceForm(WithUser):
         form.source = source
         self.assertTrue(form.is_valid(), form.errors)
         assert form.save()["updated"]
-    
+
     def test_form_ignores_update(self):
         """Object not updated if nothing changed."""
         source = create_source()

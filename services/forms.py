@@ -78,7 +78,7 @@ class ServiceForm(forms.Form, BaseForm):
         data = self.data["data"]
         slug = models.slugify_service(data["name"])
         try:
-            service = models.Service.objects.get(slug=slug) 
+            service = models.Service.objects.get(slug=slug)
             for key in ["name", "description", "type", "priority", "meta"]:
                 if data.get(key) != getattr(service, key, None):
                     setattr(service, key, data.get(key))
@@ -119,4 +119,9 @@ class ServiceForm(forms.Form, BaseForm):
                 logs.append([f"Removed dependency `{dependency}`.", messages.INFO])
                 service.dependencies.remove(dependency)
 
-        return {"created": created, "service": service, "updated": updated, "logs": logs}
+        return {
+            "created": created,
+            "service": service,
+            "updated": updated,
+            "logs": logs,
+        }
