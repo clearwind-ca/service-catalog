@@ -9,7 +9,7 @@
                     {% octicon "arrow-down" %} Depends on
                 {% endif %}
             </td>
-            <td><a href="{% url 'services:service_detail' dependency.slug %}">{{ dependency.name }}</a></td>
+            <td><a href="{% url 'services:service-detail' dependency.slug %}">{{ dependency.name }}</a></td>
             <td>
                 {% include "priority.html" with priority=dependency.priority %}
                 {% include "active.html" with active=dependency.active show_inactive_only=True %}

@@ -29,9 +29,7 @@ class Service(models.Model):
     )
     active = models.BooleanField(default=True)
 
-    source = models.ForeignKey(
-        "Source", on_delete=models.CASCADE, related_name="services"
-    )
+    source = models.ForeignKey("Source", on_delete=models.PROTECT, related_name="services")
     dependencies = models.ManyToManyField("self", blank=True, symmetrical=False)
 
     # Whilst important these fields are dramatically going to vary depending upon the
@@ -45,9 +43,7 @@ class Service(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     def logs(self):
-        return SystemLog.objects.filter(
-            content_type__model="service", object_id=self.id
-        )
+        return SystemLog.objects.filter(content_type__model="service", object_id=self.id)
 
     def dependents(self):
         return Service.objects.filter(dependencies=self)
@@ -60,7 +56,7 @@ class Service(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse("services:service_detail", kwargs={"slug": self.slug})
+        return reverse("services:service-detail", kwargs={"slug": self.slug})
 
 
 class Source(models.Model):
@@ -86,7 +82,7 @@ class Source(models.Model):
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse("services:source_detail", kwargs={"slug": self.slug})
+        return reverse("services:source-detail", kwargs={"slug": self.slug})
 
 
 def slugify_service(name):

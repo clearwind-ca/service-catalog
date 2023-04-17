@@ -6,7 +6,7 @@
 {% load helpers %}
 {% block content %}
 <div>
-    <a class="btn btn-primary" href="{% url 'services:source_add' %}">{% octicon 'plus' %} Add in a new source</a>
+    <a class="btn btn-primary" href="{% url 'services:source-add' %}">{% octicon 'plus' %} Add in a new source</a>
     {% if sources %}
         <table class="table table-striped my-3">
             <thead>
@@ -19,7 +19,7 @@
             <tbody>    
                 {% for source in sources %}
                     <tr>
-                        <td><a href="{% url 'services:source_detail' source.slug %}">{{ source.slug }}</a></td>
+                        <td><a href="{% url 'services:source-detail' source.slug %}">{{ source.slug }}</a></td>
                         <td>{{ source.services.count }}</td>
                         <td>{% include "since.html" with since=source.updated %}</td>
                     </tr>
@@ -36,6 +36,6 @@
         {% include "pagination.html" with objects=sources %}
     {% endif %}
     <hr>
-    <p class="form-text">The data being pulled is validated using <a href="{% url 'services:schema_detail' %}">this schema.</p>
+    <p class="form-text">The data being pulled is validated using <a href="{% url 'services:schema-detail' %}">this schema.</p>
 </div>
 {% endblock %}

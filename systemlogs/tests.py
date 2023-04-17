@@ -34,12 +34,12 @@ class TestTruncate(WithSource):
 
     def test_truncate_ignores_newer_logs(self):
         add_log(self.source, messages.ERROR, "test")
-        self.command(ago=1)
+        self.command(ago=1, quiet=True)
         self.assertEqual(SystemLog.objects.count(), 1)
 
     def test_truncates(self):
         add_log(self.source, messages.ERROR, "test")
-        self.command(ago=0)
+        self.command(ago=0, quiet=True)
         self.assertEqual(SystemLog.objects.count(), 0)
 
 
@@ -47,8 +47,8 @@ class TestAPI(WithSource):
     def setUp(self):
         super().setUp()
         self.log = add_log(self.source, messages.ERROR, "test")
-        self.list_url = reverse("systemlogs:api-list")
-        self.detail_url = reverse("systemlogs:api-detail", kwargs={"pk": self.log.pk})
+        self.list_url = reverse("logs:api-list")
+        self.detail_url = reverse("logs:api-detail", kwargs={"pk": self.log.pk})
 
     def test_logs_list_unauth(self):
         response = self.api_client.get(self.list_url)

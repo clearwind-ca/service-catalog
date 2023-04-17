@@ -3,7 +3,7 @@
 {% load humanize %}
 {% load octicons %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item"><a href="{% url 'services:service_list' %}">{% octicon "verified" %} Sources</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'services:service-list' %}">{% octicon "verified" %} Sources</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{ source.slug }}</li>
 {% endblock %}
 {% block content %}
@@ -42,7 +42,7 @@
                     </tr>
                     {% endfor %}
                 </table>
-                <p class="form-text">Limited to the last 3 logs. <a href="{% url 'systemlogs:log_list' %}?slug={{ source.slug }}&target=source">View more in logs</a>.</p>
+                <p class="form-text">Limited to the last 3 logs. <a href="{% url 'logs:log_list' %}?slug={{ source.slug }}&target=source">View more in logs</a>.</p>
             {% else %}
                 {% include "blankslate.html" with message="No logs found for this source." %}
             {% endif %}
@@ -54,7 +54,7 @@
         <div class="card-body">
             <div class="form-group row mb-3">
                 <label for="refresh">Refresh this data from its source <a href="{{ source.url }}">{{ source.url }}</a>.</label>
-                <form method="post" class="mt-3" action="{% url 'services:source_refresh' source.slug %}">
+                <form method="post" class="mt-3" action="{% url 'services:source-refresh' source.slug %}">
                     {% csrf_token %}
                     <input type="submit" class="btn btn-primary" value="Refresh" />
                 </form>
@@ -62,7 +62,7 @@
             
             <div class="form-group row mb-3">
                 <label for="refresh">Validate this <code>{{ source.name }}</code> without updating.</label>
-                <form method="post" class="mt-3" action="{% url 'services:source_validate' source.slug %}">
+                <form method="post" class="mt-3" action="{% url 'services:source-validate' source.slug %}">
                     {% csrf_token %}
                     <input type="submit" class="btn btn-primary" value="Validate" />
                 </form>
@@ -70,7 +70,7 @@
 
             <div class="form-group row">
                 <label for="refresh" >Delete this from the catalog. It <b>will not delete from GitHub</b> that must be done manually.</label>
-                <form method="post" class="mt-3" action="{% url 'services:source_delete' source.slug %}">
+                <form method="post" class="mt-3" action="{% url 'services:source-delete' source.slug %}">
                     {% csrf_token %}
                     <input type="submit" class="btn btn-danger" value="Delete" />
                 </form>

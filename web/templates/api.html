@@ -6,7 +6,7 @@
 <p>Each user with the Catalog can generate a Token for the API. For information on how to use the API, please see <a href="https://github.com/clearwind-ca/service-catalog/blob/main/docs/api.md">the documentation</a>.</p>
 <p>An example of using the API with <code>curl</code> to view system logs:
 <pre>
-    curl {{ request.scheme }}://{{ request.get_host }}{% url "systemlogs:api-list" %} -H "Authentication: Token: YOUR_TOKEN_HERE"
+    curl {{ request.scheme }}://{{ request.get_host }}{% url "logs:api-list" %} -H "Authentication: Token: YOUR_TOKEN_HERE"
 </pre>
 </p>
 <hr>

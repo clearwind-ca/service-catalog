@@ -23,15 +23,16 @@ if not os.path.exists(env):
 load_dotenv(dotenv_path=env)
 
 # Doing this so that it shows up in the debug page for clarity.
-CATALOG_ENV = env
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(" ")
 auth_pwd = "django.contrib.auth.password_validation"
+ATOMIC_REQUESTS = True
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": f"{auth_pwd}.UserAttributeSimilarityValidator"},
     {"NAME": f"{auth_pwd}.MinimumLengthValidator"},
     {"NAME": f"{auth_pwd}.CommonPasswordValidator"},
     {"NAME": f"{auth_pwd}.NumericPasswordValidator"},
 ]
+CATALOG_ENV = env
 DEBUG = os.environ.get("DEBUG")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 if os.environ.get("CI"):
@@ -42,9 +43,7 @@ if os.environ.get("CI"):
         }
     }
 else:
-    DATABASES = {
-        "default": dj_database_url.config(conn_max_age=600, conn_health_checks=True)
-    }
+    DATABASES = {"default": dj_database_url.config(conn_max_age=600, conn_health_checks=True)}
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -54,6 +53,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
+    "django_extensions",
     "oauthlogin",
     "rest_framework",
     "rest_framework.authtoken",

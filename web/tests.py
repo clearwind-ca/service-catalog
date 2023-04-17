@@ -83,9 +83,7 @@ class TestQs(TestCase):
         # Override params works.
         self.assertEqual(self._test_qs("page=10", page=3), "?page=3")
         # Preserve other params.
-        self.assertEqual(
-            self._test_qs("page=10&active=yes", page=3), "?page=3&active=yes"
-        )
+        self.assertEqual(self._test_qs("page=10&active=yes", page=3), "?page=3&active=yes")
         self.assertEqual(self._test_qs("priority=1"), "?priority=1")
         self.assertEqual(self._test_qs("level=10"), "?level=10")
         # No is False and then converted back to no.
