@@ -1,14 +1,16 @@
 import os
-from django.contrib import messages
 
 from django.conf import settings
-from django.contrib import auth
-from django.shortcuts import redirect, render, reverse
+from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect, render, reverse
 from django.views.decorators.http import require_POST
 from rest_framework.authtoken.models import Token
+
 from systemlogs.models import add_info
+
 from .shortcuts import get_object_or_None
+
 
 def home(request):
     return render(request, "home.html")
@@ -53,11 +55,13 @@ def debug(request):
         request, "debug.html", {"envs": selected_envs, "settings": selected_settings}
     )
 
+
 @login_required
 def api(request):
     token = get_object_or_None(Token, user=request.user)
     if request.method == "GET":
         return render(request, "api.html", {"token": token})
+
 
 @login_required
 @require_POST
@@ -65,12 +69,17 @@ def api_create(request):
     if Token.objects.filter(user=request.user).exists():
         messages.add_message(request, messages.ERROR, "Token already exists")
         return redirect(reverse("web:api"))
-    
+
     token = Token.objects.create(user=request.user)
-    messages.add_message(request, messages.SUCCESS, f"Token created: `{token.key}` this is the only time this will appear, so make a copy of it now.")
+    messages.add_message(
+        request,
+        messages.SUCCESS,
+        f"Token created: `{token.key}` this is the only time this will appear, so make a copy of it now.",
+    )
     add_info(request.user, "Created API token.", request=request)
     return render(request, "api.html", {"token": token})
-    
+
+
 @login_required
 @require_POST
 def api_delete(request):

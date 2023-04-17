@@ -1,13 +1,15 @@
+from django.contrib.auth import get_user_model
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
+from rest_framework.authtoken.models import Token
+
+from systemlogs.models import SystemLog
 
 from .helpers import process_query_params
 from .templatetags.helpers import (apply_format, log_level_as_text,
                                    markdown_filter, priority_as_colour, qs,
                                    strip_format)
-from django.contrib.auth import get_user_model
-from rest_framework.authtoken.models import Token
-from systemlogs.models import SystemLog
+
 
 class TestProcessQueryParams(TestCase):
     def setUp(self):
@@ -113,6 +115,8 @@ class TestFormat(TestCase):
 
 
 from django.contrib.auth import get_user_model
+
+
 class TestAPIToken(TestCase):
     def test_api_token(self):
         """Test the API token pages require login."""
