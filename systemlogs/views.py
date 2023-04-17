@@ -4,14 +4,13 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages import constants
 from django.core.paginator import Paginator
 from django.shortcuts import render
+from rest_framework import permissions, viewsets
 
 from web.helpers import process_query_params
 from web.templatetags.helpers import log_level_as_text
-from rest_framework import viewsets
-from rest_framework import permissions
+
 from .models import SystemLog
 from .serializers import SystemLogSerializer
-
 
 model_map = {
     "service": "services",

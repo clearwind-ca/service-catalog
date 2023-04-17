@@ -30,7 +30,7 @@
     <form method="post" action="{% url 'web:api-delete' %}">
         {% csrf_token %}
         <p class="mb-3">
-            Delete this token from the Catalog server. You can recreate a new token for use in the catalog if you'd like to.
+            This will delete the token from the Service Catalog server. You can recreate a new token for use in the catalog if you'd like to.
         </p>
         <input type="hidden" name="action" value="delete">
         <button type="submit" class="btn btn-danger">Delete this API Token</button>

@@ -66,24 +66,26 @@ class ServiceForm(forms.Form, BaseForm):
         Returns:
             dict: {
                 "created": bool,
+                "updated": bool,
                 "service": Service,
                 "logs": list
             }
         """
         logs = []
         created = False
+        updated = False
         assert self.source, "Source must be set on the form."
         data = self.data["data"]
         slug = models.slugify_service(data["name"])
         try:
             service = models.Service.objects.get(slug=slug)
-            service.name = data["name"]
-            service.description = data.get("description")
-            service.type = data["type"]
-            service.priority = data["priority"]
-            service.meta = data.get("meta")
-            service.save()
-            logs.append([f"Updated service: `{service}`.", messages.INFO])
+            for key in ["name", "description", "type", "priority", "meta"]:
+                if data.get(key) != getattr(service, key, None):
+                    setattr(service, key, data.get(key))
+                    updated = True
+            if updated:
+                service.save()
+                logs.append([f"Updated service: `{service}`.", messages.INFO])
 
         except models.Service.DoesNotExist:
             service = models.Service.objects.create(
@@ -117,4 +119,9 @@ class ServiceForm(forms.Form, BaseForm):
                 logs.append([f"Removed dependency `{dependency}`.", messages.INFO])
                 service.dependencies.remove(dependency)
 
-        return {"created": created, "service": service, "logs": logs}
+        return {
+            "created": created,
+            "service": service,
+            "updated": updated,
+            "logs": logs,
+        }

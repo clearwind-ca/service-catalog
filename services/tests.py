@@ -5,6 +5,7 @@ from unittest.mock import patch
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
+from django.forms.models import model_to_dict
 from django.test import TestCase
 from django.urls import reverse
 from faker import Faker
@@ -30,6 +31,7 @@ def create_service(source):
         description=fake.text(),
         type="application",
         source=source,
+        meta={"foo": "bar"},
     )
 
 
@@ -170,7 +172,7 @@ class TestDependencies(TestCase):
         self.assertEqual(result["service"].dependencies.first(), self.service_parent)
 
     def test_update_service_does_not_add_incorrect_dependencies(self):
-        """Test that updating a service adds dependencies."""
+        """Test that updating a service does not add an invalid dependency."""
         service_stub = self.get_service_stub()
         result = self.process_form(service_stub)
         assert result["created"]
@@ -180,7 +182,7 @@ class TestDependencies(TestCase):
         result = self.process_form(service_stub)
         assert result["created"] == False
         self.assertEqual(result["service"].dependencies.first(), None)
-        assert result["logs"][0][0].startswith("Updated service"), result["logs"][0]
+        assert "was not connected" in result["logs"][0][0], result["logs"][0]
 
     def test_update_service_removes_dependencies(self):
         """Test that updating a service removes dependencies."""
@@ -465,3 +467,29 @@ class TestManagementRefresh(WithUser):
         sources = self.command.handle(user=self.user.username, source=second.slug)
         self.assertEquals(models.Service.objects.all().count(), 1)
         self.assertEquals(mock_fetch.get.call_count, 1)
+
+
+class TestServiceForm(WithUser):
+    def setUp(self):
+        super().setUp()
+
+    def test_form_update(self):
+        """Object updated if something changed."""
+        source = create_source()
+        service = create_service(source)
+        data = model_to_dict(service)
+        data["description"] = fake.text()
+        form = forms.ServiceForm(data={"data": data})
+        form.source = source
+        self.assertTrue(form.is_valid(), form.errors)
+        assert form.save()["updated"]
+
+    def test_form_ignores_update(self):
+        """Object not updated if nothing changed."""
+        source = create_source()
+        service = create_service(source)
+        data = model_to_dict(service)
+        form = forms.ServiceForm(data={"data": data})
+        form.source = source
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.save()["updated"], False)
