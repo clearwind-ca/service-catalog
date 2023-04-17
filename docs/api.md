@@ -14,9 +14,15 @@ To use the authentication token, pass it through as a HTTP Header, example with 
 
 ## URLs
 
-* `/logs/api/list/`: List logs.
-* `/logs/api/list/<int:pk>`: Details for an individual log.
+**Note:** that the web interface uses `slug` for its URLs because those are more pleasant in a browser and to share. The API uses `pk` in its URLs as that's standard in Django Rest Framework.
+
+* `/api/logs/list/`: List logs.
+* `/api/logs/list/<int:pk>`: Details for an individual log.
 
 ## Pagination
 
 Pagination for next and previous are included the list results, but appending `?page=X` to the end of the URL will take you to the next page.
+
+## Response codes
+
+Service Catalog tries to follow the best practices for HTTP Response codes. If Service Catalog is getting an error back from a downstream service, such as GitHub, then it will return a `502` status code in the API.

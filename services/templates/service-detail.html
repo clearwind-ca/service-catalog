@@ -3,7 +3,7 @@
 {% load humanize %}
 {% load octicons %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item"><a href="{% url 'services:service_list' %}">{% octicon "dashboard" %} Services</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'services:service-list' %}">{% octicon "dashboard" %} Services</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{ service.name }}</li>
 {% endblock %}
 {% block content %}
@@ -13,7 +13,7 @@
         {% include "priority.html" with priority=service.priority %}
         {% include "active.html" with active=service.active %}
     </p>
-    <p class="form-text mb-3">This data was pulled from <code>{{ source.name }}</code> and validated using <a href="{% url 'services:schema_detail' %}">this schema</a>. It has a slug of <code>{{ service.slug }}</code>.</p>
+    <p class="form-text mb-3">This data was pulled from <code>{{ source.name }}</code> and validated using <a href="{% url 'services:schema-detail' %}">this schema</a>. It has a slug of <code>{{ service.slug }}</code>.</p>
     {% if service.description %}
         <p>{{ service.description|markdown }}</p>
     {% endif %}
@@ -53,7 +53,7 @@
                     </tr>
                     {% endfor %}
                 </table>
-                <p class="form-text">Limited to the last 3 logs. <a href="{% url 'systemlogs:log_list' %}?slug={{ service.slug }}&target=service">View more in logs</a>.</p>
+                <p class="form-text">Limited to the last 3 logs. <a href="{% url 'logs:log_list' %}?slug={{ service.slug }}&target=service">View more in logs</a>.</p>
             {% else %}
                 {% include "blankslate.html" with message="No logs found for this service." %}
             {% endif %}
@@ -65,11 +65,11 @@
         <div id="admin" class="card-header fw-bold">Admin</div>
         <div class="card-body">
             <div class="form-group row mb-3">
-                <label for="refresh">Refresh this data from its source <a href="{% url 'services:source_detail' source.slug %}">{{ source.slug }}</a>.</label>
+                <label for="refresh">Refresh this data from its source <a href="{% url 'services:source-detail' source.slug %}">{{ source.slug }}</a>.</label>
             </div>
             <div class="form-group row">
                 <label class="mb-3" for="refresh">Delete this from the catalog. It <b>will not delete from GitHub</b> that must be done seperately.</label>
-                    <form method="post" action="{% url 'services:service_delete' service.slug %}">
+                    <form method="post" action="{% url 'services:service-delete' service.slug %}">
                         {% csrf_token %}
                         <input type="submit" class="btn btn-danger" value="Delete" />
                     </form>

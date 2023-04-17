@@ -80,9 +80,7 @@ def get(user, source):
     try:
         user = gh.get_user(organization)
     except UnknownObjectException:
-        raise NoRepository(
-            f"Unable to access the user or organization: `{organization}`."
-        )
+        raise NoRepository(f"Unable to access the user or organization: `{organization}`.")
 
     try:
         repo = repo = user.get_repo(repo)

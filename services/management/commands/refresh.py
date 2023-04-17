@@ -30,9 +30,15 @@ class Command(BaseCommand):
             action="store_true",
             help="Refresh all sources to refresh.",
         )
+        parser.add_argument(
+            "--quiet",
+            action="store_true",
+            help="Print out less.",
+        )
 
     def handle(self, *args, **options):
         username = options.get("user") or os.environ.get("CRON_USER")
+        quiet = options.get("quiet", False)
         if not username:
             raise UserError(
                 "User must be set either using `--cron-user` or `CRON_USER` as the username of a user with a GitHub login."
@@ -76,4 +82,5 @@ class Command(BaseCommand):
                     add_log(source, level, msg, request=request)
                 outputs.append(output)
 
-        print(f"Processed {queryset.count()} sources.")
+        if not quiet:
+            print(f"Processed {queryset.count()} sources.")

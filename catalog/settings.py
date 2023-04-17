@@ -42,9 +42,7 @@ if os.environ.get("CI"):
         }
     }
 else:
-    DATABASES = {
-        "default": dj_database_url.config(conn_max_age=600, conn_health_checks=True)
-    }
+    DATABASES = {"default": dj_database_url.config(conn_max_age=600, conn_health_checks=True)}
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -54,6 +52,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
+    "django_extensions",
     "oauthlogin",
     "rest_framework",
     "rest_framework.authtoken",

@@ -11,14 +11,10 @@ class SystemLog(models.Model):
     content_object = GenericForeignKey("content_type", "object_id")
     content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True)
 
-    level = models.IntegerField(
-        choices=[(k, v) for k, v in constants.DEFAULT_LEVELS.items()]
-    )
+    level = models.IntegerField(choices=[(k, v) for k, v in constants.DEFAULT_LEVELS.items()])
     created = models.DateTimeField(auto_now_add=True)
     message = models.TextField()
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
-    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
 
 
 def add_log(target, level, message, web=False, request=None, **kwargs):

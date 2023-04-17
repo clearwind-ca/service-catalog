@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load octicons %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item"><a href="{% url 'services:source_list' %}">Sources</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'services:source-list' %}">Sources</a></li>
     <li class="breadcrumb-item">Add</li>
 {% endblock %}
 {% load helpers %}
@@ -12,7 +12,7 @@
     {% for path in file_paths %}<code>{{ path }}</code>{% if not forloop.last %}, {% endif %}{% endfor %}. Once added
     it will be updated from the source regularly.
 </p>
-<form method="post" action="{% url 'services:source_add' %}">
+<form method="post" action="{% url 'services:source-add' %}">
     {% csrf_token %}
     <div class="mb-3">
         <label for="source" class="form-label">Source</label>

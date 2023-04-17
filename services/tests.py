@@ -3,12 +3,14 @@ import os
 from unittest.mock import patch
 
 from django.contrib import messages
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 from django.test import TestCase
 from django.urls import reverse
 from faker import Faker
+
+from catalog.errors import FetchError
+from catalog.helpers.tests import WithUser
 
 from . import forms, models
 from .management.commands.refresh import Command, UserError
@@ -48,18 +50,31 @@ def sample_response():
     ]
 
 
-class WithUser(TestCase):
-    def setUp(self):
-        self.user = get_user_model().objects.create_user(username="andy")
-        return super().setUp()
-
-    def get_messages(self, response):
-        """Get the messages from the response."""
-        return list(messages.get_messages(response.wsgi_request))
-
-    def get_message(self, response):
-        """Get the first message from the response."""
-        return self.get_messages(response)[0]
+def mixed_responses():
+    return [
+        {
+            "contents": {
+                "priority": 1,
+                "name": fake.user_name(),
+                "type": "application",
+                "description": fake.text(),
+            }
+        },
+        {
+            "contents": {
+                "name": fake.user_name(),
+                "type": "application",
+                "description": fake.text(),
+            }
+        },
+        {
+            "contents": {
+                "name": fake.user_name(),
+                "priority": 12,
+                "description": fake.text(),
+            }
+        },
+    ]
 
 
 class ServiceTestCase(TestCase):
@@ -83,13 +98,13 @@ class TestServiceList(WithUser):
     def test_no_services(self):
         """Test the list services view with no services."""
         self.client.force_login(self.user)
-        response = self.client.get(reverse("services:service_list"))
+        response = self.client.get(reverse("services:service-list"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "blankslate.html")
 
     def test_not_logged_in(self):
         """Test the list services view when not logged in."""
-        response = self.client.get(reverse("services:service_list"))
+        response = self.client.get(reverse("services:service-list"))
         self.assertEqual(response.status_code, 302)
 
     def test_a_service(self):
@@ -97,7 +112,7 @@ class TestServiceList(WithUser):
         self.client.force_login(self.user)
         source = create_source()
         service = create_service(source)
-        response = self.client.get(reverse("services:service_list"))
+        response = self.client.get(reverse("services:service-list"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "service-list.html")
         self.assertContains(response, service.name)
@@ -108,7 +123,7 @@ class TestServiceList(WithUser):
         source = create_source()
         service = create_service(source)
         response = self.client.get(
-            reverse("services:service_detail", kwargs={"slug": service.slug})
+            reverse("services:service-detail", kwargs={"slug": service.slug})
         )
         self.assertEqual(response.status_code, 302)
 
@@ -118,7 +133,7 @@ class TestServiceList(WithUser):
         source = create_source()
         service = create_service(source)
         response = self.client.get(
-            reverse("services:service_detail", kwargs={"slug": service.slug})
+            reverse("services:service-detail", kwargs={"slug": service.slug})
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "service-detail.html")
@@ -214,13 +229,13 @@ class TestSchema(WithUser):
     def test_schema(self):
         """Test the list schema view."""
         self.client.force_login(self.user)
-        response = self.client.get(reverse("services:schema_detail"))
+        response = self.client.get(reverse("services:schema-detail"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "schema-detail.html")
 
     def test_not_logged_in(self):
         """Test the list schema view when not logged in."""
-        response = self.client.get(reverse("services:schema_detail"))
+        response = self.client.get(reverse("services:schema-detail"))
         self.assertEqual(response.status_code, 302)
 
 
@@ -228,9 +243,7 @@ class TestValidate(WithUser):
     def setUp(self):
         super().setUp()
         self.source = create_source()
-        self.url = reverse(
-            "services:source_validate", kwargs={"slug": self.source.slug}
-        )
+        self.url = reverse("services:source-validate", kwargs={"slug": self.source.slug})
 
     def test_not_logged_in(self):
         """Test the list schema view when not logged in."""
@@ -275,7 +288,7 @@ class TestDelete(WithUser):
     def setUp(self):
         super().setUp()
         self.source = create_source()
-        self.url = reverse("services:source_delete", kwargs={"slug": self.source.slug})
+        self.url = reverse("services:source-delete", kwargs={"slug": self.source.slug})
 
     def test_not_logged_in(self):
         """Test the list schema view when not logged in."""
@@ -315,7 +328,7 @@ class TestDelete(WithUser):
 class TestAdd(WithUser):
     def setUp(self):
         super().setUp()
-        self.url = reverse("services:source_add")
+        self.url = reverse("services:source-add")
 
     def test_not_logged_in(self):
         """Test the source add view when not logged in."""
@@ -349,7 +362,7 @@ class TestAdd(WithUser):
 class TestSourceList(WithUser):
     def setUp(self):
         super().setUp()
-        self.url = reverse("services:source_list")
+        self.url = reverse("services:source-list")
 
     def test_not_logged_in(self):
         """Test the source list view when not logged in."""
@@ -379,9 +392,7 @@ class TestServiceDetail(WithUser):
         super().setUp()
         self.source = create_source()
         self.service = create_service(self.source)
-        self.url = reverse(
-            "services:service_detail", kwargs={"slug": self.service.slug}
-        )
+        self.url = reverse("services:service-detail", kwargs={"slug": self.service.slug})
 
     def test_not_logged_in(self):
         """Test the service detail view when not logged in."""
@@ -402,9 +413,7 @@ class TestServiceDelete(WithUser):
         super().setUp()
         self.source = create_source()
         self.service = create_service(self.source)
-        self.url = reverse(
-            "services:service_delete", kwargs={"slug": self.service.slug}
-        )
+        self.url = reverse("services:service-delete", kwargs={"slug": self.service.slug})
 
     def test_not_logged_in(self):
         """Test the service delete view when not logged in."""
@@ -454,7 +463,7 @@ class TestManagementRefresh(WithUser):
         create_source()
         create_source()
         mock_fetch.get.return_value = sample_response()
-        self.command.handle(user=self.user.username, all=True)
+        self.command.handle(user=self.user.username, all=True, quiet=True)
         self.assertEquals(models.Service.objects.all().count(), 1)
         self.assertEquals(mock_fetch.get.call_count, 2)
 
@@ -464,7 +473,7 @@ class TestManagementRefresh(WithUser):
         create_source()  # Will not be refreshed.
         second = create_source()  # Will be refreshed.
         mock_fetch.get.return_value = sample_response()
-        sources = self.command.handle(user=self.user.username, source=second.slug)
+        sources = self.command.handle(user=self.user.username, source=second.slug, quiet=True)
         self.assertEquals(models.Service.objects.all().count(), 1)
         self.assertEquals(mock_fetch.get.call_count, 1)
 
@@ -493,3 +502,85 @@ class TestServiceForm(WithUser):
         form.source = source
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.save()["updated"], False)
+
+
+class TestAPISource(WithUser):
+    def setUp(self):
+        super().setUp()
+        self.source_list = reverse("services:api-source-list")
+
+    def test_source_list(self):
+        """Test the source list API."""
+        self.api_login()
+        response = self.api_client.get(self.source_list)
+        self.assertEqual(response.status_code, 200)
+
+    def test_source_unauth(self):
+        """Test the source list API as an unauthed user."""
+        response = self.api_client.get(self.source_list)
+        self.assertEqual(response.status_code, 401)
+
+    def test_source_add_and_get(self):
+        """Test the source list API as POST"""
+        self.api_login()
+        fake_url = fake.url()
+        response = self.api_client.post(self.source_list, data={"url": fake_url})
+        self.assertEqual(response.status_code, 201)
+
+        url = reverse("services:api-source-detail", kwargs={"pk": response.data["id"]})
+        response = self.api_client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["url"], fake_url)
+
+    def test_refresh_unauth(self):
+        """Test the source validate API requires auth."""
+        self.source = create_source()
+        url = reverse("services:api-source-refresh", kwargs={"pk": self.source.pk})
+        response = self.api_client.post(url)
+        self.assertEqual(response.status_code, 401)
+
+    @patch("services.views.fetch")
+    def test_source_add_and_refresh(self, mock_fetch):
+        """Test the source list API as POST"""
+        self.source = create_source()
+        self.api_login()
+        url = reverse("services:api-source-refresh", kwargs={"pk": self.source.pk})
+        mock_fetch.get.return_value = sample_response()
+        response = self.api_client.post(url)
+        assert mock_fetch.get.called
+        self.assertEqual(response.status_code, 200)
+
+    @patch("services.views.fetch")
+    def test_validate_gateway_error(self, mock_fetch):
+        """Test the source validate API when it fails on fetch."""
+        self.source = create_source()
+        self.api_login()
+        url = reverse("services:api-source-validate", kwargs={"pk": self.source.pk})
+        mock_fetch.get.side_effect = FetchError("Nope")
+        response = self.api_client.post(url)
+        assert mock_fetch.get.called
+        self.assertEqual(response.status_code, 502)
+
+    def test_validate_unauth(self):
+        """Test the source validate API requires auth."""
+        self.source = create_source()
+        url = reverse("services:api-source-validate", kwargs={"pk": self.source.pk})
+        response = self.api_client.post(url)
+        self.assertEqual(response.status_code, 401)
+
+    @patch("services.views.fetch")
+    def test_validate_error(self, mock_fetch):
+        """Test the source validate API when it fails on a record."""
+        self.source = create_source()
+        self.api_login()
+        url = reverse("services:api-source-validate", kwargs={"pk": self.source.pk})
+        # Will return multiple errors and one success.
+        mock_fetch.get.return_value = mixed_responses()
+        response = self.api_client.post(url)
+        assert mock_fetch.get.called
+        self.assertEqual(response.status_code, 502)
+        self.assertEqual(len(response.json()["failures"]), 2)
+        first = response.json()["failures"][0]
+        assert "priority" in first["data"][0]["message"]
+        second = response.json()["failures"][1]
+        assert "type" in second["data"][0]["message"]

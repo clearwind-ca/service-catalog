@@ -1,3 +1,4 @@
+import json
 from itertools import chain
 
 from django.conf import settings
@@ -7,6 +8,9 @@ from django.core.paginator import Paginator
 from django.db.models import CharField, Value
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
+from rest_framework import permissions, status, viewsets
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from catalog.errors import FetchError
 from gh import fetch
@@ -15,6 +19,7 @@ from web.helpers import process_query_params
 
 from .forms import ServiceForm, SourceForm, get_schema
 from .models import Service, Source
+from .serializers import SourceSerializer
 
 
 @login_required
@@ -38,9 +43,7 @@ def service_list(request):
 
     context = {
         "services": page_obj,
-        "priorities": sorted(
-            [k[0] for k in Service.objects.values_list("priority").distinct()]
-        ),
+        "priorities": sorted([k[0] for k in Service.objects.values_list("priority").distinct()]),
         "filters": filters,
         "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
     }
@@ -54,7 +57,7 @@ def service_delete(request, slug):
     msg = f"Service `{service.slug}` successfully deleted"
     add_info(service, msg, web=True, request=request)
     service.delete()
-    return redirect("services:service_list")
+    return redirect("services:service-list")
 
 
 @login_required
@@ -113,12 +116,26 @@ def source_refresh(request, slug):
     try:
         results = fetch.get(request.user, source)
     except FetchError as error:
-        msg = f"Error refreshing `{source.slug}`: {error.message}"
+        msg = f"Error attempting to refresh: `{source.slug}` via the web. {error.message}"
         add_error(source, msg, web=True, request=request)
-        return redirect("services:source_detail", slug=source.slug)
+        return redirect("services:source-detail", slug=source.slug)
 
     refresh_results(results, source, request)
-    return redirect("services:source_detail", slug=source.slug)
+    return redirect("services:source-detail", slug=source.slug)
+
+
+@api_view(["POST"])
+def api_source_refresh(request, pk):
+    source = get_object_or_404(pk=pk, klass=Source)
+    try:
+        results = fetch.get(request.user, source)
+    except FetchError as error:
+        msg = f"Error attempting to refresh: `{source.slug}` via the api. {error.message}"
+        add_error(source, msg, request=request)
+        return Response({"success": False}, status=status.HTTP_502_BAD_GATEWAY)
+
+    refresh_results(results, source, request)
+    return Response({"success": True})
 
 
 def refresh_results(results, source, request):
@@ -144,9 +161,7 @@ def refresh_results(results, source, request):
 @login_required
 def source_add(request):
     if request.method == "GET":
-        return render(
-            request, "source-add.html", context={"file_paths": fetch.file_paths}
-        )
+        return render(request, "source-add.html", context={"file_paths": fetch.file_paths})
     else:
         form = SourceForm(request.POST)
         if form.is_valid():
@@ -155,7 +170,7 @@ def source_add(request):
                 results = fetch.get(request.user, source)
             except FetchError as error:
                 messages.add_message(request, messages.ERROR, error.message)
-                return redirect("services:source_list")
+                return redirect("services:source-list")
 
             refresh_results(results, source, request)
         else:
@@ -171,16 +186,12 @@ def source_delete(request, slug):
     if source.services.exists():
         err = f"Source `{source.slug}` cannot be deleted because it is associated with at least one service. Delete the services first."
         messages.add_message(request, messages.ERROR, err)
-        return redirect("services:source_list")
+        return redirect("services:source-list")
 
-    add_info(
-        source,
-        f"Source `{source.slug}` successfully deleted",
-        web=True,
-        request=request,
-    )
+    msg = f"Source `{source.slug}` successfully deleted"
+    add_info(source, msg, web=True, request=request)
     source.delete()
-    return redirect("services:source_list")
+    return redirect("services:source-list")
 
 
 @login_required
@@ -190,24 +201,38 @@ def source_validate(request, slug):
         results = fetch.get(request.user, source)
     except (FetchError) as error:
         add_error(source, error.message, web=True, request=request)
-        return redirect("services:source_detail", slug=source.slug)
+        return redirect("services:source-detail", slug=source.slug)
 
     for data in results:
         form = ServiceForm({"data": data["contents"]})
         if not form.is_valid():
-            message = (
-                f"Validation failed for: `{source.url}`. Error: {form.nice_errors()}."
-            )
+            message = f"Validation failed for: `{source.url}`. Error: {form.nice_errors()}."
             add_error(source, message, web=True, request=request)
-            return redirect("services:source_detail", slug=source.slug)
+            return redirect("services:source-detail", slug=source.slug)
 
-    add_info(
-        source,
-        f"Source `{source.slug}` successfully validated.",
-        web=True,
-        request=request,
-    )
-    return redirect("services:source_detail", slug=source.slug)
+    add_info(source, f"Source `{source.slug}` successfully validated.", web=True, request=request)
+    return redirect("services:source-detail", slug=source.slug)
+
+
+@api_view(["POST"])
+def api_source_validate(request, pk):
+    source = get_object_or_404(pk=pk, klass=Source)
+    try:
+        results = fetch.get(request.user, source)
+    except (FetchError) as error:
+        add_error(source, error.message, request=request)
+        return Response({"success": False}, status=status.HTTP_502_BAD_GATEWAY)
+
+    response = {"source": SourceSerializer(source).data, "success": False, "failures": []}
+    for data in results:
+        form = ServiceForm({"data": data["contents"]})
+        if not form.is_valid():
+            response["failures"].append(json.loads(form.errors.as_json()))
+
+    if not response["failures"]:
+        return Response({"success": True})
+    else:
+        return Response(response, status=status.HTTP_502_BAD_GATEWAY)
 
 
 @login_required
@@ -217,3 +242,9 @@ def schema_detail(request):
         "schema-detail.html",
         {"path": settings.SERVICE_SCHEMA, "schema": get_schema()},
     )
+
+
+class SourceViewSet(viewsets.ModelViewSet):
+    queryset = Source.objects.all().order_by("-created")
+    serializer_class = SourceSerializer
+    permission_classes = [permissions.IsAuthenticated]

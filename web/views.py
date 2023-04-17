@@ -51,9 +51,7 @@ def debug(request):
         "CATALOG_ENV": settings.CATALOG_ENV,
         "DEBUG": settings.DEBUG,
     }
-    return render(
-        request, "debug.html", {"envs": selected_envs, "settings": selected_settings}
-    )
+    return render(request, "debug.html", {"envs": selected_envs, "settings": selected_settings})
 
 
 @login_required
