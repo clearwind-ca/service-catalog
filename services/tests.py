@@ -1,7 +1,7 @@
 import logging
 import os
 from unittest.mock import patch
-
+from django.db.models.deletion import ProtectedError
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
@@ -14,7 +14,7 @@ from catalog.helpers.tests import WithUser
 
 from . import forms, models
 from .management.commands.refresh import Command, UserError
-
+from web.shortcuts import get_object_or_None
 logging.getLogger("faker").setLevel(logging.ERROR)
 fake = Faker("en_US")
 
@@ -473,7 +473,7 @@ class TestManagementRefresh(WithUser):
         create_source()  # Will not be refreshed.
         second = create_source()  # Will be refreshed.
         mock_fetch.get.return_value = sample_response()
-        sources = self.command.handle(user=self.user.username, source=second.slug, quiet=True)
+        self.command.handle(user=self.user.username, source=second.slug, quiet=True)
         self.assertEquals(models.Service.objects.all().count(), 1)
         self.assertEquals(mock_fetch.get.call_count, 1)
 
@@ -519,6 +519,23 @@ class TestAPISource(WithUser):
         """Test the source list API as an unauthed user."""
         response = self.api_client.get(self.source_list)
         self.assertEqual(response.status_code, 401)
+
+    def test_source_delete(self):
+        """Test deleting a source."""
+        self.api_login()
+        self.source = create_source()
+        url = reverse("services:api-source-detail", kwargs={"pk": self.source.pk})
+        response = self.api_client.delete(url)
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(get_object_or_None(models.Source, pk=self.source.pk), None)
+
+    def test_source_delete(self):
+        """Test deleting a source with a service."""
+        self.api_login()
+        self.source = create_source()
+        self.service = create_service(self.source)
+        url = reverse("services:api-source-detail", kwargs={"pk": self.source.pk})
+        self.assertRaises(ProtectedError, self.api_client.delete, url)
 
     def test_source_add_and_get(self):
         """Test the source list API as POST"""

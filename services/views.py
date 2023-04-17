@@ -1,6 +1,5 @@
-import json
 from itertools import chain
-
+import json
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -8,8 +7,7 @@ from django.core.paginator import Paginator
 from django.db.models import CharField, Value
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
-from rest_framework import permissions, status, viewsets
-from rest_framework.decorators import api_view
+from rest_framework import permissions, viewsets, status
 from rest_framework.response import Response
 
 from catalog.errors import FetchError
@@ -20,6 +18,8 @@ from web.helpers import process_query_params
 from .forms import ServiceForm, SourceForm, get_schema
 from .models import Service, Source
 from .serializers import SourceSerializer
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 
 @login_required

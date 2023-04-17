@@ -29,7 +29,7 @@ class Service(models.Model):
     )
     active = models.BooleanField(default=True)
 
-    source = models.ForeignKey("Source", on_delete=models.CASCADE, related_name="services")
+    source = models.ForeignKey("Source", on_delete=models.PROTECT, related_name="services")
     dependencies = models.ManyToManyField("self", blank=True, symmetrical=False)
 
     # Whilst important these fields are dramatically going to vary depending upon the

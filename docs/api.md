@@ -16,8 +16,14 @@ To use the authentication token, pass it through as a HTTP Header, example with 
 
 **Note:** that the web interface uses `slug` for its URLs because those are more pleasant in a browser and to share. The API uses `pk` in its URLs as that's standard in Django Rest Framework.
 
-* `/api/logs/list/`: List logs.
-* `/api/logs/list/<int:pk>`: Details for an individual log.
+* `GET /api/logs/list/`: List logs.
+* `GET /api/logs/list/<int:pk>`: Details for an individual log.
+* `GET /api/source/`: List sources.
+* `POST /api/source/`: Create a source.
+* `GET /api/source/<int:pk>/`: Details for a source.
+* `DELETE /api/source/<int:pk>/`: Delete a source.
+* `GET /api/source/<int:pk>/refresh`: Refresh a source.
+* `GET /api/source/<int:pk>/validate`: Validate a source.
 
 ## Pagination
 
