@@ -13,7 +13,7 @@
         {% include "priority.html" with priority=service.priority %}
         {% include "active.html" with active=service.active %}
     </p>
-    <p class="form-text mb-3">This data was pulled from <code>{{ source.name }}</code> and validated using <a href="{% url 'services:schema-detail' %}">this schema</a>. It has a slug of <code>{{ service.slug }}</code>.</p>
+    <p class="form-text mb-3">This data was pulled from <a href="{{ source.url }}">this source</a> and validated using <a href="{% url 'services:schema-detail' %}">this schema</a>. The slug is: <code>{{ service.slug }}</code>.</p>
     {% if service.description %}
         <p>{{ service.description|markdown }}</p>
     {% endif %}
