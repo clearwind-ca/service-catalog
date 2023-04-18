@@ -12,18 +12,24 @@ To use the authentication token, pass it through as a HTTP Header, example with 
 -H `Authentication: Token YOUR_TOKEN HERE`
 ```
 
+**Except where noted, all API endpoints** require the caller to be authenticated.
+
 ## URLs
 
 **Note:** that the web interface uses `slug` for its URLs because those are more pleasant in a browser and to share. The API uses `pk` in its URLs as that's standard in Django Rest Framework.
 
 * `GET /api/logs/list/`: List logs.
-* `GET /api/logs/list/<int:pk>`: Details for an individual log.
+* `GET /api/logs/list/<int:pk>/`: Details for an individual log.
 * `GET /api/source/`: List sources.
 * `POST /api/source/`: Create a source.
 * `GET /api/source/<int:pk>/`: Details for a source.
 * `DELETE /api/source/<int:pk>/`: Delete a source.
-* `GET /api/source/<int:pk>/refresh`: Refresh a source.
-* `GET /api/source/<int:pk>/validate`: Validate a source.
+* `GET /api/source/<int:pk>/refresh/`: Refresh a source.
+* `GET /api/source/<int:pk>/validate/`: Validate a source.
+* `GET /api/service/`: List services.
+* `GET /api/service/<int:pk>/`: Details for a service.
+* `DELETE /api/service/<int:pk>/`: Delete a source.
+* `GET /api/service/schema/`: Return the schema. *This endpoint does not require authentication.*
 
 ## Pagination
 

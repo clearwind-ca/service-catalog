@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Source
+from .models import Service, Source
 
 
 class SourceSerializer(serializers.ModelSerializer):
@@ -8,3 +8,9 @@ class SourceSerializer(serializers.ModelSerializer):
         model = Source
         fields = "__all__"
         read_only_fields = ["slug", "created", "updated"]
+
+
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = "__all__"
