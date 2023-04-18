@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load octicons %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'health:checks-list' %}">Health checks</a></li>
+    <li class="breadcrumb-item">Add</li>
+{% endblock %}
+{% load helpers %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<h4>Add a health check</h4>
+<p>Blurb
+</p>
+<form method="post" action="{% url 'health:checks-add' %}">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary">{% octicon 'plus' %} Add health check</button>
+</form>
+
+{% endblock %}

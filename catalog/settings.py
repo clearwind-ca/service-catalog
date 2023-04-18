@@ -33,6 +33,8 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": f"{auth_pwd}.NumericPasswordValidator"},
 ]
 CATALOG_ENV = env
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 DEBUG = os.environ.get("DEBUG")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 if os.environ.get("CI"):
@@ -54,6 +56,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.humanize",
     "django_extensions",
+    "crispy_forms",
+    "crispy_bootstrap5",
     "oauthlogin",
     "rest_framework",
     "rest_framework.authtoken",

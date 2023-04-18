@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load octicons %}
+{% block content %}
+<div>
+
+    {% if results %}
+        <table class="table table-striped my-3">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Priority</th>
+                    <th>Type</th>
+                    <th>{% octicon "past" %} Updated</th>
+                </tr>
+            </thead>
+            <tbody>    
+                {% for service in services %}
+                    <tr>
+
+                        <td>{% include "since.html" with since=service.updated %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="blankslate my-3">
+            {% include "blankslate.html" with message="No health checks matched those filters." %}
+        </div>
+    {% endif %}
+
+    {% if results %}
+        {% include "pagination.html" with objects=healthchecks %}
+    {% endif %}
+</div>
+{% endblock %}

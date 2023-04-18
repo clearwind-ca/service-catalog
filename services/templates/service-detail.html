@@ -53,7 +53,7 @@
                     </tr>
                     {% endfor %}
                 </table>
-                <p class="form-text">Limited to the last 3 logs. <a href="{% url 'logs:log_list' %}?slug={{ service.slug }}&target=service">View more in logs</a>.</p>
+                <p class="form-text">Limited to the last 3 logs. <a href="{% url 'logs:log-list' %}?slug={{ service.slug }}&target=service">View more in logs</a>.</p>
             {% else %}
                 {% include "blankslate.html" with message="No logs found for this service." %}
             {% endif %}
