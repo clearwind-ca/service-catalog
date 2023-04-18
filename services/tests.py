@@ -642,7 +642,7 @@ class TestAPIService(WithUser):
         self.assertEqual(get_object_or_None(models.Service, pk=self.service.pk), None)
 
 
-class TestAPIService(WithUser):        
+class TestAPIService(WithUser):
     def test_get_schema(self):
         self.url = reverse("services:api-schema-detail")
         response = self.api_client.get(self.url)
