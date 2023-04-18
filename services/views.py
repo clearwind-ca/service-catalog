@@ -1,5 +1,6 @@
-from itertools import chain
 import json
+from itertools import chain
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -7,8 +8,10 @@ from django.core.paginator import Paginator
 from django.db.models import CharField, Value
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
-from rest_framework import permissions, viewsets, status
+from rest_framework import mixins, permissions, status, viewsets
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 
 from catalog.errors import FetchError
 from gh import fetch
@@ -17,9 +20,7 @@ from web.helpers import process_query_params
 
 from .forms import ServiceForm, SourceForm, get_schema
 from .models import Service, Source
-from .serializers import SourceSerializer
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
+from .serializers import ServiceSerializer, SourceSerializer
 
 
 @login_required
@@ -243,8 +244,25 @@ def schema_detail(request):
         {"path": settings.SERVICE_SCHEMA, "schema": get_schema()},
     )
 
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def api_schema_detail(request):
+    return Response(
+        {"path": settings.SERVICE_SCHEMA, "schema": get_schema()},
+    )
 
 class SourceViewSet(viewsets.ModelViewSet):
     queryset = Source.objects.all().order_by("-created")
     serializer_class = SourceSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class ServiceViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
+    queryset = Service.objects.all().order_by("-created")
+    serializer_class = ServiceSerializer
     permission_classes = [permissions.IsAuthenticated]

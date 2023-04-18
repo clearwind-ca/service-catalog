@@ -1,9 +1,10 @@
 import logging
 import os
 from unittest.mock import patch
-from django.db.models.deletion import ProtectedError
+
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.db.models.deletion import ProtectedError
 from django.forms.models import model_to_dict
 from django.test import TestCase
 from django.urls import reverse
@@ -11,10 +12,11 @@ from faker import Faker
 
 from catalog.errors import FetchError
 from catalog.helpers.tests import WithUser
+from web.shortcuts import get_object_or_None
 
 from . import forms, models
 from .management.commands.refresh import Command, UserError
-from web.shortcuts import get_object_or_None
+
 logging.getLogger("faker").setLevel(logging.ERROR)
 fake = Faker("en_US")
 
@@ -601,3 +603,47 @@ class TestAPISource(WithUser):
         assert "priority" in first["data"][0]["message"]
         second = response.json()["failures"][1]
         assert "type" in second["data"][0]["message"]
+
+
+class TestAPIService(WithUser):
+    def setUp(self):
+        super().setUp()
+        self.service_list = reverse("services:api-service-list")
+
+    def test_service_list(self):
+        """Test the service list API."""
+        self.api_login()
+        response = self.api_client.get(self.service_list)
+        self.assertEqual(response.status_code, 200)
+
+    def test_service_unauth(self):
+        """Test the service list API as an unauthed user."""
+        response = self.api_client.get(self.service_list)
+        self.assertEqual(response.status_code, 401)
+
+    def test_service_get(self):
+        """Test the service list API as GET"""
+        self.api_login()
+        self.source = create_source()
+        self.service = create_service(self.source)
+        url = reverse("services:api-service-detail", kwargs={"pk": self.service.pk})
+        response = self.api_client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["description"], self.service.description)
+
+    def test_service_delete(self):
+        """Test deleting a service."""
+        self.api_login()
+        self.source = create_source()
+        self.service = create_service(self.source)
+        url = reverse("services:api-service-detail", kwargs={"pk": self.service.pk})
+        response = self.api_client.delete(url)
+        self.assertEqual(response.status_code, 204, response.content)
+        self.assertEqual(get_object_or_None(models.Service, pk=self.service.pk), None)
+
+
+class TestAPIService(WithUser):        
+    def test_get_schema(self):
+        self.url = reverse("services:api-schema-detail")
+        response = self.api_client.get(self.url)
+        self.assertEqual(response.status_code, 200)
