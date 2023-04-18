@@ -20,9 +20,8 @@ urlpatterns = [
     path("sources/<str:slug>/validate/", views.source_validate, name="source-validate"),
     path("sources/<str:slug>/refresh/", views.source_refresh, name="source-refresh"),
     path("sources/<str:slug>/delete/", views.source_delete, name="source-delete"),
-    
     path("api/", include(router.urls)),
     path("api/sources/<pk>/refresh/", views.api_source_refresh, name="api-source-refresh"),
     path("api/sources/<pk>/validate/", views.api_source_validate, name="api-source-validate"),
-    path("api/services/schema/", views.api_schema_detail, name="api-schema-detail")
+    path("api/services/schema/", views.api_schema_detail, name="api-schema-detail"),
 ]
