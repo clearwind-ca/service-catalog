@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 {% load octicons %}
+{% load helpers %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item">{% octicon "heart" %} Health checks</li>
+    <li class="breadcrumb-item active" aria-current="page">Results</li>
+{% endblock %}
 {% block content %}
 <div>
 
@@ -7,17 +12,21 @@
         <table class="table table-striped my-3">
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Priority</th>
-                    <th>Type</th>
+                    <th>Check</th>
+                    <th>Service</th>
+                    <th>Result</th>
+                    <th>Status</th>
                     <th>{% octicon "past" %} Updated</th>
                 </tr>
             </thead>
             <tbody>    
-                {% for service in services %}
+                {% for result in results %}
                     <tr>
-
-                        <td>{% include "since.html" with since=service.updated %}</td>
+                        <td><a href="{% url 'health:checks-detail' result.health_check.slug %}">{{ result.health_check }}</a></td>
+                        <td><a href="{% url 'services:service-detail' result.service.slug %}">{{ result.service }}</a></td>
+                        <td>{% include "pass.html" with result=result %}</td>
+                        <td>{% include "status.html" with status=result %}</td>
+                        <td>{% include "since.html" with since=result.updated %}</td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -29,7 +38,7 @@
     {% endif %}
 
     {% if results %}
-        {% include "pagination.html" with objects=healthchecks %}
+        {% include "pagination.html" with objects=Checks %}
     {% endif %}
 </div>
 {% endblock %}

@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="healthcheck",
+            model_name="Check",
             name="slug",
             field=models.SlugField(default=None, max_length=255, unique=True),
             preserve_default=False,

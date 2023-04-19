@@ -12,6 +12,7 @@
     <p>
         {% include "priority.html" with priority=service.priority %}
         {% include "active.html" with active=service.active %}
+        {% include "health-check-badge.html" with checks=checks %}
     </p>
     <p class="form-text mb-3">This data was pulled from <a href="{{ source.url }}">this source</a> and validated using <a href="{% url 'services:schema-detail' %}">this schema</a>. The slug is: <code>{{ service.slug }}</code>.</p>
     {% if service.description %}
@@ -37,6 +38,13 @@
             {% else %}
                 {% include "blankslate.html" with message="No metadata has been defined for this service." %}
             {% endif %}
+        </div>
+    </div>
+
+    <div class="card mt-3 mb-3">
+        <div class="card-header fw-bold">Health checks</div>
+        <div class="card-body">
+            {% include "health-check.html" with check=check %}
         </div>
     </div>
 

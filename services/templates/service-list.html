@@ -54,6 +54,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Priority</th>
+                    <th>Health</th>
                     <th>Type</th>
                     <th>{% octicon "past" %} Updated</th>
                 </tr>
@@ -66,6 +67,7 @@
                             {% include "priority.html" with priority=service.priority %}
                             {% include "active.html" with active=service.active show_inactive_only=True %}
                         </td>
+                        <td>{% include "health-check-badge.html" with checks=service.latest_results %}</td>
                         <td>{{ service.type }}</td>
                         <td>{% include "since.html" with since=service.updated %}</td>
                     </tr>

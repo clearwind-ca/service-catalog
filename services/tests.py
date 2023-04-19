@@ -1,4 +1,3 @@
-import logging
 import os
 from unittest.mock import patch
 
@@ -17,7 +16,6 @@ from web.shortcuts import get_object_or_None
 from . import forms, models
 from .management.commands.refresh import Command, UserError
 
-logging.getLogger("faker").setLevel(logging.ERROR)
 fake = Faker("en_US")
 
 

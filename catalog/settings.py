@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 
@@ -83,6 +84,11 @@ LOGGING = {
         "level": "DEBUG",
     },
 }
+
+logging.getLogger("github").setLevel(logging.ERROR)
+logging.getLogger("faker").setLevel(logging.ERROR)
+logging.getLogger("gh.fetch").setLevel(logging.ERROR)
+
 LOGIN_URL = "/"
 LOGIN_REDIRECT_URL = "/services/"
 MESSAGE_TAGS = {
@@ -115,7 +121,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 1,
+    "PAGE_SIZE": 10,
 }
 ROOT_URLCONF = "catalog.urls"
 SERVICE_SCHEMA = os.environ.get(
@@ -123,6 +129,7 @@ SERVICE_SCHEMA = os.environ.get(
 )
 SECRET_KEY = os.environ.get("SECRET_KEY")
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SERVER_URL = os.environ.get("SERVER_URL")
 STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, "web", "static"))
 STATIC_URL = "static/"
 TEMPLATES = [
@@ -145,3 +152,5 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 WSGI_APPLICATION = "catalog.wsgi.application"
+GITHUB_CHECK_REPOSITORY = "burnt-tomatoes/service-catalog-checks"
+GITHUB_DEBUG = DEBUG

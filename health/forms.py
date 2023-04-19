@@ -1,7 +1,9 @@
 from django.forms import ModelForm
-from .models import HealthCheck
 
-class HealthCheckForm(ModelForm):
+from .models import Check
+
+
+class CheckForm(ModelForm):
     class Meta:
-        model = HealthCheck
-        fields = ['name', 'description', 'frequency']
+        model = Check
+        fields = ["name", "description", "frequency"]

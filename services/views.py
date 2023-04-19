@@ -77,6 +77,7 @@ def service_detail(request, slug):
                 ),
             )
         ),
+        "checks": service.latest_results(),
         "logs": service.logs().order_by("-created")[:3],
     }
     return render(request, "service-detail.html", context)

@@ -41,7 +41,7 @@ class Command(BaseCommand):
         quiet = options.get("quiet", False)
         if not username:
             raise UserError(
-                "User must be set either using `--cron-user` or `CRON_USER` as the username of a user with a GitHub login."
+                "User must be set either using `--user` or `CRON_USER` as the username of a user with a GitHub login."
             )
 
         user = User.objects.get(username=username)

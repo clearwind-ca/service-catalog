@@ -12,8 +12,6 @@ from services.models import Source
 
 from .fetch import file_paths, get, get_file, get_file_from_list, login_as_user
 
-logging.getLogger("faker").setLevel(logging.ERROR)
-logging.getLogger("gh.fetch").setLevel(logging.ERROR)
 fake = Faker("en_US")
 
 from django.contrib.auth import get_user_model
