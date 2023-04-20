@@ -6,6 +6,10 @@ Service Catalog is an open source tool for tracking teams, applications and tool
 
 This is under rapid development and isn't anywhere near a stable release yet, so please feel free to use, but understand that anything and everything might change as we figure out how best this can serve people.
 
+### Demo instance
+
+There is a demo instance here: https://service-catalog.fly.dev/ which is currently intermittenly updated.
+
 ---
 
 Service Catalog is under the [MIT License](LICENSE.md) and originally built by [Clearwind Consulting](https://clearwind.ca).
