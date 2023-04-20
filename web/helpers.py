@@ -27,6 +27,10 @@ default_query_params = {
     "slug": None,
     "target": None,
     "priority": None,
+    "result": None,
+    "status": None,
+    "service": None,
+    "check": None,
 }
 
 
@@ -41,7 +45,7 @@ def process_query_params(func):
         parsed["active"] = attempt_yesno(request.GET.get("active"))
         parsed["level"] = attempt_int(request.GET.get("level"))
         parsed["priority"] = attempt_int(request.GET.get("priority"))
-        for key in ("source", "slug", "target"):
+        for key in ("source", "slug", "target", "result", "status", "service", "check"):
             if request.GET.get(key):
                 parsed[key] = request.GET[key]
 

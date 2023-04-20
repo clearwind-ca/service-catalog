@@ -14,14 +14,15 @@
         {% include "active.html" with active=check.active %}
     </p>
     <p class="form-text mb-3">This check has a slug of <code>{{ check.slug }}</code>.</p>
+    {% if check.description %}
+        <p>{{ check.description|markdown }}</p>
+    {% endif %}
     <div class="card mt-3 mb-3">
         <div id="admin" class="card-header fw-bold">Details</div>
         <div class="card-body">
             <dl>
                 <dt>Name</dt>
                 <dd>{{ check.name }}</dd>
-                <dt>Description</dt>
-                <dd>{{ check.description|markdown }}</dd>
                 <dt>Frequency</dt>
                 <dd>{{ check.get_frequency_display }}</dd>
             </dl>

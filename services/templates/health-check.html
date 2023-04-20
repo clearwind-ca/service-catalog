@@ -2,7 +2,7 @@
 <table class="table">
     {% for entry in checks %}
         <tr>
-            <td>{{ entry.check.name }}</td>
+            <td><a href="{% url "health:checks-detail" entry.check.slug %}">{{ entry.check.name }}</a></td>
             {% if entry.last %}
                 <td>{% include "pass.html" with result=entry.last %}</td>
                 <td>{% include "since.html" with since=entry.last.updated %}</td>

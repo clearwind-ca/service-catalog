@@ -134,7 +134,7 @@ def qs(request, **overrides):
 
     # Since this is the default, no point in passing it around.
     for k, v in default_query_params.items():
-        if v is not None:
+        if v is not None and k in qs:
             if qs[k] == v:
                 del qs[k]
 

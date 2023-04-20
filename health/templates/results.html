@@ -3,18 +3,57 @@
 {% load helpers %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item">{% octicon "heart" %} Health checks</li>
-    <li class="breadcrumb-item active" aria-current="page">Results</li>
 {% endblock %}
 {% block content %}
 <div>
+    <div class="btn-group" role="group">
+        <div class="btn-group " role="group">
+            <button type="button" class="btn btn-outline-secondary dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="#">
+                {% octicon "filters" %} Result
+            </button>
+            <ul class="dropdown-menu">
+                {% for choice, display in choices.result %}
+                    <li>
+                        <a class="dropdown-item {% if choice == request.GET.result %}active{% endif %}" href="{% qs request result=choice %}">{{ display }} only</a>
+                    </li>
+                {% endfor %}
+                <li>
+                    <a class="dropdown-item" href="{% qs request result=None %}">All</a>
+                </li>
+            </ul>
+        </div>
+        <div class="btn-group " role="group">
+            <button type="button" class="btn btn-outline-secondary dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="#">
+                Status
+            </button>
+            <ul class="dropdown-menu">
+                {% for choice, display in choices.status %}
+                    <li>
+                        <a class="dropdown-item {% if choice == request.GET.status %}active{% endif %}" href="{% qs request status=choice %}">{{ display }} only</a>
+                    </li>
+                {% endfor %}
+                <li>
+                    <a class="dropdown-item" href="{% qs request status=None %}">All</a>
+                </li>
+            </ul>
+        </div>
+        <button type="button" class="btn btn-outline-secondary">
+            <a class="dropdown-item" href="{% url 'health:results-list' %}">Reset</a>
+        </button>
+    </div>
+
+    {% if filters %}
+        <p class="form-text">Filtered by: {% for k, v in filters.items %}<code>{{ k }}: {{ v }}</code>{% if not forloop.last %} and {% endif %}{% endfor %}.</p>
+    {% endif %}
 
     {% if results %}
         <table class="table table-striped my-3">
             <thead>
                 <tr>
-                    <th>Check</th>
                     <th>Service</th>
                     <th>Result</th>
+                    <th>Details</th>
+                    <th>Check</th>
                     <th>Status</th>
                     <th>{% octicon "past" %} Updated</th>
                 </tr>
@@ -22,9 +61,22 @@
             <tbody>    
                 {% for result in results %}
                     <tr>
-                        <td><a href="{% url 'health:checks-detail' result.health_check.slug %}">{{ result.health_check }}</a></td>
                         <td><a href="{% url 'services:service-detail' result.service.slug %}">{{ result.service }}</a></td>
                         <td>{% include "pass.html" with result=result %}</td>
+                        <td>
+                            {% if result.message %}
+                                {{ result.message|markdown|safe|truncatechars:50 }}
+                                {% if result.message|length > 50 %}
+                                <a href="#" data-bs-toggle="collapse" role="button" data-bs-target="#result-details-{{ result.pk }}" aria-expanded="false">
+                                    More
+                                </a>
+                                <div class="collapse" id="result-details-{{ result.pk }}">
+                                    <p class="mt-3">{{ result.message|markdown|safe }}</p>
+                                </div>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td><a href="{% url 'health:checks-detail' result.health_check.slug %}">{{ result.health_check }}</a></td>
                         <td>{% include "status.html" with status=result %}</td>
                         <td>{% include "since.html" with since=result.updated %}</td>
                     </tr>
@@ -33,12 +85,12 @@
         </table>
     {% else %}
         <div class="blankslate my-3">
-            {% include "blankslate.html" with message="No health checks matched those filters." %}
+            {% include "blankslate.html" with message="No health check results matched those filters." %}
         </div>
     {% endif %}
 
     {% if results %}
-        {% include "pagination.html" with objects=Checks %}
+        {% include "pagination.html" with objects=results %}
     {% endif %}
 </div>
 {% endblock %}

@@ -5,16 +5,16 @@ FREQUENCY_CHOICES = (
     ("hourly", "Hourly"),
     ("daily", "Daily"),
     ("weekly", "Weekly"),
-    ("ad hoc", "Ad hoc"),
+    ("ad-hoc", "Ad hoc"),
 )
 
 
 class Check(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True, help_text="Markdown is supported.")
 
-    frequency = models.CharField(max_length=10, default="D", choices=FREQUENCY_CHOICES)
+    frequency = models.CharField(max_length=10, default="daily", choices=FREQUENCY_CHOICES)
 
     active = models.BooleanField(default=True)
 
@@ -35,12 +35,12 @@ class Check(models.Model):
 # The status of sending the check result to the service.
 STATUS_CHOICES = (
     ("sent", "Sent"),  # We sent the status to the service.
-    ("timed out", "Timed out"),  # The service timed out, so we gave up on it.
+    ("timed-out", "Timed out"),  # The service timed out, so we gave up on it.
     ("error", "Error"),  # There was an error sending the status to the service, so it never got it.
     (
         "completed",
         "Completed",
-    ),  # The service got the status and completed it, maybe unsuccessfully.
+    ),  # The service got the status and completed it.
 )
 
 # The actual result that the check returns.

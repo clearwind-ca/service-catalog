@@ -1,12 +1,15 @@
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from rest_framework import permissions, viewsets
 
 from systemlogs.models import add_info
+from web.helpers import process_query_params
 
 from .forms import CheckForm
-from .models import Check, CheckResult
+from .models import RESULT_CHOICES, STATUS_CHOICES, Check, CheckResult
 from .serializers import CheckResultSerializer, CheckSerializer
 
 
@@ -25,8 +28,12 @@ def checks_add(request):
             msg = f"Added health check `{check.name}`"
             add_info(check, msg, web=True, request=request)
             return redirect(reverse("health:checks-list"))
-        return render(request, "checks-add.html", {"form": form})
-    return render(request, "checks-add.html", {"form": CheckForm()})
+    else:
+        form = CheckForm()
+
+    return render(
+        request, "checks-add.html", {"form": form, "repo": settings.GITHUB_CHECK_REPOSITORY}
+    )
 
 
 @login_required
@@ -61,9 +68,33 @@ def checks_delete(request, slug):
 
 
 @login_required
+@process_query_params
 def results(request):
-    results = CheckResult.objects.order_by("-created")
-    return render(request, "results.html", {"results": results})
+    filters, display_filters = {}, {}
+    get = request.GET
+    for param, lookup in (
+        ("result", "result"),
+        ("status", "status"),
+        ("service", "service__slug"),
+        ("check", "health_check__slug"),
+    ):
+        if get.get(param) is not None:
+            filters[lookup] = get[param]
+            display_filters[param] = get[param]
+
+    results = CheckResult.objects.filter(**filters).order_by("-created")
+
+    paginator = Paginator(results, per_page=get["per_page"])
+    page_number = get["page"]
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "results": page_obj,
+        "filters": display_filters,
+        "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
+        "choices": {"result": RESULT_CHOICES, "status": STATUS_CHOICES},
+    }
+    return render(request, "results.html", context)
 
 
 class CheckViewSet(viewsets.ModelViewSet):
