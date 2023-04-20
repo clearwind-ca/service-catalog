@@ -6,14 +6,9 @@ from rest_framework.authtoken.models import Token
 from systemlogs.models import SystemLog
 
 from .helpers import process_query_params
-from .templatetags.helpers import (
-    apply_format,
-    log_level_as_text,
-    markdown_filter,
-    priority_as_colour,
-    qs,
-    strip_format,
-)
+from .templatetags.helpers import (apply_format, log_level_as_text,
+                                   markdown_filter, priority_as_colour, qs,
+                                   strip_format)
 
 
 class TestProcessQueryParams(TestCase):

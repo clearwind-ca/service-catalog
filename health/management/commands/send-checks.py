@@ -79,11 +79,8 @@ class Command(BaseCommand):
         if options.get("service"):
             service_queryset = Service.objects.filter(slug=options.get("service"))
 
-
         request = requestStub(user)
         outputs = []
-
-        
 
         for check in check_queryset:
             for service in service_queryset:

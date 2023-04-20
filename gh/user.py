@@ -1,6 +1,7 @@
+from django.conf import settings
 from github import Github, enable_console_debug_logging
 from oauthlogin.models import OAuthConnection
-from django.conf import settings
+
 
 def login_as_user(user):
     """Login as the user."""
