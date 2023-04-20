@@ -5,10 +5,10 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 
+from catalog.errors import NoRepository, SendError
 from gh import send
 from health.models import Check, CheckResult
 from services.models import Service
-from systemlogs.models import add_error, add_log
 
 
 class Command(BaseCommand):
@@ -85,7 +85,15 @@ class Command(BaseCommand):
                     status="sent",
                     service=service,
                 )
-                send.dispatch(user, result)
+                try:
+                    send.dispatch(user, result)
+                except (SendError, NoRepository) as error:
+                    # Fatal error, they are all going to fail.
+                    # Should we log here?
+                    result.status = "error"
+                    result.save()
+                    raise error
+
                 k += 1
                 time.sleep(settings.SEND_CHECKS_DELAY)
 

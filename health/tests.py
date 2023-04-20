@@ -1,14 +1,20 @@
-from django.urls import reverse
-
-from catalog.helpers.tests import WithUser
-from services.tests import create_service, create_source
 import os
 from unittest.mock import patch
-from .models import Check, CheckResult
-from .management.commands import send 
+
 from django.contrib.auth.models import User
+from django.urls import reverse
 from faker import Faker
+
+from catalog.errors import NoRepository
+from catalog.helpers.tests import WithUser
+from services.tests import create_service, create_source
+from systemlogs.models import SystemLog
+
+from .management.commands import send
+from .models import Check, CheckResult
+
 fake = Faker()
+
 
 def create_health_check():
     source = create_source()
@@ -23,6 +29,7 @@ def create_health_check_result(health_check, service):
         service=service,
     )
 
+
 class WithHealthCheck(WithUser):
     def setUp(self):
         super().setUp()
@@ -31,12 +38,13 @@ class WithHealthCheck(WithUser):
         self.service = created["service"]
         self.health_check = created["health_check"]
 
+
 class TestAPICheck(WithUser):
     def setUp(self):
         super().setUp()
         self.source = create_source()
         self.service = create_service(self.source)
-    
+
     def test_add_check(self):
         """Tests adding in a check via the API"""
         url = reverse("health:api-check-list")
@@ -65,7 +73,7 @@ class TestAPICheck(WithUser):
         # Slug hasn't changed.
         self.assertEqual(check.slug, "some-name")
         self.assertEqual(check.active, False)
-    
+
     def test_delete_check(self):
         """Test deleting via the API also deletes results"""
         check = Check.objects.create(name=fake.name())
@@ -116,10 +124,10 @@ class TestSend(WithHealthCheck):
             {"user": None},
             {"all_checks": False, "check": False, "user": self.user.username},
             {"all_services": False, "service": False, "user": self.user.username},
-            ]:
+        ]:
             with self.assertRaises(ValueError):
                 self.command(**params)
-    
+
     def test_no_user(self):
         """Takes the username from the environment, and checks it fails"""
         os.environ["CRON_USER"] = "nope"
@@ -129,16 +137,51 @@ class TestSend(WithHealthCheck):
     def test_refresh_fails_with_wrong_command_user(self):
         """Test the username from the command, and checks it fails"""
         self.assertRaises(User.DoesNotExist, self.command, user="nope")
- 
+
+    @patch("health.management.commands.send.send")
+    def test_logs_and_stops(self, mock_send):
+        """A fatal error stops the process"""
+        Check.objects.create(name=fake.name())
+        mock_send.dispatch.side_effect = NoRepository("Nope")
+        kwargs = {
+            "all_checks": True,
+            "all_services": True,
+            "user": self.user.username,
+            "quiet": True,
+        }
+        with self.settings(SEND_CHECKS_DELAY=0):
+            self.assertRaises(NoRepository, self.command, **kwargs)
+        self.assertEqual(mock_send.dispatch.call_count, 1)
+        result = CheckResult.objects.get()
+        self.assertEqual(result.status, "error")
+
     @patch("health.management.commands.send.send")
     def test_send_one(self, mock_send):
         """Test sends one"""
+        Check.objects.create(name=fake.name())
         mock_send.dispatch.return_value = True
-        kwargs = {"all_checks": True, "all_services": True, "user": self.user.username, "quiet": True}
+        kwargs = {
+            "all_checks": True,
+            "all_services": True,
+            "user": self.user.username,
+            "quiet": True,
+        }
         with self.settings(SEND_CHECKS_DELAY=0):
             self.command(**kwargs)
-        # 1 Service and 1 Check Result
-        self.assertEqual(mock_send.dispatch.call_count, 1)
-        result = CheckResult.objects.get()
+        # 1 Service and 2 Checks, means 2 calls.
+        self.assertEqual(mock_send.dispatch.call_count, 2)
+        self.assertEqual(CheckResult.objects.count(), 2)
+        for result in CheckResult.objects.all():
+            self.assertEqual(result.status, "sent")
+            self.assertEqual(result.result, "unknown")
+
+
+class TestResultModel(WithHealthCheck):
+    def test_health_result_logic(self):
+        result = create_health_check_result(self.health_check, self.service)
         self.assertEqual(result.status, "sent")
-        self.assertEqual(result.result, "unknown")
+        result.result = "pass"
+        result.save()
+        self.assertEqual(result.status, "completed")
+        result.result = "fail"
+        self.assertRaises(ValueError, result.save)

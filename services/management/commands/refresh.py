@@ -8,6 +8,7 @@ from gh import fetch
 from services import forms, models
 from systemlogs.models import add_error, add_log
 
+
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
