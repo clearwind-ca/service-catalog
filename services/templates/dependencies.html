@@ -4,12 +4,11 @@
         <tr>
             <td>
                 {% if dependency.relation == "dependency" %}
-                    {% octicon "arrow-up" %} Dependency of
+                    {% octicon "arrow-down" %} this depends on
                 {% else %}
-                    {% octicon "arrow-down" %} Depends on
+                    {% octicon "arrow-up" %} a dependency of
                 {% endif %}
-            </td>
-            <td><a href="{% url 'services:service-detail' dependency.slug %}">{{ dependency.name }}</a></td>
+                <a href="{% url 'services:service-detail' dependency.slug %}">{{ dependency.name }}</a></td>
             <td>
                 {% include "priority.html" with priority=dependency.priority %}
                 {% include "active.html" with active=dependency.active show_inactive_only=True %}

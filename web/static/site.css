@@ -1,27 +1,3 @@
-#navbar-side svg, #navbar-top svg, .btn-primary svg {
-    fill: white;
-}
-
-#navbar-top .dropdown-menu svg {
-    fill: black;
-}
-
-#navbar-top .dropdown-menu .active svg {
-    fill: white;
-}
-
-#navbar-side .dropdown-menu svg {
-    fill: black;
-}
-
-body {
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-  }
-  
-html {
-    height: -webkit-fill-available;
-}
 
 span.asteriskField {
     display: none;
@@ -41,18 +17,8 @@ label.requiredField {
     font-weight: bold;
 }
 
-main {
-    display: flex;
-    flex-wrap: nowrap;
-    height: 100vh;
-    height: -webkit-fill-available;
-    max-height: 100vh;
-    overflow-x: auto;
-    overflow-y: auto;
-}
-
 .breadcrumb-item a {
-    color: black;
+    color: var(--bs-gray);
     font-weight: bold;
     text-decoration: none;
 }
@@ -69,15 +35,10 @@ main {
     width: 16px;
 }
 
-@media screen and (max-width: 767px) {
-    #navbar-side {
-        display: none;
-    }
-    #navbar-top {
-        display: block;
-    }
-
+a.nav-link svg {
+    fill: white;
 }
+
 
 svg {
     vertical-align: -.15em;
@@ -99,16 +60,7 @@ table > tbody > tr:last-child > td {
     border-bottom-width: 0;
 }
 
-@media screen and (min-width: 765px) {
-    #navbar-top {
-        display: none;
-    }
-    #navbar-side {
-        display: block;
-    }
-}
-
 td p {
     margin: 0;
     padding: 0;
-  }
+}

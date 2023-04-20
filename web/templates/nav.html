@@ -1,23 +1,29 @@
 {% load helpers %}
 {% load octicons %}
-<li class="{{ li_class }}">
-    <a class="{{ a_class }} {% at_url request 'services:service-list' %}" href="{% url 'services:service-list' %}">{% octicon "dashboard" %} Services</a>
+<li>
+    <a class="nav-link {% at_url request 'services:service-list' %}" href="{% url 'services:service-list' %}">{% octicon "dashboard" %} Services</a>
 </li>
-<li class="{{ li_class }}">
-    <a class="{{ a_class }} {% at_url request 'health:results-list' %}" href="{% url 'health:results-list' %}">{% octicon "heart" %} Health</a>
+<li>
+    <a class="nav-link {% at_url request 'health:results-list' %}" href="{% url 'health:results-list' %}">{% octicon "heart" %} Health</a>
 </li>
 {% if False %}
-<li class="{{ li_class }}">
-    <a class="{{ a_class }} {% at_url request 'deployments:deployments' %}" href="{% url 'deployments:deployments' %}">{% octicon "graph" %} Deployments</a>
+<li>
+    <a class="nav-link {% at_url request 'deployments:deployments' %}" href="{% url 'deployments:deployments' %}">{% octicon "graph" %} Deployments</a>
 </li>
 {% endif %}
-<li class="new-line"></li>
-<li class="{{ li_class }}">
-    <a class="{{ a_class }} {% at_url request 'services:source-list' %}" href="{% url 'services:source-list' %}">{% octicon "signed" %} Sources</a>
-</li>
-<li class="{{ li_class }}">
-    <a class="{{ a_class }} {% at_url request 'health:checks-list' %}" href="{% url 'health:checks-list' %}">{% octicon "signed" %} Health checks</a>
-</li>
-<li class="{{ li_class }}">
-    <a class="{{ a_class }} {% at_url request 'logs:log-list' %}" href="{% url 'logs:log-list' %}">{% octicon "scrum" %} Logs</a>
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        {% octicon "settings" %} Settings
+    </a>
+    <ul class="dropdown-menu">
+        <li>
+            <a class="dropdown-item {% at_url request 'services:source-list' %}" href="{% url 'services:source-list' %}">{% octicon "signed" %} Sources</a>
+        </li>
+        <li>
+            <a class="dropdown-item {% at_url request 'health:checks-list' %}" href="{% url 'health:checks-list' %}">{% octicon "signed" %} Health checks</a>
+        </li>
+        <li>
+            <a class="dropdown-item {% at_url request 'logs:log-list' %}" href="{% url 'logs:log-list' %}">{% octicon "scrum" %} Logs</a>
+        </li>
+    </ul>
 </li>
