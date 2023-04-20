@@ -14,7 +14,7 @@ from catalog.helpers.tests import WithUser
 from web.shortcuts import get_object_or_None
 
 from . import forms, models
-from .management.commands.refresh import Command, UserError
+from .management.commands.refresh import Command
 
 fake = Faker("en_US")
 
@@ -441,7 +441,7 @@ class TestManagementRefresh(WithUser):
 
     def test_refresh_fails_with_no_user(self):
         """Test the refresh command fails with no user"""
-        self.assertRaises(UserError, self.command.handle)
+        self.assertRaises(ValueError, self.command.handle)
 
     def test_refresh_fails_with_wrong_cron_user(self):
         """Takes the username from the environment, and checks it fails"""

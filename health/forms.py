@@ -6,4 +6,4 @@ from .models import Check
 class CheckForm(ModelForm):
     class Meta:
         model = Check
-        fields = ["name", "description", "frequency"]
+        fields = ["name", "description", "frequency", "active"]

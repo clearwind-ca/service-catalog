@@ -11,6 +11,7 @@
             <thead>
                 <tr>
                     <th>Name</th>
+                    <th>Active</th>
                     <th>Frequency</th>
                     <th>{% octicon "past" %} Updated</th>
                 </tr>
@@ -19,6 +20,7 @@
                 {% for check in checks %}
                     <tr>
                         <td><a href="{% url 'health:checks-detail' check.slug %}">{{ check.name }}</a></td>
+                        <td>{% include "active.html" with active=check.active %}</td>
                         <td><span class="badge text-bg-secondary">{{ check.get_frequency_display }}</span></td>
                         <td>{% include "since.html" with since=check.updated %}</td>
                     </tr>

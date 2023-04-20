@@ -1,5 +1,7 @@
 import os
+import time
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 
@@ -7,10 +9,6 @@ from gh import send
 from health.models import Check, CheckResult
 from services.models import Service
 from systemlogs.models import add_error, add_log
-
-
-class UserError(Exception):
-    pass
 
 
 class Command(BaseCommand):
@@ -47,11 +45,10 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        print(options)
         username = options.get("user") or os.environ.get("CRON_USER")
         quiet = options.get("quiet", False)
         if not username:
-            raise UserError(
+            raise ValueError(
                 "User must be set either using `--cron-user` or `CRON_USER` as the username of a user with a GitHub login."
             )
 
@@ -80,8 +77,7 @@ class Command(BaseCommand):
             service_queryset = Service.objects.filter(slug=options.get("service"))
 
         request = requestStub(user)
-        outputs = []
-
+        k = 0
         for check in check_queryset:
             for service in service_queryset:
                 result = CheckResult.objects.create(
@@ -90,6 +86,8 @@ class Command(BaseCommand):
                     service=service,
                 )
                 send.dispatch(user, result)
+                k += 1
+                time.sleep(settings.SEND_CHECKS_DELAY)
 
         if not quiet:
-            print(f"Sent {check_queryset.count()} checks.")
+            print(f"Sent {k} checks to GitHub.")

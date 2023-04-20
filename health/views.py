@@ -32,6 +32,12 @@ def checks_add(request):
 @login_required
 def checks_detail(request, slug):
     check = Check.objects.get(slug=slug)
+    return render(request, "checks-detail.html", {"check": check})
+
+
+@login_required
+def checks_update(request, slug):
+    check = Check.objects.get(slug=slug)
     if request.method == "POST":
         form = CheckForm(request.POST, instance=check)
         if form.is_valid():
@@ -39,9 +45,19 @@ def checks_detail(request, slug):
             msg = f"Updated health check `{check.name}`"
             add_info(check, msg, web=True, request=request)
             return redirect(reverse("health:checks-list"))
-        return render(request, "checks-detail.html", {"check": check, "form": form})
+        return render(request, "checks-update.html", {"check": check, "form": form})
+
     form = CheckForm(instance=check)
-    return render(request, "checks-detail.html", {"check": check, "form": form})
+    return render(request, "checks-update.html", {"check": check, "form": form})
+
+
+@login_required
+def checks_delete(request, slug):
+    check = Check.objects.get(slug=slug)
+    msg = f"Health check `{slug}` and matching results deleted"
+    add_info(check, msg, web=True, request=request)
+    Check.objects.get(slug=slug).delete()
+    return redirect(reverse("health:checks-list"))
 
 
 @login_required

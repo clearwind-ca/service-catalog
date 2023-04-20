@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load helpers %}
+{% load humanize %}
+{% load octicons %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'health:checks-list' %}">{% octicon "verified" %} Health checks</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ check.slug }}</li>
+{% endblock %}
+{% block content %}
+{% load crispy_forms_tags %}
+<div>
+    <h3>{{ check.name }}</h3>
+    <p>
+        {% include "active.html" with active=check.active %}
+    </p>
+    <p class="form-text mb-3">This check has a slug of <code>{{ check.slug }}</code>.</p>
+    <div class="card mt-3 mb-3">
+        <div id="admin" class="card-header fw-bold">Details</div>
+        <div class="card-body">
+            <form method="post" action="{% url 'health:checks-update' check.slug %}">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button type="submit" class="btn btn-primary">{% octicon 'plus' %} Update health check</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -72,7 +72,7 @@ def get(user, source):
         raise NoRepository(f"Unable to access the user or organization: `{organization}`.")
 
     try:
-        repo = repo = user.get_repo(repo)
+        repo = user.get_repo(repo)
     except UnknownObjectException:
         raise NoRepository(f"Unable to access the repository at: `{repo}`.")
 

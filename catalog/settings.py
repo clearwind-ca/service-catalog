@@ -129,6 +129,7 @@ SERVICE_SCHEMA = os.environ.get(
 )
 SECRET_KEY = os.environ.get("SECRET_KEY")
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SEND_CHECKS_DELAY = 10
 SERVER_URL = os.environ.get("SERVER_URL")
 STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, "web", "static"))
 STATIC_URL = "static/"
