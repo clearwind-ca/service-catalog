@@ -1,4 +1,4 @@
-Design notes and project goal.
+Some design notes and project goal.
 
 ## Visibility
 
@@ -7,4 +7,15 @@ Design notes and project goal.
 
 ## GitHub App access
 
-* The long term goal is to keep the permissions needed by the GitHub App to the minimum needed to satifsy the needs of the project.
+The long term goal is to keep the permissions needed by the GitHub App to the minimum needed to satifsy the needs of the project. Currently they include:
+
+* `Write contents to repo`: because the health checks run GitHub Actions.
+
+## Running health checks
+
+Health checks are passed to an external service, in this case GitHub Actions. This is done because those health checks could involve whatever business logic you need. It could be pulling down, building and running arbitrary code to see if conforms with your standards. By passing this through GitHub Actions, we can use that platform for running any arbitrary code you might like in a safe and controlled environment.
+
+Because GitHub Actions allows self hosted runners, you can send these jobs back to a local system.
+
+Having code run elsewhere, means that we can keep our Docker container simple and focused on it's goal of collecting information about the services in your system.
+

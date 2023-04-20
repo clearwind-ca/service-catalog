@@ -153,5 +153,5 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 WSGI_APPLICATION = "catalog.wsgi.application"
-GITHUB_CHECK_REPOSITORY = "burnt-tomatoes/service-catalog-checks"
+GITHUB_CHECK_REPOSITORY = os.environ.get("GITHUB_CHECK_REPOSITORY", None)
 GITHUB_DEBUG = DEBUG

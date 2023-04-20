@@ -10,8 +10,11 @@ This is under rapid development and isn't anywhere near a stable release yet, so
 
 There is a demo instance here: https://service-catalog.fly.dev/ which is currently intermittenly updated.
 
+### Documentation
+
+All the information you need to know is in [the documentation](docs).
+
 ---
 
 Service Catalog is under the [MIT License](LICENSE.md) and originally built by [Clearwind Consulting](https://clearwind.ca).
 
-All the information you need to know is in [the documentation](docs).

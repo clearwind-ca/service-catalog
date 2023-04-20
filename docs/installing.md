@@ -29,6 +29,7 @@ Where possible configuration is done through environment variables which alter t
 |GITHUB_APP_ID|The GitHub app configuration.|Yes|Empty|
 |GITHUB_CLIENT_ID|As above.|Yes|Empty|
 |GITHUB_CLIENT_SECRET|As above.|Yes|Empty|
+|GITHUB_CHECK_REPOSITORY|The repository to send health checks to.|Yes|Otherwise health checks won't work|
 |SECRET_KEY|Set the Django `SECRET_KEY` variable.|Yes|Empty|
 |SERVICE_SCHEMA|Path on the filesystem to the schema|No|`catalog/schemas/service.json`|
 
