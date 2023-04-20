@@ -9,10 +9,6 @@ from services import forms, models
 from systemlogs.models import add_error, add_log
 
 
-class UserError(Exception):
-    pass
-
-
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
@@ -40,8 +36,8 @@ class Command(BaseCommand):
         username = options.get("user") or os.environ.get("CRON_USER")
         quiet = options.get("quiet", False)
         if not username:
-            raise UserError(
-                "User must be set either using `--cron-user` or `CRON_USER` as the username of a user with a GitHub login."
+            raise ValueError(
+                "User must be set either using `--user` or `CRON_USER` as the username of a user with a GitHub login."
             )
 
         user = User.objects.get(username=username)

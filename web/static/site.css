@@ -23,6 +23,24 @@ html {
     height: -webkit-fill-available;
 }
 
+span.asteriskField {
+    display: none;
+}
+
+a { 
+    text-decoration: none;
+    color: var(--bs-gray);
+    font-weight: 600;
+}
+
+a:hover { 
+    color: var(--bs-blue);
+}
+
+label.requiredField {
+    font-weight: bold;
+}
+
 main {
     display: flex;
     flex-wrap: nowrap;
@@ -30,7 +48,7 @@ main {
     height: -webkit-fill-available;
     max-height: 100vh;
     overflow-x: auto;
-    overflow-y: hidden;
+    overflow-y: auto;
 }
 
 .breadcrumb-item a {

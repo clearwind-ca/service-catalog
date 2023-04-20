@@ -1,5 +1,3 @@
-import logging
-
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -7,7 +5,6 @@ from faker import Faker
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
-logging.getLogger("faker").setLevel(logging.ERROR)
 fake = Faker("en_US")
 
 

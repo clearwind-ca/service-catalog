@@ -1,9 +1,17 @@
-class FetchError(Exception):
+class CatalogError(Exception):
     """Base class for all catalog errors"""
 
     def __init__(self, message):
         self.message = message
         super().__init__(message)
+
+
+class FetchError(CatalogError):
+    """Base class for all GitHub fetching errors"""
+
+
+class SendError(CatalogError):
+    """Base class for all GitHub sending errors"""
 
 
 class NoEntryFound(FetchError):
@@ -16,3 +24,7 @@ class NoRepository(FetchError):
 
 class SchemaError(FetchError):
     """The JSON file doesn't match the schema"""
+
+
+class PermissionError(SendError):
+    """The user doesn't have permission to access the repository"""

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load helpers %}
+{% load humanize %}
+{% load octicons %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'health:checks-list' %}">{% octicon "verified" %} Health checks</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ check.slug }}</li>
+{% endblock %}
+{% block content %}
+{% load crispy_forms_tags %}
+<div>
+    <h3>{{ check.name }}</h3>
+    <p>
+        {% include "active.html" with active=check.active %}
+    </p>
+    <p class="form-text mb-3">This check has a slug of <code>{{ check.slug }}</code>.</p>
+    {% if check.description %}
+        <p>{{ check.description|markdown }}</p>
+    {% endif %}
+    <div class="card mt-3 mb-3">
+        <div id="admin" class="card-header fw-bold">Details</div>
+        <div class="card-body">
+            <dl>
+                <dt>Name</dt>
+                <dd>{{ check.name }}</dd>
+                <dt>Frequency</dt>
+                <dd>{{ check.get_frequency_display }}</dd>
+            </dl>
+        </div>
+    </div>
+    <div class="card">
+        <div id="admin" class="card-header fw-bold">Admin</div>
+        <div class="card-body">
+            <div class="form-group row mb-3">
+                <div class="form-group row">
+                    <label class="mb-3" for="refresh">Edit this check.</label>
+                    <div class="col-sm-10">
+                        <a href="{% url 'health:checks-update' check.slug %}" class="btn btn-primary">Edit</a>
+                    </div>
+                </div>
+
+                <div class="form-group row mt-3">
+                    <label class="mb-3" for="refresh">Delete this check. <b>This will also delete all results</b>. If you'd like to keep results, but not have the health check run, make this check <code>inactive</code> instead.</label>
+                    <div class="col-sm-10">
+                        <a href="{% url 'health:checks-delete' check.slug %}" class="btn btn-danger">Delete</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

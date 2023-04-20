@@ -9,6 +9,6 @@ router = routers.DefaultRouter()
 router.register("logs", views.SystemLogViewSet, basename="api")
 
 urlpatterns = [
-    path("logs/list", views.log_list, name="log_list"),
+    path("logs/list", views.log_list, name="log-list"),
     path("api/", include(router.urls)),
 ]

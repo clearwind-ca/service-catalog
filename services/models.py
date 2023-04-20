@@ -5,6 +5,7 @@ from django.db import models
 from django.template.defaultfilters import slugify
 from django.urls import reverse
 
+from health.models import Check, CheckResult
 from systemlogs.models import SystemLog
 
 
@@ -57,6 +58,20 @@ class Service(models.Model):
 
     def get_absolute_url(self):
         return reverse("services:service-detail", kwargs={"slug": self.slug})
+
+    def results(self):
+        return CheckResult.objects.filter(service=self)
+
+    def latest_results(self):
+        """Return the latest results for a service."""
+        checks = Check.objects.filter(active=True)
+        results = CheckResult.objects.filter(service=self).order_by("created")
+        checks_with_results = []
+        for check in checks:
+            checks_with_results.append(
+                {"check": check, "last": results.filter(health_check=check).last()}
+            )
+        return checks_with_results
 
 
 class Source(models.Model):

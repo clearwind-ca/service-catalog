@@ -3,10 +3,10 @@
 <li class="{{ li_class }}">
     <a class="{{ a_class }} {% at_url request 'services:service-list' %}" href="{% url 'services:service-list' %}">{% octicon "dashboard" %} Services</a>
 </li>
-{% if False %}
 <li class="{{ li_class }}">
-    <a class="{{ a_class }} {% at_url request 'health:health' %}" href="{% url 'health:health' %}">{% octicon "heart" %} Health</a>
+    <a class="{{ a_class }} {% at_url request 'health:results-list' %}" href="{% url 'health:results-list' %}">{% octicon "heart" %} Health</a>
 </li>
+{% if False %}
 <li class="{{ li_class }}">
     <a class="{{ a_class }} {% at_url request 'deployments:deployments' %}" href="{% url 'deployments:deployments' %}">{% octicon "graph" %} Deployments</a>
 </li>
@@ -16,5 +16,8 @@
     <a class="{{ a_class }} {% at_url request 'services:source-list' %}" href="{% url 'services:source-list' %}">{% octicon "signed" %} Sources</a>
 </li>
 <li class="{{ li_class }}">
-    <a class="{{ a_class }} {% at_url request 'logs:log_list' %}" href="{% url 'logs:log_list' %}">{% octicon "scrum" %} Logs</a>
+    <a class="{{ a_class }} {% at_url request 'health:checks-list' %}" href="{% url 'health:checks-list' %}">{% octicon "signed" %} Health checks</a>
+</li>
+<li class="{{ li_class }}">
+    <a class="{{ a_class }} {% at_url request 'logs:log-list' %}" href="{% url 'logs:log-list' %}">{% octicon "scrum" %} Logs</a>
 </li>

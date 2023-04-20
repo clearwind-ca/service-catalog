@@ -50,10 +50,59 @@ def log_level_as_text(value):
     return levels.get(value, "Unknown")
 
 
+@register.filter(name="check_as_colour")
+def check_as_colour(value):
+    result = {
+        "pass": "success",
+        "warning": "warning",
+        "error": "danger",
+        "unconfirmed": "secondary",
+        "fail": "danger",
+    }
+    return result.get(value, "dark")
+
+
+@register.filter(name="status_as_colour")
+def status_as_colour(value):
+    result = {"S": "secondary", "R": "success", "F": "danger"}
+    return result.get(value, "dark")
+
+
 @register.filter(name="markdown")
 def markdown_filter(text):
     md = markdown.Markdown()
     return mark_safe(md.convert(text))
+
+
+@register.simple_tag(name="checks_badge")
+def checks_badge(checks):
+    result = {
+        "colour": "dark",
+        "text": "No health checks run",
+    }
+
+    not_run = True
+    all_passing = True
+    for check in checks:
+        if check["last"] is None:
+            all_passing = False
+            continue
+        not_run = False
+        if check["last"].result != "P":
+            all_passing = False
+            break
+
+    if all_passing:
+        result["text"] = "All health checks pass"
+        result["colour"] = "success"
+    elif not_run:
+        result["colour"] = "info"
+        result["text"] = "No health checks run"
+    else:
+        result["colour"] = "warning"
+        result["text"] = "Some checks failing"
+
+    return result
 
 
 @register.simple_tag(name="qs")
@@ -85,7 +134,7 @@ def qs(request, **overrides):
 
     # Since this is the default, no point in passing it around.
     for k, v in default_query_params.items():
-        if v is not None:
+        if v is not None and k in qs:
             if qs[k] == v:
                 del qs[k]
 

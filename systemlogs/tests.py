@@ -1,20 +1,13 @@
-import logging
-
 from django.contrib import messages
-from django.test import TestCase
 from django.urls import reverse
 from faker import Faker
-from rest_framework.authtoken.models import Token
-from rest_framework.test import APIClient
 
 from catalog.helpers.tests import WithUser
-from services import forms
 from services.tests import create_source
 
 from .management.commands import truncate
 from .models import SystemLog, add_log
 
-logging.getLogger("faker").setLevel(logging.ERROR)
 fake = Faker("en_US")
 
 

@@ -12,6 +12,7 @@
     <p>
         {% include "priority.html" with priority=service.priority %}
         {% include "active.html" with active=service.active %}
+        {% include "health-check-badge.html" with checks=checks %}
     </p>
     <p class="form-text mb-3">This data was pulled from <a href="{{ source.url }}">this source</a> and validated using <a href="{% url 'services:schema-detail' %}">this schema</a>. The slug is: <code>{{ service.slug }}</code>.</p>
     {% if service.description %}
@@ -41,6 +42,14 @@
     </div>
 
     <div class="card mt-3 mb-3">
+        <div class="card-header fw-bold">Health checks</div>
+        <div class="card-body">
+            {% include "health-check.html" with check=check %}
+            <p class="form-text">Limited to the latest health checks. <a href="{% url 'health:results-list' %}?service={{ service.slug }}">View more in health</a>.</p>
+        </div>
+    </div>
+
+    <div class="card mt-3 mb-3">
         <div class="card-header fw-bold">Logs</div>
         <div class="card-body">
             {% if logs %}
@@ -53,7 +62,7 @@
                     </tr>
                     {% endfor %}
                 </table>
-                <p class="form-text">Limited to the last 3 logs. <a href="{% url 'logs:log_list' %}?slug={{ service.slug }}&target=service">View more in logs</a>.</p>
+                <p class="form-text">Limited to the last 3 logs. <a href="{% url 'logs:log-list' %}?slug={{ service.slug }}&target=service">View more in logs</a>.</p>
             {% else %}
                 {% include "blankslate.html" with message="No logs found for this service." %}
             {% endif %}

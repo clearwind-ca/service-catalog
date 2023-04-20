@@ -2,24 +2,13 @@ import json
 import logging
 from urllib.parse import urlparse
 
-from github import Github, GithubException, UnknownObjectException
+from github import GithubException, UnknownObjectException
 
 from catalog.errors import NoEntryFound, NoRepository, SchemaError
 
-logging.getLogger("github").setLevel(logging.ERROR)
+from .user import login_as_user
+
 logger = logging.getLogger(__name__)
-
-from oauthlogin.models import OAuthConnection
-
-
-def login_as_user(user):
-    """Login as the user."""
-    connection = OAuthConnection.objects.get(user=user, provider_key="github")
-    if connection.access_token_expired():
-        connection.refresh_access_token()
-
-    return Github(connection.access_token)
-
 
 file_paths = [
     "catalog.json",
@@ -83,7 +72,7 @@ def get(user, source):
         raise NoRepository(f"Unable to access the user or organization: `{organization}`.")
 
     try:
-        repo = repo = user.get_repo(repo)
+        repo = user.get_repo(repo)
     except UnknownObjectException:
         raise NoRepository(f"Unable to access the repository at: `{repo}`.")
 
