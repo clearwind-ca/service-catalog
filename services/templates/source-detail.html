@@ -3,7 +3,7 @@
 {% load humanize %}
 {% load octicons %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item"><a href="{% url 'services:service-list' %}">{% octicon "verified" %} Sources</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'services:service-list' %}">{% octicon "dashboard" %} Sources</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{ source.slug }}</li>
 {% endblock %}
 {% block content %}

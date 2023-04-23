@@ -4,7 +4,7 @@
     <a class="nav-link {% at_url request 'services:service-list' %}" href="{% url 'services:service-list' %}">{% octicon "dashboard" %} Services</a>
 </li>
 <li>
-    <a class="nav-link {% at_url request 'health:results-list' %}" href="{% url 'health:results-list' %}">{% octicon "heart" %} Health</a>
+    <a class="nav-link {% at_url request 'health:results-list' %}" href="{% url 'health:results-list' %}">{% octicon "check" %} Health</a>
 </li>
 {% if False %}
 <li>
@@ -17,10 +17,10 @@
     </a>
     <ul class="dropdown-menu">
         <li>
-            <a class="dropdown-item {% at_url request 'services:source-list' %}" href="{% url 'services:source-list' %}">{% octicon "signed" %} Sources</a>
+            <a class="dropdown-item {% at_url request 'services:source-list' %}" href="{% url 'services:source-list' %}">{% octicon "dashboard" %} Sources of service</a>
         </li>
         <li>
-            <a class="dropdown-item {% at_url request 'health:checks-list' %}" href="{% url 'health:checks-list' %}">{% octicon "signed" %} Health checks</a>
+            <a class="dropdown-item {% at_url request 'health:checks-list' %}" href="{% url 'health:checks-list' %}">{% octicon "check" %} Health checks</a>
         </li>
         <li>
             <a class="dropdown-item {% at_url request 'logs:log-list' %}" href="{% url 'logs:log-list' %}">{% octicon "scrum" %} Logs</a>

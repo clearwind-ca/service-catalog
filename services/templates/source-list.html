@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% load octicons %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item">{% octicon "verified" %} Sources</li>
+    <li class="breadcrumb-item">{% octicon "dashboard" %} Source of services</li>
 {% endblock %}
 {% load helpers %}
 {% block content %}
 <div>
-    <a class="btn btn-primary" href="{% url 'services:source-add' %}">{% octicon 'plus' %} Add in a new source</a>
+    
     {% if sources %}
         <table class="table table-striped my-3">
             <thead>
@@ -35,6 +35,7 @@
     {% if sources %}
         {% include "pagination.html" with objects=sources %}
     {% endif %}
+    <a href="{% url 'services:source-add' %}">{% octicon 'plus' %} Add in a new source</a>
     <hr>
     <p class="form-text">The data being pulled is validated using <a href="{% url 'services:schema-detail' %}">this schema.</p>
 </div>

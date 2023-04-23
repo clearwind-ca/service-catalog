@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load octicons %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item"><a href="{% url 'health:checks-list' %}">Health checks</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'health:checks-list' %}">{% octicon "check" %} Health checks</a></li>
     <li class="breadcrumb-item">Add</li>
 {% endblock %}
 {% load helpers %}
@@ -13,11 +13,11 @@
 </p>
 <p>The repository called is: <code>{{ repo }}</code>.</p>
 <div class="card mt-3 mb-3">
-<form method="post" action="{% url 'health:checks-add' %}" class="m-3">
-    {% csrf_token %}
-    {{ form|crispy }}
-    <button type="submit" class="btn btn-primary">{% octicon 'plus' %} Add health check</button>
-</form>
+    <form method="post" action="{% url 'health:checks-add' %}" class="m-3">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-outline-primary">Add health check</button>
+    </form>
 </div>
 
 {% endblock %}

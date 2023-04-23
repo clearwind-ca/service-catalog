@@ -5,7 +5,7 @@ span.asteriskField {
 
 a { 
     text-decoration: none;
-    color: var(--bs-gray);
+    color: var(--bs-gray-700);
     font-weight: 600;
 }
 
@@ -15,12 +15,6 @@ a:hover {
 
 label.requiredField {
     font-weight: bold;
-}
-
-.breadcrumb-item a {
-    color: var(--bs-gray);
-    font-weight: bold;
-    text-decoration: none;
 }
 
 #main-content {
@@ -36,6 +30,10 @@ label.requiredField {
 }
 
 a.nav-link svg {
+    fill: white;
+} 
+
+footer svg {
     fill: white;
 }
 

@@ -2,11 +2,10 @@
 {% load octicons %}
 {% load helpers %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item">{% octicon "verified" %} Health checks</li>
+    <li class="breadcrumb-item">{% octicon "check" %} Health checks</li>
 {% endblock %}
 {% block content %}
 <div>
-    <a class="btn btn-primary" href="{% url 'health:checks-add' %}">{% octicon 'plus' %} Add in a new health check</a>
     {% if checks %}
         <table class="table table-striped my-3">
             <thead>
@@ -43,6 +42,8 @@
             {% include "blankslate.html" with message="No health checks matched those filters." %}
         </div>
     {% endif %}
+
+    <a href="{% url 'health:checks-add' %}">{% octicon 'plus' %} Add health check</a>
 
     {% if checks %}
         {% include "pagination.html" with objects=Checks %}

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load octicons %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item"><a href="{% url 'services:source-list' %}">Sources</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'services:source-list' %}">{% octicon "dashboard" %}Sources</a></li>
     <li class="breadcrumb-item">Add</li>
 {% endblock %}
 {% load helpers %}
@@ -12,14 +12,16 @@
     {% for path in file_paths %}<code>{{ path }}</code>{% if not forloop.last %}, {% endif %}{% endfor %}. Once added
     it will be updated from the source regularly.
 </p>
-<form method="post" action="{% url 'services:source-add' %}">
-    {% csrf_token %}
-    <div class="mb-3">
-        <label for="source" class="form-label">Source</label>
-        <input name="url" class="form-control" placeholder="location" value="{{ request.POST.url }}">
-        <div class="form-text">The repository containing your catalog entry. For GitHub this is the URL to the repository</code>.</div>
-    </div>
-    <button type="submit" class="btn btn-primary">{% octicon 'plus' %} Add source</button>
-</form>
+<div class="card mt-3 mb-3">
+    <form method="post" action="{% url 'services:source-add' %}" class="m-3">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="source" class="form-label">Source</label>
+            <input name="url" class="form-control" placeholder="https://github.com/user/repository" value="{{ request.POST.url }}">
+            <div class="form-text">The repository containing your catalog entry. For GitHub this is the URL to the repository</code>.</div>
+        </div>
+        <button type="submit" class="btn btn-outline-primary">Add source</button>
+    </form>
+</div>
 
 {% endblock %}

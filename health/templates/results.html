@@ -2,7 +2,7 @@
 {% load octicons %}
 {% load helpers %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item">{% octicon "heart" %} Health checks</li>
+    <li class="breadcrumb-item">{% octicon "check" %} Health check results</li>
 {% endblock %}
 {% block content %}
 <div>
@@ -37,13 +37,11 @@
                 </li>
             </ul>
         </div>
-        <button type="button" class="btn btn-outline-secondary">
-            <a class="dropdown-item" href="{% url 'health:results-list' %}">Reset</a>
-        </button>
     </div>
 
     {% if filters %}
-        <p class="form-text">Filtered by: {% for k, v in filters.items %}<code>{{ k }}: {{ v }}</code>{% if not forloop.last %} and {% endif %}{% endfor %}.</p>
+        <p class="form-text">Filtered by: {% for k, v in filters.items %}<code>{{ k }}: {{ v }}</code>{% if not forloop.last %} and {% endif %}{% endfor %}.
+        &bull; <a href="{% url 'health:results-list' %}">Reset</a></p>
     {% endif %}
 
     {% if results %}
@@ -52,7 +50,7 @@
                 <tr>
                     <th>Service</th>
                     <th>Result</th>
-                    <th>Details</th>
+                    <th>Message</th>
                     <th>Check</th>
                     <th>Status</th>
                     <th>{% octicon "past" %} Updated</th>
@@ -74,6 +72,8 @@
                                     <p class="mt-3">{{ result.message|markdown|safe }}</p>
                                 </div>
                                 {% endif %}
+                            {% else %}
+                                <span data-bs-toggle="tooltip" data-bs-title="No details included in this result">{% octicon "deny" %}</span>
                             {% endif %}
                         </td>
                         <td><a href="{% url 'health:checks-detail' result.health_check.slug %}">{{ result.health_check }}</a></td>

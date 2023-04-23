@@ -14,7 +14,7 @@ class Check(models.Model):
     slug = models.SlugField(max_length=255, unique=True)
     description = models.TextField(blank=True, help_text="Markdown is supported.")
 
-    frequency = models.CharField(max_length=10, default="daily", choices=FREQUENCY_CHOICES)
+    frequency = models.CharField(max_length=10, default="daily", choices=FREQUENCY_CHOICES, help_text="How often this check will be run.")
 
     active = models.BooleanField(default=True)
 
