@@ -7,84 +7,97 @@
     <li class="breadcrumb-item active" aria-current="page">{{ service.name }}</li>
 {% endblock %}
 {% block content %}
-<div>
+
     <h3>{{ service.name }}</h3>
     <p>
         {% include "priority.html" with priority=service.priority %}
         {% include "active.html" with active=service.active %}
         {% include "health-check-badge.html" with checks=checks %}
     </p>
-    <p class="form-text mb-3">This data was pulled from <a href="{{ source.url }}">this source</a> and validated using <a href="{% url 'services:schema-detail' %}">this schema</a>. The slug is: <code>{{ service.slug }}</code>.</p>
-    {% if service.description %}
-        <p>{{ service.description|markdown }}</p>
-    {% endif %}
+    
+    {{ service.description|markdown }}
 
-    <div class="card mt-3 mb-3">
-        <div class="card-header fw-bold">Dependencies</div>
-        <div class="card-body">
-            {% if related  %}
-                {% include "dependencies.html" with items=related %}
-            {% else %}
-                {% include "blankslate.html" with message="No services define this service as a dependency and this service is not dependent upon another service." %}
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="card mt-3 mb-3">
-        <div class="card-header fw-bold">Metadata</div>
-        <div class="card-body">
-            {% if service.meta %}
-                {% include "fields.html" with items=service.meta %}
-            {% else %}
-                {% include "blankslate.html" with message="No metadata has been defined for this service." %}
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="card mt-3 mb-3">
-        <div class="card-header fw-bold">Health checks</div>
-        <div class="card-body">
-            {% include "health-check.html" with check=check %}
-            <p class="form-text">Limited to the latest health checks. <a href="{% url 'health:results-list' %}?service={{ service.slug }}">View more in health</a>.</p>
-        </div>
-    </div>
-
-    <div class="card mt-3 mb-3">
-        <div class="card-header fw-bold">Logs</div>
-        <div class="card-body">
-            {% if logs %}
-                <table class="table">
-                    {% for log in logs %}
-                    <tr>
-                        <td>{{ log.message|markdown }}</td>
-                        <td><span class="badge bg-{{ log.level|log_level_as_colour }}">{{ log.level|log_level_as_text }}</span></td>
-                        <td><span data-bs-toggle="tooltip" data-bs-title="{{ log.created }}">{{ log.created|naturaltime }}</span></td>
-                    </tr>
-                    {% endfor %}
-                </table>
-                <p class="form-text">Limited to the last 3 logs. <a href="{% url 'logs:log-list' %}?slug={{ service.slug }}&target=service">View more in logs</a>.</p>
-            {% else %}
-                {% include "blankslate.html" with message="No logs found for this service." %}
-            {% endif %}
-        </div>
-    </div>
-
-
-    <div class="card">
-        <div id="admin" class="card-header fw-bold">Admin</div>
-        <div class="card-body">
-            <div class="form-group row mb-3">
-                <label for="refresh">Refresh this data from its source <a href="{% url 'services:source-detail' source.slug %}">{{ source.slug }}</a>.</label>
+    <div class="row align-items-start">
+        <div class="col-md-8">
+            <div class="card mt-3 mb-3">
+                <div class="card-header fw-bold">Dependencies</div>
+                <div class="card-body">
+                    {% if related  %}
+                        {% include "dependencies.html" with items=related %}
+                    {% else %}
+                        {% include "blankslate.html" with message="No services define this service as a dependency and this service is not dependent." %}
+                    {% endif %}
+                </div>
             </div>
-            <div class="form-group row">
-                <label class="mb-3" for="refresh">Delete this from the catalog. It <b>will not delete from GitHub</b> that must be done seperately.</label>
-                    <form method="post" action="{% url 'services:service-delete' service.slug %}">
-                        {% csrf_token %}
-                        <input type="submit" class="btn btn-danger" value="Delete" />
-                    </form>
+
+            <div class="card mt-3 mb-3">
+                <div class="card-header fw-bold">Metadata</div>
+                <div class="card-body">
+                    {% if service.meta %}
+                        {% include "fields.html" with items=service.meta %}
+                    {% else %}
+                        {% include "blankslate.html" with message="No metadata has been defined for this service." %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card mt-3 mb-3">
+                <div class="card-header fw-bold">Health checks</div>
+                <div class="card-body">
+                    {% include "health-check.html" with check=check %}
+                    <p class="form-text pt-3">{% octicon "info" %} Limited to the <i>latest</i> health checks. <a href="{% url 'health:results-list' %}?service={{ service.slug }}">View all health checks</a>.</p>
+                </div>
             </div>
         </div>
+
+        <div class="col-md-4 sidebar"> 
+            <div class="pb-3">
+                <h6 class="text-muted border-bottom">Info</h6>
+                <p>Validated using <a href="{% url 'services:schema-detail' %}">this schema</a></p>
+                <p>Slug: <code>{{ service.slug }}</code></p>
+            </div>
+
+            <div class="pb-3">
+                <h6 class="text-muted border-bottom">Logs</h6>
+                {% if logs %}
+                    {{ logs.message|markdown }} 
+                    <p>{% octicon "clock" %} {% include "since.html" with since=logs.created %}</p>
+                    <p><a href="{% url 'logs:log-list' %}?slug={{ service.slug }}&target=service">View more</a></p>
+                {% else %}
+                    <p>{% octicon "deny" %} No logs found for this service.</p>
+                {% endif %}
+            </div>
+        
+            <div>
+                <h6 class="text-muted border-bottom">Admin</h6>
+                <p><a href="{% url 'services:source-detail' source.slug %}">Refresh from its source</a></p>
+                <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete from the catalog</a>
+            </div>
+        </div>
+
+        <div class="modal " tabindex="-1" id="delete-modal">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Delete Service</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>This will delete this service from the catalog. It will not delete the file from GitHub or the source. It might be re-added if the catalog updates from GitHub again.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <form method="post" action="{% url 'services:service-delete' service.slug %}">
+                            {% csrf_token %}
+                            <input type="submit" class="btn btn-danger" value="Delete" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+
 
 
 </div>

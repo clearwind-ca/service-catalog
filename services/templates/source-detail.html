@@ -3,77 +3,86 @@
 {% load humanize %}
 {% load octicons %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item"><a href="{% url 'services:service-list' %}">{% octicon "verified" %} Sources</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'services:service-list' %}">{% octicon "dashboard" %} Sources</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{ source.slug }}</li>
 {% endblock %}
 {% block content %}
 <div>
     <h3>{{ source.slug }}</h3>
-    <p class="form-text">This source is pulling data from <a href="{{ source.url }}">{{ source.url }}</a> and has a slug of <code>{{ source.slug }}</code>.</p>
-    <div class="card mt-3 mb-3">
-        <div class="card-header fw-bold">Services</div>
-        <div class="card-body">
-            {% if services %}
-                <table class="table">
-                    {% for service in services %}
-                    <tr>
-                        <td><a href="{{ service.get_absolute_url }}">{{ service.name }}</a></td>
-                        <td>{% include "priority.html" with priority=service.priority %}</td>
-                        <td>{% include "active.html" with active=service.active %}</td>
-                    </tr>
-                    {% endfor %}
-                </table>
-            {% else %}
-                {% include "blankslate.html" with message="No services found for this source." %}
-            {% endif %}
-        </div>
-    </div>
 
-    <div class="card mt-3 mb-3">
-        <div class="card-header fw-bold">Logs</div>
-        <div class="card-body">
-            {% if logs %}
-                <table class="table">
-                    {% for log in logs %}
-                    <tr>
-                        <td>{{ log.message|markdown }}</td>
-                        <td><span class="badge bg-{{ log.level|log_level_as_colour }}">{{ log.level|log_level_as_text }}</span></td>
-                        <td><span data-bs-toggle="tooltip" data-bs-title="{{ log.created }}">{{ log.created|naturaltime }}</span></td>
-                    </tr>
-                    {% endfor %}
-                </table>
-                <p class="form-text">Limited to the last 3 logs. <a href="{% url 'logs:log-list' %}?slug={{ source.slug }}&target=source">View more in logs</a>.</p>
-            {% else %}
-                {% include "blankslate.html" with message="No logs found for this source." %}
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="card">
-        <div id="admin" class="card-header fw-bold">Admin</div>
-        <div class="card-body">
-            <div class="form-group row mb-3">
-                <label for="refresh">Refresh this data from its source <a href="{{ source.url }}">{{ source.url }}</a>.</label>
-                <form method="post" class="mt-3" action="{% url 'services:source-refresh' source.slug %}">
-                    {% csrf_token %}
-                    <input type="submit" class="btn btn-primary" value="Refresh" />
-                </form>
+    <div class="row align-items-start">
+        <div class="col-md-8">
+            <div class="card mt-3 mb-3">
+                <div class="card-header fw-bold">Services</div>
+                <div class="card-body">
+                    {% if services %}
+                        {% for service in services %}
+                            <div class="row">
+                                <div class="col-4">
+                                    {% include "priority.html" with priority=service.priority %}
+                                    {% include "active.html" with active=service.active %}
+                                </div>
+                                <div class="col-8">
+                                    <a href="{{ service.get_absolute_url }}">{{ service.name }}</a>
+                                </div>
+                            </div>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        {% include "blankslate.html" with message="No services found for this source." %}
+                    {% endif %}
+                </div>
             </div>
-            
-            <div class="form-group row mb-3">
-                <label for="refresh">Validate this <code>{{ source.name }}</code> without updating.</label>
-                <form method="post" class="mt-3" action="{% url 'services:source-validate' source.slug %}">
-                    {% csrf_token %}
-                    <input type="submit" class="btn btn-primary" value="Validate" />
-                </form>
+        </div>
+
+        <div class="col-md-4 sidebar"> 
+            <div class="pb-3">
+                <h6 class="text-muted border-bottom">Info</h6>
+                <p>Slug: <code>{{ source.slug }}</code></p>
+                <p>Source: <code data-bs-toggle="tooltip" data-bs-title="{{ source.url }}">{{ source.url|truncatechars:20 }}</code> <a href="{{ source.url }}">{% octicon "link" %}</a></p>
             </div>
 
-            <div class="form-group row">
-                <label for="refresh" >Delete this from the catalog. It <b>will not delete from GitHub</b> that must be done manually.</label>
-                <form method="post" class="mt-3" action="{% url 'services:source-delete' source.slug %}">
-                    {% csrf_token %}
-                    <input type="submit" class="btn btn-danger" value="Delete" />
-                </form>
+            <div class="pb-3">
+                <h6 class="text-muted border-bottom">Logs</h6>
+                {% if logs %}
+                    {{ logs.message|markdown }} 
+                    <p>{% octicon "clock" %} {% include "since.html" with since=logs.created %}</p>
+                    <p><a href="{% url 'logs:log-list' %}?slug={{ service.slug }}&target=service">View more</a></p>
+                {% else %}
+                    <p>{% octicon "deny" %} No logs found for this service.</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <h6 class="text-muted border-bottom">Admin</h6>
+                <p><a href="{% url 'services:source-refresh' source.slug %}">Refresh from its source</a></p>
+                <p><a href="{% url 'services:source-validate' source.slug %}">Validate from its source</a></p>
+                <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete from the catalog</a>
+            </div>
+        </div>
+
+        <div class="modal " tabindex="-1" id="delete-modal">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Delete Source</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {% if services %}
+                            <p>This source has {{ services.count }} services associated with it. You must delete them first.</p>
+                        {% else %}
+                            <p>This will delete this service from the catalog. It will not delete anything from GitHub.</p>
+                        {% endif %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <form method="post" action="{% url 'services:source-delete' source.slug %}">
+                            {% csrf_token %}
+                            <input type="submit" class="btn btn-danger" {% if services %}disabled="disabled"{% endif %} value="Delete" />
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

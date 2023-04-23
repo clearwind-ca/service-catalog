@@ -38,13 +38,13 @@
                 </li>
             </ul>
         </div>
-        <button type="button" class="btn btn-outline-secondary">
-            <a class="dropdown-item" href="{% url 'services:service-list' %}">Reset</a>
-        </button>
     </div>
 
     {% if filters %}
-        <p class="form-text">Filtered by: {% for k, v in filters.items %}<code>{{ k }}: {{ v }}</code>{% if not forloop.last %} and {% endif %}{% endfor %}.</p>
+        <p class="form-text">
+            Filtered by: {% for k, v in filters.items %}<code>{{ k }}: {{ v }}</code>{% if not forloop.last %} and {% endif %}{% endfor %} &bull;
+            <a href="{% url 'services:service-list' %}">Reset</a>
+        </p>
     {% endif %}
 
 

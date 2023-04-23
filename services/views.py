@@ -78,7 +78,7 @@ def service_detail(request, slug):
             )
         ),
         "checks": service.latest_results(),
-        "logs": service.logs().order_by("-created")[:3],
+        "logs": service.logs().order_by("-created").first(),
     }
     return render(request, "service-detail.html", context)
 
@@ -106,7 +106,7 @@ def source_detail(request, slug):
     context = {
         "services": source.services.all(),
         "source": source,
-        "logs": source.logs().order_by("-created")[:3],
+        "logs": source.logs().order_by("-created").first(),
     }
     return render(request, "source-detail.html", context)
 

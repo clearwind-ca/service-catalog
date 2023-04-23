@@ -1,15 +1,12 @@
 {% load helpers %}
-<table class="table">
     {% for entry in checks %}
-        <tr>
-            <td><a href="{% url "health:checks-detail" entry.check.slug %}">{{ entry.check.name }}</a></td>
+        <div class="row mb-2">
             {% if entry.last %}
-                <td>{% include "pass.html" with result=entry.last %}</td>
-                <td>{% include "since.html" with since=entry.last.updated %}</td>
+                <div class="col-2">{% include "pass.html" with result=entry.last %}</div>
             {% else %}
-                <td><span class="badge text-bg-info">Not run</span></td>
-                <td></td>
+                <div class="col-2"><span class="badge text-bg-info">Not run</span></div>
             {% endif %}
-        </tr>
+            <div class="col-10"><a href="{% url "health:checks-detail" entry.check.slug %}">{{ entry.check.name }}</a></div>
+        </div>
     {% endfor %}
 </table>

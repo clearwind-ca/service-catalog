@@ -46,7 +46,6 @@
         </div>
         <div class="bg-body-secondary">
             <div class="container-lg">
-                {% if breadcrumbs %}
                 <div class="pt-3 pb-1 mt-3">
                     <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '&bull;';">
                         <ol class="breadcrumb">
@@ -56,22 +55,29 @@
                         </ol>
                     </nav>
                 </div>
-                {% endif %}
             </div>
         </div>
         <div class="bg-body">
             <div class="container-lg">
                 {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} mt-3">
-                            <div>{{ message.message|markdown }}</div>
-                        </div>
-                    {% endfor %}
+                    <div class="pt-3">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} pt-3">
+                                <div>{{ message.message|markdown }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
                 {% endif %}
                 <div class="py-3 mb-3">
-                    {% block content %}{% endblock %}
+                    {% block content %}
+                    {% endblock %}
                 </div>
             </div>
         </div>
     </body>
+    <footer>
+        <div class="container-lg py-5 text-light fw-lighter" style="font-size: small;">
+            An open source project by <a href="https://clearwind.ca">Clearwind</a> and <a href="https://github.com/clearwind-ca/service-catalog">contributors</a> on {% octicon "mark-github" %}
+          </div>
+    </footer>
 </html>
