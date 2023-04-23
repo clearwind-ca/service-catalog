@@ -1,9 +1,8 @@
 {% load helpers %}
-<table class="table">
     {% for key, value in items.items %}
-        <tr>
-            <td>{{ key|strip }}</td>
-            <td>{% apply value key %}</td>
-        </tr>
+        <div class="row mb-2">
+            <div class="col-2">{{ key|strip }}</div>
+            <div class="col-10">{% apply value key %}</div>
+        </div>
     {% endfor %}
 </table>

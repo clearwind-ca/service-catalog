@@ -60,11 +60,13 @@
         <div class="bg-body">
             <div class="container-lg">
                 {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} pt-3">
-                            <div>{{ message.message|markdown }}</div>
-                        </div>
-                    {% endfor %}
+                    <div class="pt-3">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} pt-3">
+                                <div>{{ message.message|markdown }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
                 {% endif %}
                 <div class="py-3 mb-3">
                     {% block content %}

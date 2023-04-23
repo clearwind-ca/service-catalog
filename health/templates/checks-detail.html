@@ -13,39 +13,53 @@
     <p>
         {% include "active.html" with active=check.active %}
     </p>
-    <p class="form-text mb-3">This check has a slug of <code>{{ check.slug }}</code>.</p>
-    {% if check.description %}
-        <p>{{ check.description|markdown }}</p>
-    {% endif %}
-    <div class="card mt-3 mb-3">
-        <div id="admin" class="card-header fw-bold">Details</div>
-        <div class="card-body">
+    
+    <div class="row align-items-start">
+        <div class="col-md-8">
+            <p>{{ check.description|markdown }}</p>
             <dl>
-                <dt>Name</dt>
-                <dd>{{ check.name }}</dd>
                 <dt>Frequency</dt>
                 <dd>{{ check.get_frequency_display }}</dd>
             </dl>
         </div>
+
+        <div class="col-md-4 sidebar"> 
+            <div class="pb-3">
+                <h6 class="text-muted border-bottom">Info</h6>
+                <p>Slug: <code>{{ check.slug }}</code></p>
+            </div>
+
+            <div class="pb-3">
+                <h6 class="text-muted border-bottom">Results</h6>
+                <p><a href="{% url 'health:results-list' %}{% qs request check=check.slug %}">View results</a></p>
+            </div>
+
+            <div class="pb-3">
+                <h6 class="text-muted border-bottom">Admin</h6>
+                <p><a href="{% url 'health:checks-update' check.slug %}">Edit this check</a></p>
+                <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete this check</a></p>
+            </div>
+        </div>
     </div>
-    <div class="card">
-        <div id="admin" class="card-header fw-bold">Admin</div>
-        <div class="card-body">
-            <div class="form-group row mb-3">
-                <div class="form-group row">
-                    <label class="mb-3" for="refresh">Edit this check.</label>
-                    <div class="col-sm-10">
-                        <a href="{% url 'health:checks-update' check.slug %}" class="btn btn-primary">Edit</a>
-                    </div>
-                </div>
 
-                <div class="form-group row mt-3">
-                    <label class="mb-3" for="refresh">Delete this check. <b>This will also delete all results</b>. If you'd like to keep results, but not have the health check run, make this check <code>inactive</code> instead.</label>
-                    <div class="col-sm-10">
-                        <a href="{% url 'health:checks-delete' check.slug %}" class="btn btn-danger">Delete</a>
-                    </div>
-                </div>
 
+    <div class="modal " tabindex="-1" id="delete-modal">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete this check</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>This will delete this check from the catalog. It <i>will delete all check results for this service</i> If you'd like to keep results, but not have the health check run, make this <a href="{% url 'health:checks-update' check.slug %}">check inactive</a> instead.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <form method="post" action="{% url 'health:checks-delete' check.slug %}">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-danger" value="Delete" />
+                    </form>
+                </div>
             </div>
         </div>
     </div>

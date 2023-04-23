@@ -15,12 +15,11 @@
     </p>
     <p class="form-text mb-3">This check has a slug of <code>{{ check.slug }}</code>.</p>
     <div class="card mt-3 mb-3">
-        <div id="admin" class="card-header fw-bold">Details</div>
         <div class="card-body">
             <form method="post" action="{% url 'health:checks-update' check.slug %}" class="m-3">
                 {% csrf_token %}
                 {{ form|crispy }}
-                <button type="submit" class="btn btn-primary">{% octicon 'plus' %} Update health check</button>
+                <button type="submit" class="btn btn-outline-primary">Update health check</button>
             </form>
         </div>
     </div>

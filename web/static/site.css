@@ -37,6 +37,10 @@ footer svg {
     fill: white;
 }
 
+.sidebar {
+    font-size: small;
+}
+
 
 svg {
     vertical-align: -.15em;
