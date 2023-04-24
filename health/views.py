@@ -5,6 +5,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from rest_framework import permissions, viewsets
 
+from django.views.decorators.http import require_POST
 from systemlogs.models import add_info
 from web.helpers import process_query_params
 
@@ -59,6 +60,7 @@ def checks_update(request, slug):
 
 
 @login_required
+@require_POST
 def checks_delete(request, slug):
     check = Check.objects.get(slug=slug)
     msg = f"Health check `{slug}` and matching results deleted"
