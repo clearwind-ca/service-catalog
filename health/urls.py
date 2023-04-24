@@ -19,5 +19,4 @@ urlpatterns = [
     path("results/", views.results, name="results-list"),
     path("api/", include(router.urls)),
     path("api/health/<pk>/run/", views.api_checks_run, name="api-checks-run"),
-
 ]

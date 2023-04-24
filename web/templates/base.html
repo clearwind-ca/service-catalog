@@ -11,6 +11,7 @@
         <title>Service Catalog</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="icon" href="{% static 'actions-logo-solid-64.png' %}" />
+        {% block extrahead %}{% endblock %}
     </head>
     <body class="bg-dark">
         <div class="container-lg">
@@ -57,7 +58,7 @@
                 </div>
             </div>
         </div>
-        <div class="bg-body">
+        <div class="bg-body pb-5">
             <div class="container-lg">
                 {% if messages %}
                     <div class="pt-3">

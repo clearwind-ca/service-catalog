@@ -25,5 +25,9 @@
         <li>
             <a class="dropdown-item {% at_url request 'logs:log-list' %}" href="{% url 'logs:log-list' %}">{% octicon "scrum" %} Logs</a>
         </li>
+        <li><hr></li>
+        <li>
+            <a class="dropdown-item" href="{% url 'api-docs-ui' %}">{% octicon "blast" %} API Documentation</a>
+        </li>
     </ul>
 </li>
