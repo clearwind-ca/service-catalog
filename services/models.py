@@ -1,13 +1,14 @@
 from urllib.parse import urlparse
 
+from auditlog.models import LogEntry
+from auditlog.registry import auditlog
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.urls import reverse
 
-from auditlog.registry import auditlog
 from health.models import Check, CheckResult
-from auditlog.models import LogEntry
+
 
 class Service(models.Model):
     """
@@ -106,6 +107,7 @@ def slugify_service(name):
 
 def slugify_source(url):
     return slugify(urlparse(url).path.replace("/", "-"))
+
 
 auditlog.register(Service)
 auditlog.register(Source)

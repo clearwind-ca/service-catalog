@@ -3,7 +3,6 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 
-
 from .helpers import process_query_params
 from .templatetags.helpers import (
     apply_format,
@@ -155,4 +154,3 @@ class TestAPIToken(TestCase):
         assert Token.objects.filter(user=self.user).exists()
         self.client.post(reverse("web:api-delete"))
         self.assertEquals(Token.objects.filter(user=self.user).exists(), False)
-

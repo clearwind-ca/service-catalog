@@ -153,6 +153,7 @@ def refresh_results(results, source, request):
         else:
             add_error(request, f"Refresh error on `{source.slug}`: {form.nice_errors()}.")
 
+
 @login_required
 def source_add(request):
     if request.method == "GET":

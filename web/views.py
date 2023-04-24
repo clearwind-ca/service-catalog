@@ -74,7 +74,10 @@ def api_create(request):
         messages.SUCCESS,
         f"Token created: `{token.key}` this is the only time this will appear, so make a copy of it now.",
     )
-    add_info(request, "Created API token.",)
+    add_info(
+        request,
+        "Created API token.",
+    )
     return render(request, "api.html", {"token": token})
 
 

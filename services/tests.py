@@ -1,5 +1,6 @@
 import os
 from unittest.mock import patch
+
 from auditlog.models import LogEntry
 from django.contrib import messages
 from django.contrib.auth.models import User

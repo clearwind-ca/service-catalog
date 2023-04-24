@@ -1,3 +1,4 @@
+from auditlog.models import LogEntry, LogEntryManager
 from django.contrib import messages
 from django.urls import reverse
 from faker import Faker
@@ -6,7 +7,6 @@ from catalog.helpers.tests import WithUser
 from services.tests import create_source
 
 from .management.commands import truncate
-from auditlog.models import LogEntry, LogEntryManager
 
 fake = Faker("en_US")
 
@@ -61,4 +61,4 @@ class TestAPI(WithSource):
         self.api_login()
         response = self.api_client.get(self.detail_url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()['object_repr'], self.source.slug)
+        self.assertEqual(response.json()["object_repr"], self.source.slug)

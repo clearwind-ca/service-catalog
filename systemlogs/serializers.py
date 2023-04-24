@@ -1,6 +1,5 @@
-from rest_framework import serializers
-
 from auditlog.models import LogEntry
+from rest_framework import serializers
 
 
 class LogEntrySerializer(serializers.ModelSerializer):

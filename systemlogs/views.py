@@ -1,3 +1,4 @@
+from auditlog.models import LogEntry
 from django.apps import apps
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
@@ -9,8 +10,6 @@ from rest_framework import permissions, viewsets
 from web.helpers import process_query_params
 
 from .serializers import LogEntrySerializer
-
-from auditlog.models import LogEntry
 
 model_map = {
     "service": "services",
