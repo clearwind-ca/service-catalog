@@ -3,9 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 from rest_framework import permissions, viewsets
 
-from django.views.decorators.http import require_POST
 from systemlogs.models import add_info
 from web.helpers import process_query_params
 
