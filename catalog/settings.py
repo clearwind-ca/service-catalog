@@ -34,6 +34,8 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": f"{auth_pwd}.NumericPasswordValidator"},
 ]
 CATALOG_ENV = env
+# Default timeout 6 hours.
+CHECKS_TIMEOUT_HOURS = os.environ.get("CHECKS_TIMEOUT_HOURS", 6)
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 DEBUG = os.environ.get("DEBUG")

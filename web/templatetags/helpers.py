@@ -32,7 +32,7 @@ def check_as_colour(value):
         "pass": "success",
         "warning": "warning",
         "error": "danger",
-        "unconfirmed": "secondary",
+        "unknown": "secondary",
         "fail": "danger",
     }
     return result.get(value, "dark")
@@ -40,7 +40,12 @@ def check_as_colour(value):
 
 @register.filter(name="status_as_colour")
 def status_as_colour(value):
-    result = {"S": "secondary", "R": "success", "F": "danger"}
+    result = {
+        "sent": "secondary",
+        "error": "danger",
+        "timed-out": "warning",
+        "completed": "success",
+    }
     return result.get(value, "dark")
 
 

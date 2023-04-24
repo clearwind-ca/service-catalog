@@ -91,7 +91,7 @@ print("Response", res.status_code)
 
 ## Notes
 
-* Each health check for each service is sent as an individual check.
+* Each health check for each service is sent as an individual GitHub Action run.
 * If the GitHub Action does not respond in a sufficient time then the check will be timed out.
 * Once a result has been sent to the Service Catalog, it cannot be changed. 
 

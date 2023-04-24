@@ -100,10 +100,28 @@ Arguments:
 * `--all`: runs through all the sources and refreshes them all from GitHub.
 * `--source [SOURCE_SLUG]`: just refreshes the source matching the `SOURCE_SLUG` given.
 * `--user`: the username of a user to connect to GitHub, this is the GitHub handle for that user.
+* `--quiet`: less logging.
 
 Environment variables:
 
 * `CRON_USER`: If `--user` is not specified, then the command will check to see if the environment variable `CRON_USER` is set and use that.
+
+### Send
+
+Command: `python manage.py send`
+
+Sends health checks to the GitHub Actions repository, so that health checks can be run.
+
+Arguments:
+
+* `--check`: the slug of the check to send.
+* `--all-checks`: send all checks. Either `--check` or `--all-checks` must be specified.
+* `--service`: the slug of the service to send checks for.
+* `--all-services`: send all services. Either `--service` or `--all-services` must be specified.
+* `--user`: the username of a user to connect to GitHub, this is the GitHub handle for that user.
+* `--quiet`: less logging. 
+
+As an example: `python manage.py send --all-checks --all-services` will run every health check on every service and `python manage.py send --check Log4J --service Website` will only send the health check for `Log4J` for the `Website` service.
 
 ### Truncate
 
@@ -114,3 +132,16 @@ Removes old `Log` entries in the `SystemLog` table. The default is to remove all
 Arguments:
 
 * `--ago`: the number of days to truncate logs too. For example `--ago 30` removes all `Log` entries older than 30 days.
+* `--quiet`: less logging.
+
+### Timeout
+
+Command: `python manage.py timeout`
+
+Marks old health check results as `timed out`. The default is to mark logs as timed out after 6 hours.
+
+Arguments:
+
+* `--ago`: the number of hours to make as timed out.
+* `--quiet`: less logging.
+

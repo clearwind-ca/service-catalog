@@ -19,10 +19,12 @@
                     <dl>
                         <dt>Action</dt>
                         <dd>{{ log.get_action_display|capfirst }}</dd>
-                        <dt>To</dt>
+                        <dt>Object</dt>
                         <dd>{{ log.content_type.name|capfirst }}</dd>
                         <dt>Timestamp</dt>
                         <dd>{{ log.timestamp }} &bull; {% include "since.html" with since=log.timestamp %}</dd>
+                        <dt>Primary key</dt>
+                        <dd>{{ log.object_pk }}</dd>
                     </dl>
                 </div>
             </div>
