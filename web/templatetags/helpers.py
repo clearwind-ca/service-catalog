@@ -26,30 +26,6 @@ def priority_as_colour(value):
     return levels.get(value, "dark")
 
 
-@register.filter(name="log_level_as_colour")
-def log_level_as_colour(value):
-    levels = {
-        10: "secondary",
-        20: "secondary",
-        25: "primary",
-        30: "warning",
-        40: "danger",
-    }
-    return levels.get(value, "dark")
-
-
-@register.filter(name="log_level_as_text")
-def log_level_as_text(value):
-    levels = {
-        constants.DEBUG: "Debug",
-        constants.INFO: "Info",
-        constants.SUCCESS: "Success",
-        constants.WARNING: "Warning",
-        constants.ERROR: "Error",
-    }
-    return levels.get(value, "Unknown")
-
-
 @register.filter(name="check_as_colour")
 def check_as_colour(value):
     result = {

@@ -51,7 +51,6 @@ class Command(BaseCommand):
             raise ValueError(
                 "User must be set either using `--cron-user` or `CRON_USER` as the username of a user with a GitHub login."
             )
-
         user = User.objects.get(username=username)
 
         class requestStub:

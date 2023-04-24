@@ -3,12 +3,9 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 
-from systemlogs.models import SystemLog
-
 from .helpers import process_query_params
 from .templatetags.helpers import (
     apply_format,
-    log_level_as_text,
     markdown_filter,
     priority_as_colour,
     qs,
@@ -56,9 +53,6 @@ class TestColour(TestCase):
     def test_colour_filter(self):
         self.assertEqual(priority_as_colour(1), "warning")
         self.assertEqual(priority_as_colour("foo"), "dark")
-
-    def test_log_level_filter(self):
-        self.assertEqual(log_level_as_text(20), "Info")
 
 
 class TestMarkdown(TestCase):
@@ -150,14 +144,13 @@ class TestAPIToken(TestCase):
         response = self.client.post(reverse("web:api-create"))
         token = Token.objects.get(user=self.user)
         self.assertContains(response, token.key)
-        self.assertEqual(SystemLog.objects.filter(user=self.user).count(), 1)
+        self.assertEquals(Token.objects.filter(user=self.user).exists(), True)
 
     def test_api_token_delete(self):
-        """Test that hitting the API token endpoint creates a token."""
+        """Test that hitting the API token endpoint deletes a token."""
         self.add_user()
         self.client.force_login(self.user)
         Token.objects.create(user=self.user)
         assert Token.objects.filter(user=self.user).exists()
-        response = self.client.post(reverse("web:api-delete"))
+        self.client.post(reverse("web:api-delete"))
         self.assertEquals(Token.objects.filter(user=self.user).exists(), False)
-        self.assertEqual(SystemLog.objects.filter(user=self.user).count(), 1)

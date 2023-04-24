@@ -26,8 +26,7 @@ def checks_add(request):
         form = CheckForm(request.POST)
         if form.is_valid():
             check = form.save()
-            msg = f"Added health check `{check.name}`"
-            add_info(check, msg, web=True, request=request)
+            add_info(request, f"Added health check `{check.name}`")
             return redirect(reverse("health:checks-list"))
     else:
         form = CheckForm()
@@ -50,8 +49,7 @@ def checks_update(request, slug):
         form = CheckForm(request.POST, instance=check)
         if form.is_valid():
             check = form.save()
-            msg = f"Updated health check `{check.name}`"
-            add_info(check, msg, web=True, request=request)
+            add_info(request, f"Updated health check `{check.name}`")
             return redirect(reverse("health:checks-list"))
         return render(request, "checks-update.html", {"check": check, "form": form})
 
@@ -63,8 +61,7 @@ def checks_update(request, slug):
 @require_POST
 def checks_delete(request, slug):
     check = Check.objects.get(slug=slug)
-    msg = f"Health check `{slug}` and matching results deleted"
-    add_info(check, msg, web=True, request=request)
+    add_info(request, f"Health check `{slug}` and matching results deleted")
     Check.objects.get(slug=slug).delete()
     return redirect(reverse("health:checks-list"))
 

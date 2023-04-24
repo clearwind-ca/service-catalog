@@ -1,12 +1,13 @@
 from urllib.parse import urlparse
 
+from auditlog.models import LogEntry
+from auditlog.registry import auditlog
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.urls import reverse
 
 from health.models import Check, CheckResult
-from systemlogs.models import SystemLog
 
 
 class Service(models.Model):
@@ -44,7 +45,7 @@ class Service(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     def logs(self):
-        return SystemLog.objects.filter(content_type__model="service", object_id=self.id)
+        return LogEntry.objects.get_for_object(self)
 
     def dependents(self):
         return Service.objects.filter(dependencies=self)
@@ -54,7 +55,7 @@ class Service(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.name
+        return self.slug
 
     def get_absolute_url(self):
         return reverse("services:service-detail", kwargs={"slug": self.slug})
@@ -106,3 +107,7 @@ def slugify_service(name):
 
 def slugify_source(url):
     return slugify(urlparse(url).path.replace("/", "-"))
+
+
+auditlog.register(Service)
+auditlog.register(Source)

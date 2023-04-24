@@ -1,9 +1,8 @@
+from auditlog.models import LogEntry
 from rest_framework import serializers
 
-from .models import SystemLog
 
-
-class SystemLogSerializer(serializers.ModelSerializer):
+class LogEntrySerializer(serializers.ModelSerializer):
     class Meta:
-        model = SystemLog
+        model = LogEntry
         fields = "__all__"

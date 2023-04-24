@@ -1,3 +1,4 @@
+from auditlog.registry import auditlog
 from django.db import models
 from django.template.defaultfilters import slugify
 
@@ -86,3 +87,7 @@ class CheckResult(models.Model):
             self.status = "completed"
 
         super().save(*args, **kwargs)
+
+
+auditlog.register(Check)
+auditlog.register(CheckResult)

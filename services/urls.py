@@ -11,12 +11,12 @@ router.register("service", views.ServiceViewSet, basename="api-service")
 
 urlpatterns = [
     path("services/", views.service_list, name="service-list"),
-    path("services/<str:slug>", views.service_detail, name="service-detail"),
-    path("services/<str:slug>/delete", views.service_delete, name="service-delete"),
-    path("services/schema/", views.schema_detail, name="schema-detail"),
+    path("services/<str:slug>/", views.service_detail, name="service-detail"),
+    path("services/<str:slug>/delete/", views.service_delete, name="service-delete"),
+    path("schema/", views.schema_detail, name="schema-detail"),
     path("sources/", views.source_list, name="source-list"),
     path("sources/add/", views.source_add, name="source-add"),
-    path("sources/<str:slug>", views.source_detail, name="source-detail"),
+    path("sources/<str:slug>/", views.source_detail, name="source-detail"),
     path("sources/<str:slug>/validate/", views.source_validate, name="source-validate"),
     path("sources/<str:slug>/refresh/", views.source_refresh, name="source-refresh"),
     path("sources/<str:slug>/delete/", views.source_delete, name="source-delete"),

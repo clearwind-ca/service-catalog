@@ -74,7 +74,10 @@ def api_create(request):
         messages.SUCCESS,
         f"Token created: `{token.key}` this is the only time this will appear, so make a copy of it now.",
     )
-    add_info(request.user, "Created API token.", request=request)
+    add_info(
+        request,
+        "Created API token.",
+    )
     return render(request, "api.html", {"token": token})
 
 
@@ -83,5 +86,5 @@ def api_create(request):
 def api_delete(request):
     Token.objects.filter(user=request.user).delete()
     messages.add_message(request, messages.SUCCESS, "Token deleted")
-    add_info(request.user, "Deleted API token.", request=request)
+    add_info(request, "Deleted API token.")
     return redirect(reverse("web:api"))

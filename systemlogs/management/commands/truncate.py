@@ -1,9 +1,8 @@
 from datetime import timedelta
 
+from auditlog.models import LogEntry
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-
-from systemlogs import models
 
 
 class Command(BaseCommand):
@@ -27,7 +26,7 @@ class Command(BaseCommand):
                 "You must specify `--ago` as the number of days to delete logs older than."
             )
 
-        queryset = models.SystemLog.objects.filter(created__lt=timezone.now() - timedelta(days=ago))
+        queryset = LogEntry.objects.filter(timestamp__lt=timezone.now() - timedelta(days=ago))
         count = queryset.count()
         queryset.delete()
         if not quiet:
