@@ -8,11 +8,12 @@ from rest_framework import permissions, viewsets
 
 from systemlogs.models import add_info
 from web.helpers import process_query_params
-
+from gh import send
 from .forms import CheckForm
 from .models import RESULT_CHOICES, STATUS_CHOICES, Check, CheckResult
 from .serializers import CheckResultSerializer, CheckSerializer
-
+from catalog.errors import NoRepository, SendError
+from services.models import Service
 
 @login_required
 def checks(request):
@@ -60,9 +61,32 @@ def checks_update(request, slug):
 @login_required
 @require_POST
 def checks_delete(request, slug):
-    check = Check.objects.get(slug=slug)
-    add_info(request, f"Health check `{slug}` and matching results deleted")
     Check.objects.get(slug=slug).delete()
+    add_info(request, f"Health check `{slug}` and matching results deleted")
+    return redirect(reverse("health:checks-list"))
+
+
+@login_required
+@require_POST
+def checks_run(request, slug):
+    check = Check.objects.get(slug=slug)
+    add_info(request, f"Health check `{slug}` run for all services.")
+    service_queryset = Service.objects.all()
+    for service in service_queryset:
+        result = CheckResult.objects.create(
+            health_check=check,
+            status="sent",
+            service=service,
+        )
+        try:
+            send.dispatch(request.user, result)
+        except (SendError, NoRepository) as error:
+            # Fatal error, they are all going to fail.
+            # Should we log here?
+            result.status = "error"
+            result.save()
+            raise error
+
     return redirect(reverse("health:checks-list"))
 
 
