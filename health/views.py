@@ -6,14 +6,16 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 from rest_framework import permissions, viewsets
 
-from systemlogs.models import add_info, add_error
-from web.helpers import process_query_params
+from catalog.errors import NoRepository, SendError
 from gh import send
+from services.models import Service
+from systemlogs.models import add_error, add_info
+from web.helpers import process_query_params
+
 from .forms import CheckForm
 from .models import RESULT_CHOICES, STATUS_CHOICES, Check, CheckResult
 from .serializers import CheckResultSerializer, CheckSerializer
-from catalog.errors import NoRepository, SendError
-from services.models import Service
+
 
 @login_required
 def checks(request):
