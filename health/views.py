@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 from rest_framework import permissions, viewsets
 
-from systemlogs.models import add_info
+from systemlogs.models import add_info, add_error
 from web.helpers import process_query_params
 from gh import send
 from .forms import CheckForm
@@ -70,7 +70,6 @@ def checks_delete(request, slug):
 @require_POST
 def checks_run(request, slug):
     check = Check.objects.get(slug=slug)
-    add_info(request, f"Health check `{slug}` run for all services.")
     service_queryset = Service.objects.all()
     for service in service_queryset:
         result = CheckResult.objects.create(
@@ -79,15 +78,18 @@ def checks_run(request, slug):
             service=service,
         )
         try:
+            # Should this use the cron user?
             send.dispatch(request.user, result)
         except (SendError, NoRepository) as error:
             # Fatal error, they are all going to fail.
             # Should we log here?
             result.status = "error"
             result.save()
-            raise error
+            add_error(request, f"Failed to send health check: `{error.message}`")
+            return redirect(reverse("health:checks-detail", kwargs={"slug": slug}))
 
-    return redirect(reverse("health:checks-list"))
+    add_info(request, f"Health check `{slug}` run for all services.")
+    return redirect(reverse("health:checks-detail", kwargs={"slug": slug}))
 
 
 @login_required
