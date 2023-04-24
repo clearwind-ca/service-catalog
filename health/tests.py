@@ -8,7 +8,6 @@ from faker import Faker
 from catalog.errors import NoRepository
 from catalog.helpers.tests import WithUser
 from services.tests import create_service, create_source
-from systemlogs.models import SystemLog
 
 from .management.commands import send
 from .models import Check, CheckResult
@@ -118,6 +117,8 @@ class TestSend(WithHealthCheck):
     def setUp(self):
         super().setUp()
         self.command = send.Command().handle
+        if "CRON_USER" in os.environ:
+            del os.environ["CRON_USER"]
 
     def test_arg_combos_fails(self):
         for params in [

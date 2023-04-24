@@ -6,7 +6,6 @@ from django.core.management.base import BaseCommand
 from catalog.errors import FetchError
 from gh import fetch
 from services import forms, models
-from systemlogs.models import add_error, add_log
 
 
 class Command(BaseCommand):
@@ -62,20 +61,15 @@ class Command(BaseCommand):
             try:
                 results = fetch.get(user, source)
             except FetchError as error:
-                add_error(source, error.message, request=request)
                 continue
 
             for data in results:
                 form = forms.ServiceForm({"data": data["contents"]})
                 form.source = source
                 if not form.is_valid():
-                    message = f"Background validation failed for: `{source.url}`. Error: {form.nice_errors()}."
-                    add_error(source, message, request=request)
                     continue
 
                 output = form.save()
-                for msg, level in output["logs"]:
-                    add_log(source, level, msg, request=request)
                 outputs.append(output)
 
         if not quiet:

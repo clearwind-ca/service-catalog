@@ -1,5 +1,6 @@
 from django.db import models
 from django.template.defaultfilters import slugify
+from auditlog.registry import auditlog
 
 FREQUENCY_CHOICES = (
     ("hourly", "Hourly"),
@@ -86,3 +87,6 @@ class CheckResult(models.Model):
             self.status = "completed"
 
         super().save(*args, **kwargs)
+
+auditlog.register(Check)
+auditlog.register(CheckResult)

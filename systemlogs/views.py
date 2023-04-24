@@ -7,10 +7,10 @@ from django.shortcuts import render
 from rest_framework import permissions, viewsets
 
 from web.helpers import process_query_params
-from web.templatetags.helpers import log_level_as_text
 
-from .models import SystemLog
-from .serializers import SystemLogSerializer
+from .serializers import LogEntrySerializer
+
+from auditlog.models import LogEntry
 
 model_map = {
     "service": "services",
@@ -28,7 +28,6 @@ def log_list(request):
     for param, lookup in (("level", "level"),):
         if get.get(param) is not None:
             filters[lookup] = get[param]
-            display_filters[lookup] = log_level_as_text(get[param])
 
     if get.get("target") and get.get("slug"):
         target = get["target"]
@@ -41,7 +40,7 @@ def log_list(request):
         display_filters["target"] = _object.slug
         display_filters["type"] = target.lower()
 
-    sources = SystemLog.objects.filter(**filters).order_by("-created")
+    sources = LogEntry.objects.filter(**filters).order_by("-timestamp")
     paginator = Paginator(sources, per_page=get["per_page"])
     page_number = get["page"]
     page_obj = paginator.get_page(page_number)
@@ -55,7 +54,13 @@ def log_list(request):
     return render(request, "log-list.html", context)
 
 
+@login_required
+def log_details(request, pk):
+    log = LogEntry.objects.get(pk=pk)
+    return render(request, "log-details.html", {"log": log})
+
+
 class SystemLogViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = SystemLog.objects.all().order_by("-created")
-    serializer_class = SystemLogSerializer
+    queryset = LogEntry.objects.all().order_by("-timestamp")
+    serializer_class = LogEntrySerializer
     permission_classes = [permissions.IsAuthenticated]

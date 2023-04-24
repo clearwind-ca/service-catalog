@@ -1,6 +1,6 @@
 import os
 from unittest.mock import patch
-
+from auditlog.models import LogEntry
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.db.models.deletion import ProtectedError
@@ -322,7 +322,7 @@ class TestDelete(WithUser):
         response = self.client.post(self.url)
         self.assertEqual(self.get_message(response).level, messages.INFO)
         # Assert that we still have the system log entries for that object.
-        assert self.source.logs().count() > 0
+        self.assertEquals(LogEntry.objects.get_for_object(self.source).exists(), True)
 
 
 class TestAdd(WithUser):

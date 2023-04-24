@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load helpers %}
+{% load humanize %}
+{% load octicons %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'logs:log-list' %}">{% octicon "scrum" %} Logs</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ log.pk }}</li>
+{% endblock %}
+{% block content %}
+
+    <h3>Log details: {{ log.pk }}</h3>
+
+
+    <div class="row align-items-start">
+        <div class="col-md-8">
+            <div class="card mt-3 mb-3">
+                <div class="card-header fw-bold">Details</div>
+                <div class="card-body">
+                    <dl>
+                        <dt>Action</dt>
+                        <dd>{{ log.get_action_display|capfirst }}</dd>
+                        <dt>To</dt>
+                        <dd>{{ log.content_type.name|capfirst }}</dd>
+                        <dt>Timestamp</dt>
+                        <dd>{{ log.timestamp }} &bull; {% include "since.html" with since=log.timestamp %}</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card mt-3 mb-3">
+                <div class="card-header fw-bold">Changes</div>
+                <div class="card-body">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>From</th>
+                            <th>To</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for key, value in log.changes_dict.items %}
+                        <tr>
+                            <td>{{ key }}</td>
+                            <td>{{ value.0|default:"None" }}</td>
+                            <td>{{ value.1|default:"None" }}</td>
+                        </tr>
+                        {% empty %}
+                        <p>No history for this item has been logged yet.</p>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+ 
+        <div class="col-md-4 sidebar"> 
+            <div class="pb-3">
+                <h6 class="text-muted border-bottom">Info</h6>
+                <p>No extra info.</p>
+            </div>
+        
+            <div>
+                <h6 class="text-muted border-bottom">Admin</h6>
+                <p>No admin options.</a>
+            </div>
+        </div>
+    </div>
+
+
+
+
+</div>
+{% endblock %}

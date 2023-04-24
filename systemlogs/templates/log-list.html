@@ -7,25 +7,6 @@
 {% load humanize %}
 {% block content %}
 <div>
-
-    <div class="btn-group" role="group">
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="#">
-                {% octicon "filters" %} Level
-            </button>
-            <ul class="dropdown-menu">
-                {% for level in levels %}
-                <li>
-                    <a class="dropdown-item {% if level == request.GET.level %}active{% endif %}" href="{% qs request level=level %}">{{ level|log_level_as_text }} only</a>
-                </li>
-                {% endfor %}
-                <li>
-                    <a class="dropdown-item" href="{% qs request level=None %}">All</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-
     {% if filters %}
         <p class="form-text">Filtered by: {% for k, v in filters.items %}<code>{{ k }}: {{ v }}</code>{% if not forloop.last %} and {% endif %}{% endfor %}.
             &bull; <a href="{% url 'logs:log-list' %}">Reset</a>
@@ -36,9 +17,9 @@
         <table class="table table-striped my-3">
             <thead>
                 <tr>
-                    <th>About</th>
-                    <th>Message</th>
-                    <th>Level</th>
+                    <th>Action</th>
+                    <th>Item</th>
+                    <th></th>
                     <th>{% octicon "past" %} Created</th>
                     <th>{% octicon "person" %} Who</th>
                 </tr>
@@ -46,19 +27,11 @@
             <tbody>    
                 {% for log in logs %}
                     <tr>
-                        <td>
-                        {% with log.content_object as target %}
-                            {% if target %}
-                                <a href="{{ target.get_absolute_url }}">{{ target }}</a>
-                            {% else %}
-                                (object deleted)
-                            {% endif %}
-                        {% endwith %}
-                        </td>
-                        <td>{{ log.message|markdown }}</td>
-                        <td><span class="badge bg-{{ log.level|log_level_as_colour }}">{{ log.level|log_level_as_text }}</span></td>
-                        <td>{% include "since.html" with since=log.created %}</td>
-                        <td>{{ log.user }}</td>
+                        <td>{{ log.get_action_display|capfirst }}</td>
+                        <td>{{ log.content_type.name|capfirst }}</td>
+                        <td><a href="{% url 'logs:log-details' log.pk %}">{{ log.object_repr }}</a></td>
+                        <td>{% include "since.html" with since=log.timestamp %}</td>
+                        <td>{{ log.actor }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

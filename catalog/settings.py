@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.humanize",
     "django_extensions",
+    "auditlog",
     "crispy_forms",
     "crispy_bootstrap5",
     "oauthlogin",
@@ -104,6 +105,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "auditlog.middleware.AuditlogMiddleware",
 ]
 OAUTH_LOGIN_PROVIDERS = {
     "github": {
