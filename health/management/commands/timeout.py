@@ -18,21 +18,26 @@ from web.helpers import attempt_int
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
+            "--ago",
+            type=int,
+            help="Mark as timed out, check results older than this in hours",
+        )
+        parser.add_argument(
             "--quiet",
             action="store_true",
             help="Print out less.",
         )
 
     def handle(self, *args, **options):
+        ago = options.get("ago", None)
         quiet = options.get("quiet", False)
 
-        timeout = attempt_int(settings.CHECKS_TIMEOUT_HOURS)
-        if timeout == 0 and not quiet:
-            print("Timeout is set to 0, so no check results will timeout.")
+        if ago == 0 and not quiet:
+            print("Ago is set to 0, so no check results will timeout.")
             sys.exit(1)
 
         check_queryset = CheckResult.objects.filter(
-            updated__lt=timezone.now() - timedelta(hours=timeout),
+            updated__lt=timezone.now() - timedelta(hours=ago),
             status__in=["sent"],
         )
         for check in check_queryset:
@@ -40,4 +45,4 @@ class Command(BaseCommand):
             check.save()
 
         if not quiet:
-            print(f"Timed out {check_queryset.count()} results.")
+            print(f"Timed out {check_queryset.count()} results, older than {ago} hours.")

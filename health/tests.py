@@ -194,8 +194,6 @@ class TestTimeout(WithHealthCheck):
     def setUp(self):
         super().setUp()
         self.command = timeout.Command().handle
-        if "CRON_USER" in os.environ:
-            del os.environ["CRON_USER"]
 
     def test_timeout(self):
         """Timeouts a check"""
@@ -203,12 +201,10 @@ class TestTimeout(WithHealthCheck):
         # Set the result to be 12 hours old.
         CheckResult.objects.update(updated=timezone.now() - timedelta(hours=12))
 
-        with self.settings(CHECKS_TIMEOUT_HOURS=13):
-            # This times out things older than 13 hours.
-            self.command(quiet=True)
-            self.assertEquals(CheckResult.objects.filter(status="sent").count(), 1)
+        # This times out things older than 13 hours.
+        self.command(quiet=True, ago=13)
+        self.assertEquals(CheckResult.objects.filter(status="sent").count(), 1)
 
-        with self.settings(CHECKS_TIMEOUT_HOURS=11):
-            # This times out things older than 11 hours, our check result.
-            self.command(quiet=True)
-            self.assertEquals(CheckResult.objects.filter(status="timed-out").count(), 1)
+        # This times out things older than 11 hours, our check result.
+        self.command(quiet=True, ago=11)
+        self.assertEquals(CheckResult.objects.filter(status="timed-out").count(), 1)
