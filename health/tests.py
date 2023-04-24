@@ -1,15 +1,17 @@
 import os
+from datetime import timedelta
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils import timezone
 from faker import Faker
 
 from catalog.errors import NoRepository
 from catalog.helpers.tests import WithUser
 from services.tests import create_service, create_source
 
-from .management.commands import send
+from .management.commands import send, timeout
 from .models import Check, CheckResult
 
 fake = Faker()
@@ -186,3 +188,27 @@ class TestResultModel(WithHealthCheck):
         self.assertEqual(result.status, "completed")
         result.result = "fail"
         self.assertRaises(ValueError, result.save)
+
+
+class TestTimeout(WithHealthCheck):
+    def setUp(self):
+        super().setUp()
+        self.command = timeout.Command().handle
+        if "CRON_USER" in os.environ:
+            del os.environ["CRON_USER"]
+
+    def test_timeout(self):
+        """Timeouts a check"""
+        create_health_check_result(self.health_check, self.service)
+        # Set the result to be 12 hours old.
+        CheckResult.objects.update(updated=timezone.now() - timedelta(hours=12))
+
+        with self.settings(CHECKS_TIMEOUT_HOURS=13):
+            # This times out things older than 13 hours.
+            self.command(quiet=True)
+            self.assertEquals(CheckResult.objects.filter(status="sent").count(), 1)
+
+        with self.settings(CHECKS_TIMEOUT_HOURS=11):
+            # This times out things older than 11 hours, our check result.
+            self.command(quiet=True)
+            self.assertEquals(CheckResult.objects.filter(status="timed-out").count(), 1)
