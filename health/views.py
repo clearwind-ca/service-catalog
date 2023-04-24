@@ -5,8 +5,13 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from rest_framework import permissions, viewsets
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
-from systemlogs.models import add_info
+from catalog.errors import NoRepository, SendError
+from gh import send
+from services.models import Service
+from systemlogs.models import add_error, add_info
 from web.helpers import process_query_params
 
 from .forms import CheckForm
@@ -60,10 +65,53 @@ def checks_update(request, slug):
 @login_required
 @require_POST
 def checks_delete(request, slug):
-    check = Check.objects.get(slug=slug)
-    add_info(request, f"Health check `{slug}` and matching results deleted")
     Check.objects.get(slug=slug).delete()
+    add_info(request, f"Health check `{slug}` and matching results deleted")
     return redirect(reverse("health:checks-list"))
+
+
+def adhoc_run(request, check):
+    service_queryset = Service.objects.all()
+    for service in service_queryset:
+        result = CheckResult.objects.create(
+            health_check=check,
+            status="sent",
+            service=service,
+        )
+        try:
+            # Should this use the cron user?
+            send.dispatch(request.user, result)
+        except (SendError, NoRepository) as error:
+            # Fatal error, they are all going to fail.
+            # Should we log here?
+            result.status = "error"
+            result.save()
+            raise error
+
+
+@login_required
+@require_POST
+def checks_run(request, slug):
+    check = Check.objects.get(slug=slug)
+    try:
+        adhoc_run(request, check)
+    except (SendError, NoRepository) as error:
+        add_error(request, f"Failed to send health check: `{error.message}`")
+        return redirect(reverse("health:checks-detail", kwargs={"slug": slug}))
+
+    add_info(request, f"Health check `{slug}` run for all services.")
+    return redirect(reverse("health:checks-detail", kwargs={"slug": slug}))
+
+
+@api_view(["POST"])
+def api_checks_run(request, pk):
+    check = Check.objects.get(pk=pk)
+    try:
+        adhoc_run(request, check)
+    except (SendError, NoRepository) as error:
+        return Response({"success": False}, status=status.HTTP_502_BAD_GATEWAY)
+
+    return Response({"success": True})
 
 
 @login_required
