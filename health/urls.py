@@ -18,4 +18,6 @@ urlpatterns = [
     path("health/<str:slug>/run/", views.checks_run, name="checks-run"),
     path("results/", views.results, name="results-list"),
     path("api/", include(router.urls)),
+    path("api/health/<pk>/run/", views.api_checks_run, name="api-checks-run"),
+
 ]

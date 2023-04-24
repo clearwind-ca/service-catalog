@@ -5,13 +5,13 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from rest_framework import permissions, viewsets
-
+from rest_framework.response import Response
 from catalog.errors import NoRepository, SendError
 from gh import send
 from services.models import Service
 from systemlogs.models import add_error, add_info
 from web.helpers import process_query_params
-
+from rest_framework.decorators import api_view
 from .forms import CheckForm
 from .models import RESULT_CHOICES, STATUS_CHOICES, Check, CheckResult
 from .serializers import CheckResultSerializer, CheckSerializer
@@ -68,10 +68,7 @@ def checks_delete(request, slug):
     return redirect(reverse("health:checks-list"))
 
 
-@login_required
-@require_POST
-def checks_run(request, slug):
-    check = Check.objects.get(slug=slug)
+def adhoc_run(request, check):
     service_queryset = Service.objects.all()
     for service in service_queryset:
         result = CheckResult.objects.create(
@@ -87,11 +84,32 @@ def checks_run(request, slug):
             # Should we log here?
             result.status = "error"
             result.save()
-            add_error(request, f"Failed to send health check: `{error.message}`")
-            return redirect(reverse("health:checks-detail", kwargs={"slug": slug}))
+            raise error
 
+
+@login_required
+@require_POST
+def checks_run(request, slug):
+    check = Check.objects.get(slug=slug)
+    try:
+        adhoc_run(request, check)
+    except (SendError, NoRepository) as error:
+        add_error(request, f"Failed to send health check: `{error.message}`")
+        return redirect(reverse("health:checks-detail", kwargs={"slug": slug}))
+    
     add_info(request, f"Health check `{slug}` run for all services.")
     return redirect(reverse("health:checks-detail", kwargs={"slug": slug}))
+
+
+@api_view(["POST"])
+def api_checks_run(request, pk):
+    check = Check.objects.get(pk=pk)
+    try:
+        adhoc_run(request, check)
+    except (SendError, NoRepository) as error:
+        return Response({"success": False}, status=status.HTTP_502_BAD_GATEWAY)
+
+    return Response({"success": True})
 
 
 @login_required
