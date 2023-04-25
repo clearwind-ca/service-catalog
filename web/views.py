@@ -7,13 +7,7 @@ from django.shortcuts import redirect, render, reverse
 from django.views.decorators.http import require_POST
 from rest_framework.authtoken.models import Token
 
-from systemlogs.models import add_info
-
 from .shortcuts import get_object_or_None
-
-
-def home(request):
-    return render(request, "home.html")
 
 
 def handler404(request, exception):
@@ -45,7 +39,7 @@ def debug(request):
         "ALLOWED_HOSTS": get("ALLOWED_HOSTS"),
         "GITHUB_APP_ID": truncate("GITHUB_APP_ID"),
         "GITHUB_CLIENT_ID": truncate("GITHUB_CLIENT_ID"),
-        "GITHUB_CLIENT_SECRET": truncate("GITLAB_CLIENT_SECRET"),
+        "GITHUB_CLIENT_SECRET": truncate("GITHUB_CLIENT_SECRET"),
     }
     selected_settings = {
         "CATALOG_ENV": settings.CATALOG_ENV,
@@ -81,5 +75,5 @@ def api_create(request):
 @require_POST
 def api_delete(request):
     Token.objects.filter(user=request.user).delete()
-    add_info(request, "Deleted API token.")
+    messages.add_message(request, messages.SUCCESS, "Deleted API token.")
     return redirect(reverse("web:api"))
