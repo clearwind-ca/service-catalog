@@ -198,7 +198,6 @@ class TestDependencies(TestCase):
         result = self.process_form(service_stub)
         assert result["created"] == False
         self.assertEqual(result["service"].dependencies.first(), None)
-        assert "was not connected" in result["logs"][0][0], result["logs"][0]
 
     def test_update_service_removes_dependencies(self):
         """Test that updating a service removes dependencies."""

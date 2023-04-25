@@ -64,7 +64,7 @@ class TestQs(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
 
-    def _test_qs(self, params, **overrides):
+    def _test_qs(self, params, *overrides):
         request = self.factory.get(f"/?{params}")
 
         @process_query_params
@@ -72,21 +72,21 @@ class TestQs(TestCase):
             return query_params
 
         test(request)
-        return qs(request, **overrides)
+        return qs(request, *overrides)
 
     def test_qs(self):
-        self.assertEqual(self._test_qs(""), "?")
-        self.assertEqual(self._test_qs("page=10"), "?page=10")
+        self.assertEqual(self._test_qs("page=10", None, None), "?page=10&active=yes")
         # Override params works.
-        self.assertEqual(self._test_qs("page=10", page=3), "?page=3")
+        self.assertEqual(self._test_qs("page=10", "page", 3), "?page=3&active=yes")
         # Preserve other params.
-        self.assertEqual(self._test_qs("page=10&active=yes", page=3), "?page=3&active=yes")
-        self.assertEqual(self._test_qs("priority=1"), "?priority=1")
-        self.assertEqual(self._test_qs("level=10"), "?level=10")
+        self.assertEqual(self._test_qs("page=10&active=yes", "page", 3), "?page=3&active=yes")
+        self.assertEqual(self._test_qs("priority=1", None, None), "?active=yes&priority=1")
+        self.assertEqual(self._test_qs("level=10", None, None), "?active=yes&level=10")
         # No is False and then converted back to no.
-        self.assertEqual(self._test_qs("active=no"), "?active=no")
+        self.assertEqual(self._test_qs("active=no", None, None), "?active=no")
+        self.assertEqual(self._test_qs("active=all", None, None), "?")
         # Something that converts to None is ignored
-        self.assertEqual(self._test_qs("page=10&active=whatever"), "?page=10")
+        self.assertEqual(self._test_qs("page=10&active=whatever", None, None), "?page=10")
 
 
 class TestFormat(TestCase):
