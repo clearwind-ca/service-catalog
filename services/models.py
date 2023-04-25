@@ -81,7 +81,15 @@ class Source(models.Model):
     containing the file.
     """
 
+<<<<<<< Updated upstream
     url = models.CharField(max_length=100)
+=======
+    url = models.CharField(
+        max_length=100,
+        verbose_name="Repository URL",
+        help_text="The URL to the repository on GitHub that contains the service catalog files.",
+    )
+>>>>>>> Stashed changes
     slug = models.SlugField(max_length=100, unique=True)
 
     created = models.DateTimeField(auto_now_add=True)
