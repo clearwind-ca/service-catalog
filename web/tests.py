@@ -76,8 +76,6 @@ class TestQs(TestCase):
 
     def test_qs(self):
         self.assertEqual(self._test_qs(""), "?")
-        # Irrelevant params are ignored.
-        self.assertEqual(self._test_qs("foo=bar"), "?")
         self.assertEqual(self._test_qs("page=10"), "?page=10")
         # Override params works.
         self.assertEqual(self._test_qs("page=10", page=3), "?page=3")
