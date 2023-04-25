@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="//unpkg.com/swagger-ui-dist@3/swagger-ui.css" />
+{% endblock %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item active" aria-current="page">API Documentation</li>
+{% endblock %}
+{% block content %}
+
+<h2>API Documentation</h2>
+<p>Each user will need to <a href="{% url 'web:api' %}">create a token for the API</a>. The <a href="{% url 'api-schema' %}">schema is available</a>.</p>
+<div id="swagger-ui"></div>
+<script src="//unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js"></script>
+<script>
+const ui = SwaggerUIBundle({
+    url: "{% url schema_url %}",
+    dom_id: '#swagger-ui',
+    presets: [
+        SwaggerUIBundle.presets.apis,
+        SwaggerUIBundle.SwaggerUIStandalonePreset
+    ],
+    layout: "BaseLayout",
+    requestInterceptor: (request) => {
+        request.headers['X-CSRFToken'] = "{{ csrf_token }}"
+        return request;
+    }
+    })
+</script>
+
+{% endblock %}
