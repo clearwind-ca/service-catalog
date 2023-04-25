@@ -1,3 +1,4 @@
+from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -44,7 +45,8 @@ def checks_add(request):
 @login_required
 def checks_detail(request, slug):
     check = Check.objects.get(slug=slug)
-    return render(request, "checks-detail.html", {"check": check})
+    log = LogEntry.objects.get_for_object(check).order_by("-timestamp").first()
+    return render(request, "checks-detail.html", {"check": check, "log": log})
 
 
 @login_required

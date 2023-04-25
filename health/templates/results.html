@@ -14,7 +14,7 @@
             <ul class="dropdown-menu">
                 {% for choice, display in choices.result %}
                     <li>
-                        <a class="dropdown-item {% if choice == request.GET.result %}active{% endif %}" href="{% qs request result=choice %}">{{ display }} only</a>
+                        <a class="dropdown-item {% if choice == request.GET.result %}active{% endif %}" href="{% qs request result=choice %}">{{ display }}</a>
                     </li>
                 {% endfor %}
                 <li>
@@ -29,7 +29,7 @@
             <ul class="dropdown-menu">
                 {% for choice, display in choices.status %}
                     <li>
-                        <a class="dropdown-item {% if choice == request.GET.status %}active{% endif %}" href="{% qs request status=choice %}">{{ display }} only</a>
+                        <a class="dropdown-item {% if choice == request.GET.status %}active{% endif %}" href="{% qs request status=choice %}">{{ display }}</a>
                     </li>
                 {% endfor %}
                 <li>

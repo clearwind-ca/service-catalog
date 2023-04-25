@@ -1,12 +1,14 @@
 import json
 from itertools import chain
 
+from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import CharField, Value
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
@@ -77,7 +79,7 @@ def service_detail(request, slug):
             )
         ),
         "checks": service.latest_results(),
-        "logs": service.logs().order_by("-timestamp").first(),
+        "log": LogEntry.objects.get_for_object(service).order_by("-timestamp").first(),
     }
     return render(request, "service-detail.html", context)
 
@@ -105,7 +107,7 @@ def source_detail(request, slug):
     context = {
         "services": source.services.all(),
         "source": source,
-        "logs": source.logs().order_by("-timestamp").first(),
+        "log": LogEntry.objects.get_for_object(source).order_by("-timestamp").first(),
     }
     return render(request, "source-detail.html", context)
 
@@ -149,6 +151,8 @@ def refresh_results(results, source, request):
         form.source = source
         if form.is_valid():
             form.save()
+            source.updated = timezone.now()
+            source.save()
             add_info(request, f"Refreshed `{source.slug}` successfully.")
         else:
             add_error(request, f"Refresh error on `{source.slug}`: {form.nice_errors()}.")

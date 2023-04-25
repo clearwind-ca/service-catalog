@@ -102,7 +102,7 @@ def qs(request, **overrides):
         return v
 
     qs = {}
-    for k in default_query_params.keys():
+    for k in request.GET.keys():
         v = request.GET.get(k)
         if v is not None:
             qs[k] = convert(v)
