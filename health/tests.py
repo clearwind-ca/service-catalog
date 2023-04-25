@@ -179,6 +179,39 @@ class TestSend(WithHealthCheck):
             self.assertEqual(result.result, "unknown")
 
 
+class TestSendFrequency(WithHealthCheck):
+    def test_send_if_not_run(self):
+        """Test that it will send if not run"""
+        assert send.should_run(self.health_check, self.service)
+
+    def test_send_if_daily(self):
+        """Test that it will send if daily"""
+        self.health_check.frequency = "daily"
+        result = CheckResult.objects.create(health_check=self.health_check, service=self.service)
+        assert not send.should_run(self.health_check, self.service)
+        CheckResult.objects.update(created=timezone.now() - timedelta(days=1))
+        assert send.should_run(self.health_check, self.service)
+
+    def test_send_if_hourly(self):
+        """Test that it will send if hourly"""
+        self.health_check.frequency = "hourly"
+        result = CheckResult.objects.create(health_check=self.health_check, service=self.service)
+        assert not send.should_run(self.health_check, self.service)
+        CheckResult.objects.update(created=timezone.now() - timedelta(seconds=30 * 60))
+        assert not send.should_run(self.health_check, self.service)
+
+        CheckResult.objects.update(created=timezone.now() - timedelta(seconds=60 * 60 + 1))
+        assert send.should_run(self.health_check, self.service)
+
+    def test_send_if_weekly(self):
+        """Test that it will send if weekly"""
+        self.health_check.frequency = "weekly"
+        result = CheckResult.objects.create(health_check=self.health_check, service=self.service)
+        assert not send.should_run(self.health_check, self.service)
+        CheckResult.objects.update(created=timezone.now() - timedelta(days=7))
+        assert send.should_run(self.health_check, self.service)
+
+
 class TestResultModel(WithHealthCheck):
     def test_health_result_logic(self):
         result = create_health_check_result(self.health_check, self.service)

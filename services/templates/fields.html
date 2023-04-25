@@ -1,8 +1,8 @@
 {% load helpers %}
     {% for key, value in items.items %}
         <div class="row mb-2">
-            <div class="col-2">{{ key|strip }}</div>
-            <div class="col-10">{% apply value key %}</div>
+            <div class="col-sm-2">{{ key|strip }}</div>
+            <div class="col-sm-10">{% apply value key %}</div>
         </div>
     {% endfor %}
 </table>

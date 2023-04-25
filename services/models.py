@@ -88,7 +88,7 @@ class Source(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     def logs(self):
-        return SystemLog.objects.filter(content_type__model="source", object_id=self.id)
+        return LogEntry.objects.get_for_object(self)
 
     def __str__(self):
         return self.slug
