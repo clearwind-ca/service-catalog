@@ -1,3 +1,6 @@
+from auditlog.models import LogEntry
+
+
 def attempt_int(value):
     try:
         return int(value)
@@ -18,20 +21,12 @@ def attempt_yesno(value):
     }.get(value)
 
 
-default_query_params = {
-    "per_page": 10,
-    "page": 1,
-    "active": None,
-    "level": None,
-    "source": None,
-    "slug": None,
-    "target": None,
-    "priority": None,
-    "result": None,
-    "status": None,
-    "service": None,
-    "check": None,
-}
+def attempt_choices(value):
+    choices = dict([(v, k) for k, v in LogEntry.Action.choices])
+    return choices.get(value, None)
+
+
+default_query_params = {"per_page": 10, "page": 1}
 
 
 def process_query_params(func):
@@ -45,9 +40,11 @@ def process_query_params(func):
         parsed["active"] = attempt_yesno(request.GET.get("active"))
         parsed["level"] = attempt_int(request.GET.get("level"))
         parsed["priority"] = attempt_int(request.GET.get("priority"))
-        for key in ("source", "slug", "target", "result", "status", "service", "check"):
-            if request.GET.get(key):
-                parsed[key] = request.GET[key]
+        parsed["action"] = attempt_choices(request.GET.get("action"))
+        for key in request.GET.keys():
+            if key in parsed.keys():
+                continue
+            parsed[key] = request.GET[key]
 
         if request.GET.get("per_page"):
             try:

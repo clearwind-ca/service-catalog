@@ -7,6 +7,39 @@
 {% load humanize %}
 {% block content %}
 <div>
+    <div class="btn-group" role="group">
+        <div class="btn-group " role="group">
+            <button type="button" class="btn btn-outline-secondary dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="#">
+                {% octicon "filters" %} Action
+            </button>
+            <ul class="dropdown-menu">
+                {% for action in actions %}
+                <li>
+                    <a class="dropdown-item {% if action == request.GET.action %}active{% endif %}" href="{% qs request action=action %}">{{ action|capfirst }}</a>
+                </li>
+                {% endfor %}
+                <li>
+                    <a class="dropdown-item" href="{% qs request active=None %}">All</a>
+                </li>
+            </ul>
+        </div>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-secondary dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="#">
+                Type
+            </button>
+            <ul class="dropdown-menu">
+                {% for type in types %}
+                <li>
+                    <a class="dropdown-item {% if type == request.GET.item %}active{% endif %}" href="{% qs request type=type %}">{{ type|capfirst }}</a>
+                </li>
+                {% endfor %}
+                <li>
+                    <a class="dropdown-item" href="{% qs request priority=None %}">All</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
     {% if filters %}
         <p class="form-text">Filtered by: {% for k, v in filters.items %}<code>{{ k }}: {{ v }}</code>{% if not forloop.last %} and {% endif %}{% endfor %}.
             &bull; <a href="{% url 'logs:log-list' %}">Reset</a>
@@ -18,7 +51,7 @@
             <thead>
                 <tr>
                     <th>Action</th>
-                    <th>Item</th>
+                    <th>Type</th>
                     <th></th>
                     <th>{% octicon "past" %} Created</th>
                     <th>{% octicon "person" %} Who</th>

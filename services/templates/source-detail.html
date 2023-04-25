@@ -46,12 +46,11 @@
 
             <div class="pb-3">
                 <h6 class="text-muted border-bottom">Logs</h6>
-                {% if logs %}
-                    {{ logs.message|markdown }} 
-                    <p>{% octicon "clock" %} {% include "since.html" with since=logs.created %}</p>
-                    <p><a href="{% url 'logs:log-list' %}?slug={{ service.slug }}&target=service">View more</a></p>
+                {% if log %}
+                    <p>{{ log.get_action_display|capfirst }} {% include "since.html" with since=log.timestamp %}</p>
+                    <p><a href="{% url 'logs:log-list' %}?slug={{ source.slug }}&type=source">View more</a></p>
                 {% else %}
-                    <p>{% octicon "deny" %} No logs found for this service.</p>
+                    <p>{% octicon "deny" %} No logs found for this source.</p>
                 {% endif %}
             </div>
 

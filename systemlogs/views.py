@@ -14,8 +14,9 @@ from .serializers import LogEntrySerializer
 model_map = {
     "service": "services",
     "source": "services",
-    "event": "events",
-    "health": "health",
+    # "event": "events",
+    "check": "health",
+    "check result": "health",
 }
 
 
@@ -24,20 +25,23 @@ model_map = {
 def log_list(request):
     get = request.GET
     filters, display_filters = {}, {}
-    for param, lookup in (("level", "level"),):
-        if get.get(param) is not None:
-            filters[lookup] = get[param]
 
-    if get.get("target") and get.get("slug"):
-        target = get["target"]
-        _model = apps.get_model(model_name=target, app_label=model_map.get(target))
-        _object = _model.objects.get(slug=get["slug"])
+    if get.get("action") is not None:
+        filters["action"] = get["action"]
+        display_filters["action"] = dict(LogEntry.Action.choices).get(get["action"])
 
+    if get.get("type"):
+        target = get["type"]
+        _model_name = model_map.get(target)
+        assert _model_name
+        _model = apps.get_model(model_name=target.replace(" ", ""), app_label=_model_name)
         filters["content_type__pk"] = ContentType.objects.get_for_model(_model).pk
-        filters["object_id"] = _object.pk
-
-        display_filters["target"] = _object.slug
         display_filters["type"] = target.lower()
+
+    if get.get("slug"):
+        _object = _model.objects.get(slug=get["slug"])
+        filters["object_id"] = _object.pk
+        display_filters["target"] = _object.slug
 
     sources = LogEntry.objects.filter(**filters).order_by("-timestamp")
     paginator = Paginator(sources, per_page=get["per_page"])
@@ -47,7 +51,8 @@ def log_list(request):
     context = {
         "logs": page_obj,
         "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
-        "levels": constants.DEFAULT_LEVELS.values,
+        "actions": ["create", "update", "delete"],
+        "types": sorted(model_map.keys()),
         "filters": display_filters,
     }
     return render(request, "log-list.html", context)
