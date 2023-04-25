@@ -1,5 +1,5 @@
 from django.shortcuts import render
 
 
-def deployments(request):
-    return render(request, "deployments.html")
+def events(request):
+    return render(request, "events.html")

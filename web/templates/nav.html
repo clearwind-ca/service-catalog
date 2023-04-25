@@ -6,11 +6,9 @@
 <li>
     <a class="nav-link {% at_url request 'health:results-list' %}" href="{% url 'health:results-list' %}">{% octicon "check" %} Health</a>
 </li>
-{% if False %}
 <li>
-    <a class="nav-link {% at_url request 'deployments:deployments' %}" href="{% url 'deployments:deployments' %}">{% octicon "graph" %} Deployments</a>
+    <a class="nav-link {% at_url request 'events:events' %}" href="{% url 'events:events' %}">{% octicon "graph" %} Events</a>
 </li>
-{% endif %}
 <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
         {% octicon "settings" %} Settings
