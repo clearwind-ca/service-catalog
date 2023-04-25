@@ -17,17 +17,19 @@
                 <div class="card-body">
                     {% if services %}
                         {% for service in services %}
-                            <div class="row">
-                                <div class="col-4">
+                            <div class="row mb-2">
+                                <div class="col-sm-2">
                                     {% include "priority.html" with priority=service.priority %}
-                                    {% include "active.html" with active=service.active %}
                                 </div>
-                                <div class="col-8">
+                                <div class="col-sm-10">
                                     <a href="{{ service.get_absolute_url }}">{{ service.name }}</a>
+                                    <div class="form-text">
+                                        {{ service.description|markdown }}
+                                    </div>
                                 </div>
                             </div>
-                        </tr>
                         {% endfor %}
+                        <p class="form-text">{% octicon "info" %} Services that have are being created and updated from this source.</p>
                     {% else %}
                         {% include "blankslate.html" with message="No services found for this source." %}
                     {% endif %}
@@ -35,7 +37,7 @@
             </div>
         </div>
 
-        <div class="col-md-4 sidebar"> 
+        <div class="col-md-4 sidebar p-3"> 
             <div class="pb-3">
                 <h6 class="text-muted border-bottom">Info</h6>
                 <p>Slug: <code>{{ source.slug }}</code></p>
@@ -55,8 +57,8 @@
 
             <div>
                 <h6 class="text-muted border-bottom">Admin</h6>
-                <p><a href="{% url 'services:source-refresh' source.slug %}">Refresh from its source</a></p>
-                <p><a href="{% url 'services:source-validate' source.slug %}">Validate from its source</a></p>
+                <p><a href="{% url 'services:source-refresh' source.slug %}">Refresh this source</a></p>
+                <p><a href="{% url 'services:source-validate' source.slug %}">Validate the JSON</a></p>
                 <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete from the catalog</a>
             </div>
         </div>

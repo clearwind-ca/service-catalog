@@ -32,6 +32,11 @@ class Command(BaseCommand):
         ago = options.get("ago", None)
         quiet = options.get("quiet", False)
 
+        if ago is None:
+            raise ValueError(
+                "Ago is required, use `--ago` to set the number of hours to mark as timed out."
+            )
+
         if ago == 0 and not quiet:
             print("Ago is set to 0, so no check results will timeout.")
             sys.exit(1)

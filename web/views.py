@@ -34,7 +34,7 @@ def debug(request):
 
     selected_envs = {
         "CATALOG_ENV": get("CATALOG_ENV"),
-        "DEBUG": get("DEBUG"),
+        "CRON_USER": get("CRON_USER"),
         "DATABASE_URL": truncate("DATABASE_URL"),
         "ALLOWED_HOSTS": get("ALLOWED_HOSTS"),
         "GITHUB_APP_ID": truncate("GITHUB_APP_ID"),
@@ -44,6 +44,9 @@ def debug(request):
     selected_settings = {
         "CATALOG_ENV": settings.CATALOG_ENV,
         "DEBUG": settings.DEBUG,
+        "GITHUB_CHECK_REPOSITORY": settings.GITHUB_CHECK_REPOSITORY,
+        "GITHUB_DEBUG": settings.GITHUB_DEBUG,
+        "SERVICE_SCHEMA": settings.SERVICE_SCHEMA,
     }
     return render(request, "debug.html", {"envs": selected_envs, "settings": selected_settings})
 

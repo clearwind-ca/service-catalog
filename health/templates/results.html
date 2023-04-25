@@ -48,10 +48,10 @@
         <table class="table table-striped my-3">
             <thead>
                 <tr>
-                    <th>Service</th>
-                    <th>Result</th>
-                    <th>Message</th>
                     <th>Check</th>
+                    <th>Result</th>
+                    <th>Service</th>
+                    <th>Message</th>
                     <th>Status</th>
                     <th>{% octicon "past" %} Updated</th>
                 </tr>
@@ -59,8 +59,9 @@
             <tbody>    
                 {% for result in results %}
                     <tr>
-                        <td><a href="{% url 'services:service-detail' result.service.slug %}">{{ result.service }}</a></td>
+                        <td><a href="{% url 'health:checks-detail' result.health_check.slug %}">{{ result.health_check }}</a></td>
                         <td>{% include "pass.html" with result=result %}</td>
+                        <td><a href="{% url 'services:service-detail' result.service.slug %}">{{ result.service }}</a></td>
                         <td>
                             {% if result.message %}
                                 {{ result.message|markdown|safe|truncatechars:50 }}
@@ -76,7 +77,6 @@
                                 <span data-bs-toggle="tooltip" data-bs-title="No details included in this result">{% octicon "deny" %}</span>
                             {% endif %}
                         </td>
-                        <td><a href="{% url 'health:checks-detail' result.health_check.slug %}">{{ result.health_check }}</a></td>
                         <td>{% include "status.html" with status=result %}</td>
                         <td>{% include "since.html" with since=result.updated %}</td>
                     </tr>

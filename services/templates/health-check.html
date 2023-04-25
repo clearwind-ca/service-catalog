@@ -2,11 +2,11 @@
     {% for entry in checks %}
         <div class="row mb-2">
             {% if entry.last %}
-                <div class="col-2">{% include "pass.html" with result=entry.last %}</div>
+                <div class="col-sm-2">{% include "pass.html" with result=entry.last %}</div>
             {% else %}
-                <div class="col-2"><span class="badge text-bg-info">Not run</span></div>
+                <div class="col-sm-2"><span class="badge text-bg-info">Not run</span></div>
             {% endif %}
-            <div class="col-10"><a href="{% url "health:checks-detail" entry.check.slug %}">{{ entry.check.name }}</a></div>
+            <div class="col-sm-10"><a href="{% url "health:checks-detail" entry.check.slug %}">{{ entry.check.name }}</a></div>
         </div>
     {% endfor %}
 </table>
