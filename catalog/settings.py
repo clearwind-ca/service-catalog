@@ -67,7 +67,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "services",
     "health",
-    "deployments",
+    "events",
     "octicons",
     "systemlogs",
     "web",
