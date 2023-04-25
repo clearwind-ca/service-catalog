@@ -21,6 +21,7 @@ def attempt_yesno(value):
         "all": None,
     }.get(value)
 
+
 def attempt_yesno_all(value):
     if value is None:
         return default_query_params["active"]

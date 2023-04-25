@@ -16,10 +16,10 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from catalog.errors import FetchError
+from events.models import Event
 from gh import fetch
 from systemlogs.models import add_error, add_info
 from web.helpers import process_query_params
-from events.models import Event
 
 from .forms import ServiceForm, SourceForm, get_schema
 from .models import Service, Source
@@ -52,7 +52,6 @@ def service_list(request):
         "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
         "active": ["yes", "no"],
     }
-    print(context)
     return render(request, "service-list.html", context)
 
 

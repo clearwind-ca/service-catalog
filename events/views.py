@@ -1,17 +1,20 @@
+from datetime import timedelta
+
+from auditlog.models import LogEntry
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
-from datetime import timedelta
+from services.models import Service
 from systemlogs.models import add_info
 from web.helpers import process_query_params
 
 from .forms import EventForm
 from .models import EVENT_TYPES, Event
-from services.models import Service
-from auditlog.models import LogEntry
+
+
 @login_required
 def events_add(request):
     if request.POST:
@@ -34,6 +37,7 @@ def events_detail(request, slug):
         "log": LogEntry.objects.get_for_object(event).order_by("-timestamp").first(),
     }
     return render(request, "events-detail.html", context)
+
 
 @login_required
 def events_update(request, slug):
