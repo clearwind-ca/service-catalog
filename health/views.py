@@ -21,9 +21,29 @@ from .serializers import CheckResultSerializer, CheckSerializer
 
 
 @login_required
+@process_query_params
 def checks(request):
-    checks = Check.objects.order_by("-created")
-    return render(request, "checks-list.html", {"checks": checks})
+    filters = {}
+    get = request.GET
+    for param, lookup in (
+        ("active", "active"),
+    ):
+        if get.get(param) is not None:
+            filters[lookup] = get[param]
+
+    checks = Check.objects.filter(**filters).order_by("-created")
+
+    paginator = Paginator(checks, per_page=get["per_page"])
+    page_number = get["page"]
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "checks": page_obj,
+        "filters": filters,
+        "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
+        "active": ["yes", "no"],
+    }
+    return render(request, "checks-list.html", context)
 
 
 @login_required
@@ -141,9 +161,10 @@ def results(request):
         "results": page_obj,
         "filters": display_filters,
         "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
-        "choices": {"result": RESULT_CHOICES, "status": STATUS_CHOICES},
+        "result_choices": dict(RESULT_CHOICES).keys(), 
+        "status_choices": dict(STATUS_CHOICES).keys(),
     }
-    return render(request, "results.html", context)
+    return render(request, "results-list.html", context)
 
 
 class CheckViewSet(viewsets.ModelViewSet):

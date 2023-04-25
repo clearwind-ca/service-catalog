@@ -14,7 +14,7 @@ from .serializers import LogEntrySerializer
 model_map = {
     "service": "services",
     "source": "services",
-    # "event": "events",
+    "event": "events",
     "check": "health",
     "check result": "health",
 }

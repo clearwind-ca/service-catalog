@@ -49,7 +49,9 @@ def service_list(request):
         "priorities": sorted([k[0] for k in Service.objects.values_list("priority").distinct()]),
         "filters": filters,
         "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
+        "active": ["yes", "no"],
     }
+    print(context)
     return render(request, "service-list.html", context)
 
 
@@ -153,10 +155,11 @@ def refresh_results(results, source, request):
             form.save()
             source.updated = timezone.now()
             source.save()
-            add_info(request, f"Refreshed `{source.slug}` successfully.")
         else:
             add_error(request, f"Refresh error on `{source.slug}`: {form.nice_errors()}.")
+            break
 
+    add_info(request, f"Refreshed source `{source.slug}` successfully.")
 
 @login_required
 def source_add(request):

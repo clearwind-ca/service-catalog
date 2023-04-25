@@ -1,64 +1,66 @@
-{% extends "base.html" %}
+{% extends "base-two-column.html" %}
 {% load helpers %}
 {% load humanize %}
 {% load octicons %}
+{% load crispy_forms_tags %}
+
 {% block breadcrumbs %}
     <li class="breadcrumb-item"><a href="{% url 'health:checks-list' %}">{% octicon "dashboard" %} Health checks</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{ check.slug }}</li>
 {% endblock %}
-{% block content %}
-{% load crispy_forms_tags %}
-<div>
+
+{% block top %}
     <h3>{{ check.name }}</h3>
     <p>
         {% include "active.html" with active=check.active %}
     </p>
+{% endblock %}
     
-    <div class="row align-items-start">
-        <div class="col-md-8">
-            <p>{{ check.description|markdown }}</p>
-            <dl>
-                <dt>Frequency</dt>
-                <dd>{{ check.get_frequency_display }}
-                    {% if check.frequency == 'ad-hoc' %}
-                        <div class="mt-3">
-                            <a class="btn btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#run-modal">Run this check</a>
-                        </div>
-                    {% endif %}
-                </dd>
-            </dl>
+
+{% block main %}
+    <p>{{ check.description|markdown }}</p>
+    <dl>
+        <dt>Frequency</dt>
+        <dd>{{ check.get_frequency_display }}
+            {% if check.frequency == 'ad-hoc' %}
+                <div class="mt-3">
+                    <a class="btn btn-outline-primary" href="#" data-bs-toggle="modal" data-bs-target="#run-modal">Run this check</a>
+                </div>
+            {% endif %}
+        </dd>
+    </dl>
+{% endblock %}
+
+{% block sidebar %}
+    <div class="pb-3">
+            <h6 class="text-muted border-bottom">Info</h6>
+            <p>Slug: <code>{{ check.slug }}</code></p>
         </div>
 
-        <div class="col-md-4 sidebar p-3"> 
-            <div class="pb-3">
-                <h6 class="text-muted border-bottom">Info</h6>
-                <p>Slug: <code>{{ check.slug }}</code></p>
-            </div>
+        <div class="pb-3">
+            <h6 class="text-muted border-bottom">Results</h6>
+            <p><a href="{% url 'health:results-list' %}{% qs request check=check.slug %}">View results</a></p>
+        </div>
 
-            <div class="pb-3">
-                <h6 class="text-muted border-bottom">Results</h6>
-                <p><a href="{% url 'health:results-list' %}{% qs request check=check.slug %}">View results</a></p>
-            </div>
-
-            <div class="pb-3">
-                <h6 class="text-muted border-bottom">Logs</h6>
-                {% if log %}
-                    <p>{{ log.get_action_display|capfirst }} {% include "since.html" with since=log.timestamp %}</p>
-                    <p><a href="{% url 'logs:log-list' %}?slug={{ check.slug }}&type=check">View more</a></p>
-                {% else %}
-                    <p>{% octicon "deny" %} No logs found for this service.</p>
-                {% endif %}
-            </div>
-            <div class="pb-3">
-                <h6 class="text-muted border-bottom">Admin</h6>
-                <p><a href="#" data-bs-toggle="modal" data-bs-target="#run-modal">Run this check now</a></p>
-                <p><a href="{% url 'health:checks-update' check.slug %}">Edit this check</a></p>
-                <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete this check</a></p>
-            </div>
+        <div class="pb-3">
+            <h6 class="text-muted border-bottom">Logs</h6>
+            {% if log %}
+                <p>{{ log.get_action_display|capfirst }} {% include "since.html" with since=log.timestamp %}</p>
+                <p><a href="{% url 'logs:log-list' %}?slug={{ check.slug }}&type=check">View more</a></p>
+            {% else %}
+                <p>{% octicon "deny" %} No logs found for this service.</p>
+            {% endif %}
+        </div>
+        <div class="pb-3">
+            <h6 class="text-muted border-bottom">Admin</h6>
+            <p><a href="#" data-bs-toggle="modal" data-bs-target="#run-modal">Run this check now</a></p>
+            <p><a href="{% url 'health:checks-update' check.slug %}">Edit this check</a></p>
+            <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete this check</a></p>
         </div>
     </div>
+{% endblock %}
 
-
+{% block modals %}
     <div class="modal " tabindex="-1" id="delete-modal">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -103,5 +105,4 @@
             </div>
         </div>
     </div>
-</div>
 {% endblock %}

@@ -4,6 +4,7 @@ from pathlib import Path
 
 import dj_database_url
 from django.contrib.messages import constants as messages
+from django.forms.widgets import DateInput, TimeInput, DateTimeInput
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -91,6 +92,7 @@ LOGGING = {
 logging.getLogger("github").setLevel(logging.ERROR)
 logging.getLogger("faker").setLevel(logging.ERROR)
 logging.getLogger("gh.fetch").setLevel(logging.ERROR)
+logging.getLogger("markdown").setLevel(logging.ERROR)
 
 LOGIN_URL = "/"
 LOGIN_REDIRECT_URL = "/services/"
@@ -159,3 +161,13 @@ USE_TZ = True
 WSGI_APPLICATION = "catalog.wsgi.application"
 GITHUB_CHECK_REPOSITORY = os.environ.get("GITHUB_CHECK_REPOSITORY", None)
 GITHUB_DEBUG = DEBUG
+
+# Monkeypatch inputs so we get a good HTML date and time picker by default.
+if DateInput.input_type != "date":
+    DateInput.input_type = "date"
+
+if TimeInput.input_type != "time":
+    TimeInput.input_type = "time"
+
+if DateTimeInput.input_type != "datetime-local":
+    DateTimeInput.input_type = "datetime-local"

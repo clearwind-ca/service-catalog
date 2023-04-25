@@ -1,0 +1,29 @@
+{% extends "base-two-column.html" %}
+{% load octicons %}
+{% load crispy_forms_tags %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'events:events-list' %}">{% octicon "graph" %} Events</a></li>
+    <li class="breadcrumb-item">Add Event</li>
+{% endblock %}
+
+{% block top %}
+    <h4>Add an event</h4>
+{% endblock %}
+
+{% block main %}
+    <div class="card mt-3 mb-3">
+        <form method="post" action="{% url 'events:events-add' %}" class="m-3">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-outline-primary">Add event</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block sidebar %}
+    <div class="pb-3">
+        <h6 class="text-muted border-bottom">Info</h6>
+        <p>Events are things that happen in the system that are significant enough to be recorded. They can be used to track changes to the system.
+        </p>
+    </div>
+{% endblock %}

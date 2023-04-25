@@ -6,6 +6,12 @@
 {% endblock %}
 {% block content %}
 <div>
+    <div class="btn-group" role="group">
+        {% include "filters-dropdown.html" with list=active all="all" key="active" in_request=request.GET.key %}
+    </div>
+
+    {% include "filters-text.html" with reset="health:checks-list" %}
+
     {% if checks %}
         <table class="table table-striped my-3">
             <thead>
@@ -29,7 +35,7 @@
                                 {% octicon "hamburger" %}
                              </span>
                              <ul class="dropdown-menu">
-                                 <li><a class="dropdown-item" href="{% url 'health:results-list' %}{% qs request check=check.slug %}">Results</a></li>
+                                 <li><a class="dropdown-item" href="{% url 'health:results-list' %}{% qs request check check.slug %}">Results</a></li>
                                  <li><a class="dropdown-item" href="{% url 'health:checks-update' check.slug %}">Edit</a></li>
                              </ul>
                         </td>
@@ -43,10 +49,10 @@
         </div>
     {% endif %}
 
-    <a href="{% url 'health:checks-add' %}">{% octicon 'plus' %} Add health check</a>
-
     {% if checks %}
         {% include "pagination.html" with objects=Checks %}
     {% endif %}
+
+    <a href="{% url 'health:checks-add' %}">{% octicon 'plus' %} Add health check</a>
 </div>
 {% endblock %}

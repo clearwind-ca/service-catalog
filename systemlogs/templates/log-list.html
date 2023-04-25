@@ -39,12 +39,9 @@
             </ul>
         </div>
     </div>
-
-    {% if filters %}
-        <p class="form-text">Filtered by: {% for k, v in filters.items %}<code>{{ k }}: {{ v }}</code>{% if not forloop.last %} and {% endif %}{% endfor %}.
-            &bull; <a href="{% url 'logs:log-list' %}">Reset</a>
-        </p>
-    {% endif %}
+    
+    
+    {% include "filters-text.html" with reset="logs:log-list" %}
 
     {% if logs %}
         <table class="table table-striped my-3">
