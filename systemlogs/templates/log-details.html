@@ -23,7 +23,7 @@
                         <dd>{{ log.content_type.name|capfirst }}</dd>
                         <dt>Representation</dt>
                         <dd><code>{{ log.object_repr }}</code>
-                            <p class="form-text">For most this is also the slug for the item.</p>
+                            <p class="form-text">Usually this is also the slug for the item.</p>
                         </dd>
                         <dt>Timestamp</dt>
                         <dd>{{ log.timestamp }} &bull; {% include "since.html" with since=log.timestamp %}</dd>

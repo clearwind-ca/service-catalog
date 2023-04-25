@@ -47,6 +47,17 @@
             <p class="form-text pt-3">{% octicon "info" %} Limited to the <i>latest</i> health checks. <a href="{% url 'health:results-list' %}?service={{ service.slug }}">View all health checks</a>.</p>
         </div>
     </div>
+
+    <div class="card mt-3 mb-3">
+        <div class="card-header fw-bold">Upcoming Events</div>
+        <div class="card-body">
+            {% include "events.html" with service=service %}
+            <p class="form-text pt-3">{% octicon "info" %} Showing just the <i>upcoming</i> planned events. 
+                <a href="{% url 'events:events-list' %}?service={{ service.slug }}">View all upcoming events</a> &bull;
+                <a href="{% url 'events:events-list' %}?service={{ service.slug }}&when=past">View all past events</a>
+            </p>
+        </div>
+    </div>
 {% endblock %}
 
 {% block sidebar %}

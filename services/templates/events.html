@@ -1,0 +1,8 @@
+{% load helpers %}
+    {% for event in events %}
+        <div class="row mb-2">
+            <div class="col-sm-3">{{ event.start }}</div>
+            <div class="col-sm-9"><a href="{% url 'events:events-detail' event.slug %}">{{ event.name }}</a></div>
+        </div>
+    {% endfor %}
+</table>

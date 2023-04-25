@@ -16,20 +16,7 @@
         <div class="card-header fw-bold">Services</div>
         <div class="card-body">
             {% if services %}
-                {% for service in services %}
-                    <div class="row mb-2">
-                        <div class="col-sm-2">
-                            {% include "priority.html" with priority=service.priority %}
-                            {% include "active.html" with active=service.active show_inactive_only=True %}
-                        </div>
-                        <div class="col-sm-10">
-                            <a href="{{ service.get_absolute_url }}">{{ service.name }}</a>
-                            <div class="form-text">
-                                {{ service.description|markdown }}
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
+                {% include "services.html" with services=services %}
                 <p class="form-text">{% octicon "info" %} Services that have are being created and updated from this source.</p>
             {% else %}
                 {% include "blankslate.html" with message="No services found for this source." %}

@@ -1,0 +1,15 @@
+{% load helpers %}
+{% for service in services %}
+<div class="row mb-2">
+    <div class="col-sm-2">
+        {% include "priority.html" with priority=service.priority %}
+        {% include "active.html" with active=service.active show_inactive_only=True %}
+    </div>
+    <div class="col-sm-10">
+        <a href="{{ service.get_absolute_url }}">{{ service.name }}</a>
+        <div class="form-text">
+            {{ service.description|markdown }}
+        </div>
+    </div>
+</div>
+{% endfor %}

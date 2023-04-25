@@ -19,6 +19,7 @@ from catalog.errors import FetchError
 from gh import fetch
 from systemlogs.models import add_error, add_info
 from web.helpers import process_query_params
+from events.models import Event
 
 from .forms import ServiceForm, SourceForm, get_schema
 from .models import Service, Source
@@ -82,6 +83,7 @@ def service_detail(request, slug):
         ),
         "checks": service.latest_results(),
         "log": LogEntry.objects.get_for_object(service).order_by("-timestamp").first(),
+        "events": Event.objects.filter(services__in=[service]).order_by("start")[:3],
     }
     return render(request, "service-detail.html", context)
 
@@ -160,6 +162,7 @@ def refresh_results(results, source, request):
             break
 
     add_info(request, f"Refreshed source `{source.slug}` successfully.")
+
 
 @login_required
 def source_add(request):

@@ -95,6 +95,7 @@ def qs(request, override_key, override_value):
     the `process_query_params` decorator applied to it. Because that
     decorator will format all these query params the right way.
     """
+
     def convert(v):
         if isinstance(v, bool) and v in [True, False]:
             return "yes" if v else "no"

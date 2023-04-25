@@ -25,9 +25,7 @@ from .serializers import CheckResultSerializer, CheckSerializer
 def checks(request):
     filters = {}
     get = request.GET
-    for param, lookup in (
-        ("active", "active"),
-    ):
+    for param, lookup in (("active", "active"),):
         if get.get(param) is not None:
             filters[lookup] = get[param]
 
@@ -161,7 +159,7 @@ def results(request):
         "results": page_obj,
         "filters": display_filters,
         "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
-        "result_choices": dict(RESULT_CHOICES).keys(), 
+        "result_choices": dict(RESULT_CHOICES).keys(),
         "status_choices": dict(STATUS_CHOICES).keys(),
     }
     return render(request, "results-list.html", context)

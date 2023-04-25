@@ -1,0 +1,75 @@
+{% extends "base-two-column.html" %}
+{% load octicons %}
+{% load crispy_forms_tags %}
+{% load helpers %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'events:events-list' %}">{% octicon "graph" %} Events</a></li>
+    <li class="breadcrumb-item">Event</li>
+{% endblock %}
+
+{% block top %}
+    <h4>Event: {{ event.slug }}</h4>
+    {% include "active.html" with active=event.active %}
+    {% include "customers.html" with affects=event.customers %}
+    {{ event.description|markdown }}
+{% endblock %}
+
+{% block main %}
+<dl>
+    <dt>When</dt>
+    {% if event.start and event.end %}
+    <dd>{{ event.start }} to {{ event.end }}</dd>
+    {% else %}
+    <dd>{{ event.start }}</dd>
+    {% endif %}
+</dl>
+
+<div class="card mt-3 mb-3">
+    <div class="card-header fw-bold">Services</div>
+    <div class="card-body">
+        {% with services=event.services.all %}
+        {% if services %}
+            {% include "services.html" with services=services %}
+            <p class="form-text">{% octicon "info" %} Services affected by this event.</p>
+        {% else %}
+            {% include "blankslate.html" with message="No services affected." %}
+        {% endif %}
+        {% endwith %}
+    </div>
+</div>
+
+<dl>
+    <dt>Affects customers</dt>
+    <dd>{{ event.customers|yesno|capfirst }}</dd>
+    <dt>Type</dt>
+    <dd>{{ event.type|capfirst }}</dd>
+    <dt>External Source</dt>
+    <dd>{{ event.external_source }}</dd>
+    <dt>External ID</dt>
+    <dd>{{ event.external_id }}</dd>
+    <dt>External URL</dt>
+    <dd>{{ event.external_url|urlize }}</dd>
+</dl>
+{% endblock %}
+
+{% block sidebar %}
+<div class="pb-3">
+    <h6 class="text-muted border-bottom">Info</h6>
+    <p>Slug: <code>{{ event.slug }}</code></p>
+</div>
+
+<div class="pb-3">
+    <h6 class="text-muted border-bottom">Logs</h6>
+    {% if log %}
+        <p>{{ log.get_action_display|capfirst }} {% include "since.html" with since=log.timestamp %}</p>
+        <p><a href="{% url 'logs:log-list' %}?slug={{ source.slug }}&type=source">View more</a></p>
+    {% else %}
+        <p>{% octicon "deny" %} No logs found for this event.</p>
+    {% endif %}
+</div>
+
+<div>
+    <h6 class="text-muted border-bottom">Admin</h6>
+    <p><a href="{% url 'events:events-update' event.slug %}">Update this event</a></p>
+</div>
+{% endblock %}

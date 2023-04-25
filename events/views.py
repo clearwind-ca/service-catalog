@@ -1,15 +1,17 @@
-from django.core.paginator import Paginator
-from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse
-from web.helpers import process_query_params
-from .models import Event, EVENT_TYPES
-from .forms import EventForm
-from systemlogs.models import add_info
 from django.utils import timezone
 
+from datetime import timedelta
+from systemlogs.models import add_info
+from web.helpers import process_query_params
+
+from .forms import EventForm
+from .models import EVENT_TYPES, Event
+from services.models import Service
+from auditlog.models import LogEntry
 @login_required
 def events_add(request):
     if request.POST:
@@ -23,9 +25,19 @@ def events_add(request):
 
     return render(request, "events-add.html", {"form": form})
 
+
+@login_required
+def events_detail(request, slug):
+    event = get_object_or_404(Event, slug=slug)
+    context = {
+        "event": event,
+        "log": LogEntry.objects.get_for_object(event).order_by("-timestamp").first(),
+    }
+    return render(request, "events-detail.html", context)
+
 @login_required
 def events_update(request, slug):
-    event = Event.objects.get(slug=slug)
+    event = get_object_or_404(Event, slug=slug)
     if request.POST:
         form = EventForm(request.POST, instance=event)
         if form.is_valid():
@@ -37,10 +49,6 @@ def events_update(request, slug):
 
     return render(request, "events-update.html", {"form": form, "event": event})
 
-@login_required
-def events_details(request, slug):
-    return render(request, "events-details.html")
-
 
 @login_required
 @process_query_params
@@ -50,6 +58,7 @@ def events_list(request):
     for param, lookup in (
         ("active", "active"),
         ("type", "type"),
+        ("customers", "customers"),
     ):
         if get.get(param) is not None:
             filters[lookup] = get[param]
@@ -61,6 +70,15 @@ def events_list(request):
     elif get.get("when") == "future":
         filters["start__gte"] = timezone.now()
         display_filters["when"] = "future"
+    elif get.get("when") == "soon":
+        filters["start__gte"] = timezone.now()
+        filters["start__lte"] = timezone.now() + timedelta(days=2)
+        display_filters["when"] = "soon"
+
+    if get.get("service"):
+        service = get_object_or_404(Service, slug=get["service"])
+        filters["services__in"] = [service]
+        display_filters["service"] = get["service"]
 
     results = Event.objects.filter(**filters).order_by("-start")
 
@@ -73,7 +91,8 @@ def events_list(request):
         "filters": display_filters,
         "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
         "types": sorted(dict(EVENT_TYPES).keys()),
-        "when": ["future", "past"],
-        "active": ["yes", "no"]
+        "when": ["future", "soon", "past"],
+        "active": ["yes", "no"],
+        "customers": ["yes", "no"],
     }
     return render(request, "events-list.html", context)
