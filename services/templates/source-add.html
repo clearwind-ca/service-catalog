@@ -5,6 +5,7 @@
     <li class="breadcrumb-item">Add</li>
 {% endblock %}
 {% load helpers %}
+{% load crispy_forms_tags %}
 {% block content %}
 
 <h4>Add a source</h4>
@@ -16,9 +17,7 @@
     <form method="post" action="{% url 'services:source-add' %}" class="m-3">
         {% csrf_token %}
         <div class="mb-3">
-            <label for="source" class="form-label">Source</label>
-            <input name="url" class="form-control" placeholder="https://github.com/user/repository" value="{{ request.POST.url }}">
-            <div class="form-text">The repository containing your catalog entry. For GitHub this is the URL to the repository</code>.</div>
+            {{ form|crispy }}
         </div>
         <button type="submit" class="btn btn-outline-primary">Add source</button>
     </form>

@@ -157,7 +157,11 @@ def refresh_results(results, source, request):
 @login_required
 def source_add(request):
     if request.method == "GET":
-        return render(request, "source-add.html", context={"file_paths": fetch.file_paths})
+        return render(request, "source-add.html", context={
+            "file_paths": fetch.file_paths,
+            "form": SourceForm()
+            }
+        )
     else:
         form = SourceForm(request.POST)
         if form.is_valid():
