@@ -1,39 +1,58 @@
 {% extends "base.html" %}
-{% block content %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item active" aria-current="page">API Token</li>
+{% endblock %}
 {% load octicons %}
 {% load helpers %}
-<h2>Rest API</h2>
-<p>Each user with the Catalog can generate a Token for the API. For information on how to use the API, please see <a href="https://github.com/clearwind-ca/service-catalog/blob/main/docs/api.md">the documentation</a>.</p>
+{% block content %}
+<h2>API Token</h2>
+<p>Each user with the Catalog can generate a Token for the API. For information on how to use the API, please see <a href="{% url 'api-docs-ui' %}">the local API endpoints</a>.</p>
 <p>An example of using the API with <code>curl</code> to view system logs:
 <pre>
     curl {{ request.scheme }}://{{ request.get_host }}{% url "logs:api-list" %} -H "Authentication: Token: YOUR_TOKEN_HERE"
 </pre>
 </p>
-<hr>
-{% if not token %}
-    <form method="post" action="{% url 'web:api-create' %}">
-        {% csrf_token %}
-        <p class="mb-3">
-            Create a token for use with the API.
-        </p>
-        <input type="hidden" name="action" value="create">
-        <button type="submit" class="btn btn-outline-primary">Create API Token</button>
-    </form>
-{% else %}
-    <dl>
-        <dt>Token created:</dt>
-        <dd>{% include "since.html" with since=token.created %}</dd>
-        <dt>Token:</dt>
-        <dd><code>{{ token|truncatechars:4 }}**************</code></dd>
-    </dl>
-    <hr>
-    <form method="post" action="{% url 'web:api-delete' %}">
-        {% csrf_token %}
-        <p class="mb-3">
-            This will delete the token from the Service Catalog server. You can recreate a new token for use in the catalog if you'd like to.
-        </p>
-        <input type="hidden" name="action" value="delete">
-        <button type="submit" class="btn btn-danger">Delete this API Token</button>
-    </form>
-{% endif %}
+
+<div class="card mt-3 mb-3">
+    <div class="card-header fw-bold">Token</div>
+    <div class="card-body">
+        {% if not token %}
+            <p>No token found.</p>
+            <form method="post" action="{% url 'web:api-create' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create">
+                <button type="submit" class="btn btn-outline-primary">Create API Token</button>
+            </form>
+        {% else %}
+            <dl>
+                <dt>Token created:</dt>
+                <dd>{% include "since.html" with since=token.created %}</dd>
+                <dt>Token:</dt>
+                <dd><code>{{ token|truncatechars:4 }}**************</code></dd>
+            </dl>
+            <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete from the catalog</a>
+
+            <div class="modal " tabindex="-1" id="delete-modal">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Delete Token</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            This will delete the token from the Service Catalog server. Any future requests made using the token will fail.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <form method="post" action="{% url 'web:api-delete' %}">
+                                {% csrf_token %}
+                                <input type="submit" class="btn btn-danger" value="Delete" />
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

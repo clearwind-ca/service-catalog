@@ -208,3 +208,49 @@ class TestTimeout(WithHealthCheck):
         # This times out things older than 11 hours, our check result.
         self.command(quiet=True, ago=11)
         self.assertEquals(CheckResult.objects.filter(status="timed-out").count(), 1)
+
+
+class TestAdHoc(WithHealthCheck):
+    def setUp(self):
+        super().setUp()
+        self.url = reverse("health:checks-run", args=[self.health_check.slug])
+
+    def test_get(self):
+        """Test the view fails if a GET"""
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 405)
+
+    @patch("health.views.send")
+    def test_post(self, mock_send):
+        """Test the view works if a POST"""
+        mock_send.dispatch.return_value = True
+        self.client.force_login(self.user)
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(CheckResult.objects.filter(status="sent").count(), 1)
+
+    @patch("health.views.send")
+    def test_post(self, mock_send):
+        """Test the view works if a POST"""
+        mock_send.dispatch.side_effect = NoRepository("Nope")
+        self.client.force_login(self.user)
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(CheckResult.objects.filter(status="error").count(), 1)
+
+    @patch("health.views.send")
+    def test_api_post(self, mock_send):
+        """Test the view works if as a POST in the API"""
+        self.url = reverse("health:api-checks-run", args=[self.health_check.pk])
+        self.api_login()
+        response = self.api_client.post(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(CheckResult.objects.filter(status="sent").count(), 1)
+
+    @patch("health.views.send")
+    def test_api_post(self, mock_send):
+        """Test the view fails if as an anonymous POST in the API"""
+        self.url = reverse("health:api-checks-run", args=[self.health_check.pk])
+        response = self.api_client.post(self.url)
+        self.assertEqual(response.status_code, 401)
