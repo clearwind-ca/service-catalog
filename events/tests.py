@@ -1,9 +1,10 @@
+from datetime import timedelta
+from urllib.parse import urlencode
+
 from django.urls import reverse
 from django.utils import timezone
 from faker import Faker
-from datetime import timedelta
 
-from urllib.parse import urlencode
 from catalog.helpers.tests import WithUser
 from services.tests import create_service, create_source
 
@@ -117,7 +118,7 @@ class TestEvents(WithUser):
         self.api_login()
         res = self.api_client.delete(url)
         self.assertEqual(res.status_code, 204)
-    
+
     def create_event_at_time(self, seconds, active=True):
         event = self.create_event()
         event.start = timezone.now() + timedelta(seconds=seconds)
@@ -126,8 +127,8 @@ class TestEvents(WithUser):
         return event
 
     def event_in_results(self, res, event):
-        print([e.pk for e in res.context['events'].object_list])
-        return event.pk in [e.pk for e in res.context['events'].object_list]
+        print([e.pk for e in res.context["events"].object_list])
+        return event.pk in [e.pk for e in res.context["events"].object_list]
 
     def get_list(self, params=None):
         url = reverse("events:events-list")
@@ -141,31 +142,31 @@ class TestEvents(WithUser):
     def test_list_filters_recent(self):
         event = self.create_event_at_time(seconds=-600, active=True)
         res = self.get_list()
-        self.assertEqual(res.context['ordering'], 'start')
-        self.assertEqual(res.context['filters']['when'], 'recent')
+        self.assertEqual(res.context["ordering"], "start")
+        self.assertEqual(res.context["filters"]["when"], "recent")
         self.assertTrue(self.event_in_results(res, event))
 
     def test_list_filters_out_active(self):
         event = self.create_event_at_time(seconds=-600, active=False)
         res = self.get_list()
-        self.assertEqual(res.context['ordering'], 'start')
-        self.assertEqual(res.context['filters']['when'], 'recent')
+        self.assertEqual(res.context["ordering"], "start")
+        self.assertEqual(res.context["filters"]["when"], "recent")
         self.assertFalse(self.event_in_results(res, event))
 
     def test_list_filters_future(self):
         past = self.create_event_at_time(seconds=-600, active=True)
         future = self.create_event_at_time(seconds=600, active=True)
-        res = self.get_list(params={'when': 'future'})
-        self.assertEqual(res.context['ordering'], 'start')
-        self.assertEqual(res.context['filters']['when'], 'future')
+        res = self.get_list(params={"when": "future"})
+        self.assertEqual(res.context["ordering"], "start")
+        self.assertEqual(res.context["filters"]["when"], "future")
         self.assertFalse(self.event_in_results(res, past))
         self.assertTrue(self.event_in_results(res, future))
 
     def test_list_filters_past(self):
         past = self.create_event_at_time(seconds=-600, active=True)
         future = self.create_event_at_time(seconds=600, active=True)
-        res = self.get_list(params={'when': 'past'})
-        self.assertEqual(res.context['ordering'], '-start')
-        self.assertEqual(res.context['filters']['when'], 'past')
+        res = self.get_list(params={"when": "past"})
+        self.assertEqual(res.context["ordering"], "-start")
+        self.assertEqual(res.context["filters"]["when"], "past")
         self.assertFalse(self.event_in_results(res, future))
         self.assertTrue(self.event_in_results(res, past))

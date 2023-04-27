@@ -10,7 +10,7 @@ from .templatetags.helpers import (
     priority_as_colour,
     qs,
     strip_format,
-    yesno_if_boolean
+    yesno_if_boolean,
 )
 
 

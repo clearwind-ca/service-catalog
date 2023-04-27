@@ -15,4 +15,3 @@ class ServiceSerializer(serializers.ModelSerializer):
         model = Service
         fields = "__all__"
         read_only_fields = ["slug", "created", "updated"]
-

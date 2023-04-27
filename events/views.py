@@ -17,6 +17,7 @@ from .forms import EventForm
 from .models import EVENT_TYPES, Event
 from .serializers import EventSerializer
 
+
 @login_required
 def events_add(request):
     if request.POST:
@@ -64,7 +65,7 @@ def events_update(request, pk):
     context = {
         "event": event,
         "log": LogEntry.objects.get_for_object(event).order_by("-timestamp").first(),
-        "form": form
+        "form": form,
     }
     return render(request, "events-update.html", context)
 
@@ -96,7 +97,7 @@ def events_list(request):
         filters["start__gte"] = timezone.now() - timedelta(days=2)
         filters["start__lte"] = timezone.now() + timedelta(days=2)
         display_filters["when"] = "recent"
-    
+
     else:
         display_filters["when"] = "all"
 
@@ -126,6 +127,7 @@ def events_list(request):
         "ordering": ordering,
     }
     return render(request, "events-list.html", context)
+
 
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all().order_by("-created")
