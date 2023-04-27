@@ -1,6 +1,7 @@
 from auditlog.registry import auditlog
 from django.db import models
 from django.template.defaultfilters import slugify
+from datetime import datetime
 
 EVENT_TYPES = (
     ("backup", "Backup"),
@@ -27,7 +28,7 @@ EVENT_TYPES = (
 class Event(models.Model):
     name = models.CharField(max_length=255)
 
-    start = models.DateTimeField()
+    start = models.DateTimeField(default=datetime.now, blank=True)
     # Some events might be a point in time, in which case can be null.
     end = models.DateTimeField(
         blank=True,
