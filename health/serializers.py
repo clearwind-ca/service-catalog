@@ -7,11 +7,11 @@ class CheckSerializer(serializers.ModelSerializer):
     class Meta:
         model = Check
         fields = "__all__"
-        read_only_fields = ["slug"]
+        read_only_fields = ["slug", "created", "updated"]
 
 
 class CheckResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = CheckResult
         fields = "__all__"
-        read_only_fields = ["status"]
+        read_only_fields = ["status", "created", "updated"]

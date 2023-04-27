@@ -1,5 +1,6 @@
+{% load helpers %}
 {% if filters %}
-    <p class="form-text">Filtered by: {% for k, v in filters.items %}<code>{{ k }}: {{ v }}</code>{% if not forloop.last %} and {% endif %}{% endfor %}.
+    <p class="form-text">Filtered by: {% for k, v in filters.items %}<code>{{ k }}: {{ v|yesno_if_boolean }}</code>{% if not forloop.last %} and {% endif %}{% endfor %}.
     &bull; <a href="{% url reset %}">Reset</a></p>
 {% else %}
     {% if not hide_all_message %}

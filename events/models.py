@@ -1,7 +1,8 @@
+from datetime import datetime
+
 from auditlog.registry import auditlog
 from django.db import models
 from django.template.defaultfilters import slugify
-from datetime import datetime
 
 EVENT_TYPES = (
     ("backup", "Backup"),
@@ -28,7 +29,7 @@ EVENT_TYPES = (
 class Event(models.Model):
     name = models.CharField(max_length=255)
 
-    start = models.DateTimeField(default=datetime.now, blank=True)
+    start = models.DateTimeField(default=datetime.now)
     # Some events might be a point in time, in which case can be null.
     end = models.DateTimeField(
         blank=True,
@@ -42,6 +43,14 @@ class Event(models.Model):
     services = models.ManyToManyField(
         "services.Service", blank=True, help_text="The services affected by this event."
     )
+
+    customers = models.BooleanField(
+        default=False,
+        verbose_name="Impacts customers",
+        help_text="Whether this event impacts customers of the service.",
+    )
+
+    active = models.BooleanField(default=True)
 
     # Fields that external things might set.
     external_source = models.CharField(
@@ -65,16 +74,8 @@ class Event(models.Model):
         help_text="Any external URL for this event.",
     )
 
-    customers = models.BooleanField(
-        default=False,
-        verbose_name="Impacts customers",
-        help_text="Whether this event is impacts customers of the service.",
-    )
-
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-
-    active = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.name} - {self.type}"

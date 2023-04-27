@@ -42,7 +42,7 @@ def attempt_choices(value):
     return choices.get(value, None)
 
 
-default_query_params = {"per_page": 10, "page": 1, "active": True, "when": "future"}
+default_query_params = {"per_page": 10, "page": 1, "active": True}
 
 
 def process_query_params(func):
@@ -58,7 +58,6 @@ def process_query_params(func):
         parsed["level"] = attempt_int(request.GET.get("level"))
         parsed["priority"] = attempt_int(request.GET.get("priority"))
         parsed["action"] = attempt_choices(request.GET.get("action"))
-        parsed["when"] = request.GET.get("when", "future")
         for key in request.GET.keys():
             if key in parsed.keys():
                 continue

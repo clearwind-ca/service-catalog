@@ -55,7 +55,7 @@ class Service(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.slug
+        return self.name
 
     def get_absolute_url(self):
         return reverse("services:service-detail", kwargs={"slug": self.slug})

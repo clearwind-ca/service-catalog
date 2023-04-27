@@ -8,13 +8,14 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from rest_framework import permissions, viewsets
 
 from services.models import Service
 from web.helpers import process_query_params
 
 from .forms import EventForm
 from .models import EVENT_TYPES, Event
-
+from .serializers import EventSerializer
 
 @login_required
 def events_add(request):
@@ -46,7 +47,7 @@ def events_delete(request, pk):
     event = get_object_or_404(Event, pk=pk)
     event.delete()
     messages.info(request, f"Event `{event.name}` successfully deleted")
-    return redirect(request, "events-list.html")
+    return redirect(reverse("events:events-list"))
 
 
 @login_required
@@ -57,11 +58,15 @@ def events_update(request, pk):
         if form.is_valid():
             form.save()
             messages.info(request, "Event updated successfully")
-            return redirect(reverse("events:events-list"))
+            return redirect(reverse("events:events-detail", kwargs={"pk": event.pk}))
     else:
         form = EventForm(instance=event)
-
-    return render(request, "events-update.html", {"form": form, "event": event})
+    context = {
+        "event": event,
+        "log": LogEntry.objects.get_for_object(event).order_by("-timestamp").first(),
+        "form": form
+    }
+    return render(request, "events-update.html", context)
 
 
 @login_required
@@ -81,22 +86,28 @@ def events_list(request):
     if get.get("when") == "past":
         filters["start__lt"] = timezone.now()
         display_filters["when"] = "past"
+
     elif get.get("when") == "future":
         filters["start__gte"] = timezone.now()
         display_filters["when"] = "future"
-    elif get.get("when") == "soon":
-        filters["start__gte"] = timezone.now()
+
+    elif get.get("when", None) in [None, "recent"]:
+        # Default to 2 days either side from now
+        filters["start__gte"] = timezone.now() - timedelta(days=2)
         filters["start__lte"] = timezone.now() + timedelta(days=2)
-        display_filters["when"] = "soon"
+        display_filters["when"] = "recent"
+    
+    else:
+        display_filters["when"] = "all"
 
     if get.get("service"):
         service = get_object_or_404(Service, slug=get["service"])
         filters["services__in"] = [service]
         display_filters["service"] = get["service"]
 
-    ordering = "-start"
-    if get.get("when") in ["future", "soon"]:
-        ordering = "start"
+    ordering = "start"
+    if get.get("when") == "past":
+        ordering = "-start"
 
     results = Event.objects.filter(**filters).order_by(ordering)
 
@@ -108,10 +119,15 @@ def events_list(request):
         "events": page_obj,
         "filters": display_filters,
         "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
-        "types": sorted(dict(EVENT_TYPES).keys()),
-        "when": ["future", "soon", "past"],
+        "types": dict(EVENT_TYPES).keys(),
+        "when": ["future", "recent", "past"],
         "active": ["yes", "no"],
         "customers": ["yes", "no"],
-        "ordering": "ordering",
+        "ordering": ordering,
     }
     return render(request, "events-list.html", context)
+
+class EventViewSet(viewsets.ModelViewSet):
+    queryset = Event.objects.all().order_by("-created")
+    serializer_class = EventSerializer
+    permission_classes = [permissions.IsAuthenticated]

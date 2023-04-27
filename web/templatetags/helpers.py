@@ -2,7 +2,6 @@ from urllib.parse import urlencode
 
 import markdown
 from django import template
-from django.contrib.messages import constants
 from django.urls import reverse
 from django.utils.html import urlize
 from django.utils.safestring import mark_safe
@@ -164,3 +163,10 @@ def at_url(request, url):
 @register.filter
 def pretty_json(value):
     return json.dumps(value, indent=4)
+
+
+@register.filter
+def yesno_if_boolean(value):
+    if isinstance(value, bool):
+        return "yes" if value else "no"
+    return value

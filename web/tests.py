@@ -10,6 +10,7 @@ from .templatetags.helpers import (
     priority_as_colour,
     qs,
     strip_format,
+    yesno_if_boolean
 )
 
 
@@ -58,6 +59,14 @@ class TestColour(TestCase):
 class TestMarkdown(TestCase):
     def test_markdown_filter(self):
         self.assertEqual(markdown_filter("# Hello"), "<h1>Hello</h1>")
+
+
+class TestYesNo(TestCase):
+    def test_yesno_filter(self):
+        self.assertEqual(yesno_if_boolean(True), "yes")
+        self.assertEqual(yesno_if_boolean(False), "no")
+        self.assertEqual(yesno_if_boolean(None), None)
+        self.assertEqual(yesno_if_boolean("foo"), "foo")
 
 
 class TestQs(TestCase):

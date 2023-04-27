@@ -4,7 +4,7 @@ from pathlib import Path
 
 import dj_database_url
 from django.contrib.messages import constants as messages
-from django.forms.widgets import DateInput, DateTimeInput, TimeInput
+from django.forms.widgets import DateInput, DateTimeInput, TimeInput, SelectMultiple
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -171,3 +171,11 @@ if TimeInput.input_type != "time":
 
 if DateTimeInput.input_type != "datetime-local":
     DateTimeInput.input_type = "datetime-local"
+
+
+def render_options(self, selected_choices):
+    self.choices = sorted(self.choices)
+    self.choices.sort(key=lambda x: x[1])
+    return super(SelectMultiple, self).render_options(selected_choices)
+
+SelectMultiple.render_options = render_options
