@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load octicons %}
+{% load helpers %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item">{% octicon "graph" %} Events</li>
+{% endblock %}
+{% block content %}
+<div>
+    <div class="btn-group" role="group">
+        {% include "filters-dropdown.html" with list=active all="all" key="active" in_request=request.GET.key %}
+        {% include "filters-dropdown.html" with list=types key="type" in_request=request.GET.key %}
+        {% include "filters-dropdown.html" with list=customers key="customers" in_request=request.GET.key %}
+        {% include "filters-dropdown.html" with list=when key="when" all="all" in_request=request.GET.key %}
+    </div>
+    
+    {% include "filters-text.html" with reset="events:events-list" %}
+
+    {% if events %}
+        <table class="table table-hover my-3">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Start</th>
+                    <th>Customers</th>
+                    <th>Type</th>
+                    <th>{% octicon "past" %} Updated</th>
+                    <th>More</th>
+                </tr>
+            </thead>
+            <tbody>    
+                {% for event in events %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'events:events-detail' event.pk %}">{{ event.name }}</a>
+                            {% include "active.html" with active=event.active show_inactive_only=True %}
+                        </td>
+                        <td>{% include "since.html" with since=event.start %}</td>
+                        <td>{% include "customers.html" with impacts=event.customers %}</td>
+                        <td>{{ event.type|capfirst }}</td>
+                        <td>{% include "since.html" with since=event.updated %}</td>
+                        <td>
+                            <span class="dropdown-toggle" type="button"data-bs-toggle="dropdown" aria-expanded="false">
+                                {% octicon "hamburger" %}
+                             </span>
+                             <ul class="dropdown-menu">
+                                 <li><a class="dropdown-item" href="{% url 'events:events-detail' event.pk %}">Details</a></li>
+                                 <li><a class="dropdown-item" href="{% url 'events:events-update' event.pk %}">Edit</a></li>
+                             </ul>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="blankslate my-3">
+            {% include "blankslate.html" with message="No events." %}
+        </div>
+    {% endif %}
+
+    {% if logs %}
+        {% include "pagination.html" with objects=events %}
+    {% endif %}
+
+    <a href="{% url 'events:events-add' %}">{% octicon 'plus' %} Add event</a>
+</div>
+{% endblock %}

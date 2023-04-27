@@ -1,4 +1,5 @@
 from auditlog.models import LogEntry
+from django.conf import settings
 
 
 def attempt_int(value):
@@ -10,7 +11,7 @@ def attempt_int(value):
 
 def attempt_yesno(value):
     if value is None:
-        return
+        return None
     try:
         value = str(value).lower()
     except (TypeError, ValueError):
@@ -18,6 +19,21 @@ def attempt_yesno(value):
     return {
         "yes": True,
         "no": False,
+        "all": None,
+    }.get(value)
+
+
+def attempt_yesno_all(value):
+    if value is None:
+        return default_query_params["active"]
+    try:
+        value = str(value).lower()
+    except (TypeError, ValueError):
+        pass
+    return {
+        "yes": True,
+        "no": False,
+        "all": None,
     }.get(value)
 
 
@@ -26,7 +42,7 @@ def attempt_choices(value):
     return choices.get(value, None)
 
 
-default_query_params = {"per_page": 10, "page": 1}
+default_query_params = {"per_page": 10, "page": 1, "active": True}
 
 
 def process_query_params(func):
@@ -37,7 +53,8 @@ def process_query_params(func):
     def wrapper(request, *args, **kwargs):
         parsed = default_query_params.copy()
         parsed["page"] = attempt_int(request.GET.get("page", 1)) or 1
-        parsed["active"] = attempt_yesno(request.GET.get("active"))
+        parsed["active"] = attempt_yesno_all(request.GET.get("active"))
+        parsed["customers"] = attempt_yesno(request.GET.get("customers"))
         parsed["level"] = attempt_int(request.GET.get("level"))
         parsed["priority"] = attempt_int(request.GET.get("priority"))
         parsed["action"] = attempt_choices(request.GET.get("action"))
@@ -65,5 +82,8 @@ def site_context(request):
     """
     return {
         # Set to true, and then override in views to False to hide breadcrumbs.
-        "breadcrumbs": True
+        "breadcrumbs": True,
+        "settings": {
+            "timezone": settings.TIME_ZONE,
+        },
     }

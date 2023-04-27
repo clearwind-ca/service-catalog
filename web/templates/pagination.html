@@ -5,7 +5,7 @@
     <nav>
         <ul class="pagination pagination-sm">
                 {% if objects.has_previous %}
-                    <li class="page-item"><a href="{% qs request page=objects.previous_page_number %}" class="page-link">{% octicon "arrow-left" %}</a></li>
+                    <li class="page-item"><a href="{% qs request page objects.previous_page_number %}" class="page-link">{% octicon "arrow-left" %}</a></li>
                 {% else %}
                     <li class="page-item disabled"><span class="page-link">{% octicon "arrow-left" %}</span></li>
                 {% endif %}
@@ -15,13 +15,13 @@
                         {% if page == objects.paginator.ELLIPSIS %}
                             <span class="page-link disabled">...</span>
                         {% else %}
-                            <a href="{% qs request page=page %}" class="page-link {% if page == request.GET.page %}active{% endif %}">{{ page }}</a>
+                            <a href="{% qs request page page %}" class="page-link {% if page == request.GET.page %}active{% endif %}">{{ page }}</a>
                         {% endif %}
                     </li>
                 {% endfor %}
                 
                 {% if objects.has_next %}
-                    <li class="page-item"><a href="{% qs request page=objects.next_page_number %}" class="page-link">{% octicon "arrow-right" %}</a></li>
+                    <li class="page-item"><a href="{% qs request page objects.next_page_number %}" class="page-link">{% octicon "arrow-right" %}</a></li>
                 {% else %}
                     <li class="page-item disabled"><span class="page-link">{% octicon "arrow-right" %}</span></li>
                 {% endif %}

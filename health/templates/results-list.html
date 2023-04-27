@@ -7,45 +7,14 @@
 {% block content %}
 <div>
     <div class="btn-group" role="group">
-        <div class="btn-group " role="group">
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="#">
-                {% octicon "filters" %} Result
-            </button>
-            <ul class="dropdown-menu">
-                {% for choice, display in choices.result %}
-                    <li>
-                        <a class="dropdown-item {% if choice == request.GET.result %}active{% endif %}" href="{% qs request result=choice %}">{{ display }}</a>
-                    </li>
-                {% endfor %}
-                <li>
-                    <a class="dropdown-item" href="{% qs request result=None %}">All</a>
-                </li>
-            </ul>
-        </div>
-        <div class="btn-group " role="group">
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="#">
-                Status
-            </button>
-            <ul class="dropdown-menu">
-                {% for choice, display in choices.status %}
-                    <li>
-                        <a class="dropdown-item {% if choice == request.GET.status %}active{% endif %}" href="{% qs request status=choice %}">{{ display }}</a>
-                    </li>
-                {% endfor %}
-                <li>
-                    <a class="dropdown-item" href="{% qs request status=None %}">All</a>
-                </li>
-            </ul>
-        </div>
+        {% include "filters-dropdown.html" with list=result_choices key="result" in_request=request.GET.key %}
+        {% include "filters-dropdown.html" with list=status_choices key="status" in_request=request.GET.key %}
     </div>
 
-    {% if filters %}
-        <p class="form-text">Filtered by: {% for k, v in filters.items %}<code>{{ k }}: {{ v }}</code>{% if not forloop.last %} and {% endif %}{% endfor %}.
-        &bull; <a href="{% url 'health:results-list' %}">Reset</a></p>
-    {% endif %}
+    {% include "filters-text.html" with reset="health:results-list" hide_all_message=True %}
 
     {% if results %}
-        <table class="table table-striped my-3">
+        <table class="table table-hover my-3">
             <thead>
                 <tr>
                     <th>Check</th>

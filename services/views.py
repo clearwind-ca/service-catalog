@@ -16,8 +16,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from catalog.errors import FetchError
+from events.models import Event
 from gh import fetch
-from systemlogs.models import add_error, add_info
 from web.helpers import process_query_params
 
 from .forms import ServiceForm, SourceForm, get_schema
@@ -49,6 +49,7 @@ def service_list(request):
         "priorities": sorted([k[0] for k in Service.objects.values_list("priority").distinct()]),
         "filters": filters,
         "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
+        "active": ["yes", "no"],
     }
     return render(request, "service-list.html", context)
 
@@ -57,7 +58,7 @@ def service_list(request):
 @require_POST
 def service_delete(request, slug):
     service = get_object_or_404(slug=slug, klass=Service)
-    add_info(request, f"Service `{service.slug}` successfully deleted")
+    messages.info(request, f"Service `{service.slug}` successfully deleted")
     service.delete()
     return redirect("services:service-list")
 
@@ -80,6 +81,7 @@ def service_detail(request, slug):
         ),
         "checks": service.latest_results(),
         "log": LogEntry.objects.get_for_object(service).order_by("-timestamp").first(),
+        "events": Event.objects.filter(services__in=[service]).order_by("start")[:3],
     }
     return render(request, "service-detail.html", context)
 
@@ -120,7 +122,7 @@ def source_refresh(request, slug):
         results = fetch.get(request.user, source)
     except FetchError as error:
         msg = f"Error attempting to refresh: `{source.slug}` via the web. {error.message}"
-        add_error(request, msg)
+        messages.error(request, msg)
         return redirect("services:source-detail", slug=source.slug)
 
     refresh_results(results, source, request)
@@ -134,7 +136,7 @@ def api_source_refresh(request, pk):
         results = fetch.get(request.user, source)
     except FetchError as error:
         msg = f"Error attempting to refresh: `{source.slug}` via the api. {error.message}"
-        add_error(request, msg)
+        messages.error(request, msg)
         return Response({"success": False}, status=status.HTTP_502_BAD_GATEWAY)
 
     refresh_results(results, source, request)
@@ -153,9 +155,11 @@ def refresh_results(results, source, request):
             form.save()
             source.updated = timezone.now()
             source.save()
-            add_info(request, f"Refreshed `{source.slug}` successfully.")
         else:
-            add_error(request, f"Refresh error on `{source.slug}`: {form.nice_errors()}.")
+            messages.error(request, f"Refresh error on `{source.slug}`: {form.nice_errors()}.")
+            break
+
+    messages.info(request, f"Refreshed source `{source.slug}` successfully.")
 
 
 @login_required
@@ -173,12 +177,12 @@ def source_add(request):
             try:
                 results = fetch.get(request.user, source)
             except FetchError as error:
-                add_error(request, error.message)
+                messages.error(request, error.message)
                 return redirect("services:source-list")
 
             refresh_results(results, source, request)
         else:
-            add_error(request, form.nice_errors())
+            messages.error(request, form.nice_errors())
 
         return render(request, "source-add.html")
 
@@ -192,7 +196,7 @@ def source_delete(request, slug):
         messages.add_message(request, messages.ERROR, err)
         return redirect("services:source-list")
 
-    add_info(request, f"Source `{source.slug}` successfully deleted")
+    messages.info(request, f"Source `{source.slug}` successfully deleted")
     source.delete()
     return redirect("services:source-list")
 
@@ -203,17 +207,17 @@ def source_validate(request, slug):
     try:
         results = fetch.get(request.user, source)
     except (FetchError) as error:
-        add_error(request, error.message)
+        messages.error(request, error.message)
         return redirect("services:source-detail", slug=source.slug)
 
     for data in results:
         form = ServiceForm({"data": data["contents"]})
         if not form.is_valid():
             message = f"Validation failed for: `{source.url}`. Error: {form.nice_errors()}."
-            add_error(request, message)
+            messages.error(request, message)
             return redirect("services:source-detail", slug=source.slug)
 
-    add_info(request, f"Source `{source.slug}` successfully validated.")
+    messages.info(request, f"Source `{source.slug}` successfully validated.")
     return redirect("services:source-detail", slug=source.slug)
 
 
@@ -223,7 +227,7 @@ def api_source_validate(request, pk):
     try:
         results = fetch.get(request.user, source)
     except (FetchError) as error:
-        add_error(request, error.message)
+        messages.error(request, error.message)
         return Response({"success": False}, status=status.HTTP_502_BAD_GATEWAY)
 
     response = {"source": SourceSerializer(source).data, "success": False, "failures": []}

@@ -1,0 +1,67 @@
+{% extends "base-two-column.html" %}
+{% load octicons %}
+{% load crispy_forms_tags %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'events:events-list' %}">{% octicon "graph" %} Events</a></li>
+    <li class="breadcrumb-item">Edit Event</li>
+{% endblock %}
+
+
+{% block top %}
+    <h4>Edit this event</h4>
+    {% include "active.html" with active=event.active %}
+    {% include "customers.html" with impacts=event.customers %}
+{% endblock %}
+
+{% block main %}
+    <div class="card mt-3 mb-3">
+        <form method="post" action="{% url 'events:events-update' event.pk %}" class="m-3">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-outline-primary">Edit event</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block modals %}
+    <div class="modal " tabindex="-1" id="delete-modal">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete this event</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>This will delete this event from the catalog. You can also make <i>inactive</i> as well.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <form method="post" action="{% url 'events:events-delete' event.pk %}">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-danger" value="Delete" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block sidebar %}
+    <div class="pb-3">
+        <h6 class="text-muted border-bottom">Info</h6>
+        <p>Primary key: <code>{{ event.pk }}</code></p>
+    </div>
+    <div class="pb-3">
+        <h6 class="text-muted border-bottom">Logs</h6>
+        {% if log %}
+            <p>{{ log.get_action_display|capfirst }} {% include "since.html" with since=log.timestamp %}</p>
+            <p><a href="{% url 'logs:log-list' %}?pk={{ event.pk }}&type=event">View more</a></p>
+        {% else %}
+            <p>{% octicon "deny" %} No logs found for this event.</p>
+        {% endif %}
+    </div>
+    <div class="pb-3">
+        <h6 class="text-muted border-bottom">Admin</h6>
+        <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete this event</a></p>
+    </div>
+{% endblock %}

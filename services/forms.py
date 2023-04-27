@@ -79,9 +79,12 @@ class ServiceForm(forms.Form, BaseForm):
         slug = models.slugify_service(data["name"])
         try:
             service = models.Service.objects.get(slug=slug)
-            for key in ["name", "description", "type", "priority", "meta"]:
+            for key in ["name", "description", "type", "priority", "meta", "active"]:
                 if data.get(key) != getattr(service, key, None):
-                    setattr(service, key, data.get(key))
+                    value = data.get(key)
+                    if key == "active" and not value:
+                        value = True
+                    setattr(service, key, value)
                     updated = True
             if updated:
                 service.save()
@@ -95,6 +98,7 @@ class ServiceForm(forms.Form, BaseForm):
                 priority=data["priority"],
                 meta=data.get("meta"),
                 source=self.source,
+                active=data.get("active", True),
             )
             created = True
             logs.append([f"Created service: `{service}`.", messages.INFO])

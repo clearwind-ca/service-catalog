@@ -7,49 +7,14 @@
 {% block content %}
 <div>
     <div class="btn-group" role="group">
-        <div class="btn-group " role="group">
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="#">
-                {% octicon "filters" %} Activity
-            </button>
-            <ul class="dropdown-menu">
-                <li>
-                    <a class="dropdown-item {% if request.GET.active %}active{% endif %}" href="{% qs request active='yes' %}">Active</a>
-                </li>
-                <li>
-                    <a class="dropdown-item {% if request.GET.active == False %}active{% endif %}" href="{% qs request active='no' %}">Inactive</a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="{% qs request active=None %}">All</a>
-                </li>
-            </ul>
-        </div>
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="#">
-                Priority
-            </button>
-            <ul class="dropdown-menu">
-                {% for priority in priorities %}
-                <li>
-                    <a class="dropdown-item {% if priority == request.GET.priority %}active{% endif %}" href="{% qs request priority=priority %}">Priority {{ priority }}</a>
-                </li>
-                {% endfor %}
-                <li>
-                    <a class="dropdown-item" href="{% qs request priority=None %}">All</a>
-                </li>
-            </ul>
-        </div>
+        {% include "filters-dropdown.html" with list=active all="all" key="active" in_request=request.GET.key %}
+        {% include "filters-dropdown.html" with list=priorities all="all" key="priority" prefix="Priority " in_request=request.GET.key %}
     </div>
 
-    {% if filters %}
-        <p class="form-text">
-            Filtered by: {% for k, v in filters.items %}<code>{{ k }}: {{ v }}</code>{% if not forloop.last %} and {% endif %}{% endfor %} &bull;
-            <a href="{% url 'services:service-list' %}">Reset</a>
-        </p>
-    {% endif %}
-
+    {% include "filters-text.html" with reset="services:service-list" %}
 
     {% if services %}
-        <table class="table table-striped my-3">
+        <table class="table table-hover my-3">
             <thead>
                 <tr>
                     <th>Name</th>

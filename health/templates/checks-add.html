@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base-two-column.html" %}
 {% load octicons %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item"><a href="{% url 'health:checks-list' %}">{% octicon "check" %} Health checks</a></li>
@@ -6,12 +6,10 @@
 {% endblock %}
 {% load helpers %}
 {% load crispy_forms_tags %}
-{% block content %}
-
+{% block top %}
 <h4>Add a health check</h4>
-<p>Health checks are ways to check the overall health of a service that make sense to the organisation. They can be run on a regular basis or when needed. They call a {% octicon "mark-github" %} GitHub repository using GitHub Actions.
-</p>
-<p>The repository called is: <code>{{ repo }}</code>.</p>
+{% endblock %}
+{% block main %}
 <div class="card mt-3 mb-3">
     <form method="post" action="{% url 'health:checks-add' %}" class="m-3">
         {% csrf_token %}
@@ -19,5 +17,14 @@
         <button type="submit" class="btn btn-outline-primary">Add health check</button>
     </form>
 </div>
-
 {% endblock %}
+
+{% block sidebar %}
+<div class="pb-3">
+    <h6 class="text-muted border-bottom">Info</h6>
+    <p>Health checks are ways to check the overall health of a service that make sense to the organisation. They can be run on a regular basis or when needed. They call a GitHub repository using GitHub Actions.
+    </p>
+    <p>The repository called is: <code>{{ repo }}</code>.</p>
+</div>
+{% endblock %}
+

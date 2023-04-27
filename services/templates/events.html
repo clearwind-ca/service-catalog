@@ -1,0 +1,12 @@
+{% load helpers %}
+    {% if events %}
+        {% for event in events %}
+            <div class="row mb-2">
+                <div class="col-sm-2">{% include "customers.html" with impacts=event.customers %}</div>
+                <div class="col-sm-10"><a href="{% url 'events:events-detail' event.pk %}">{{ event.name }} on {{ event.start.date }}</a></div>
+            </div>
+        {% endfor %}
+    {% else %}
+        {% include "blankslate.html" with message="No upcoming events for this service" %}
+    {% endif %}
+</table>

@@ -2,7 +2,6 @@ from urllib.parse import urlencode
 
 import markdown
 from django import template
-from django.contrib.messages import constants
 from django.urls import reverse
 from django.utils.html import urlize
 from django.utils.safestring import mark_safe
@@ -51,7 +50,7 @@ def status_as_colour(value):
 
 @register.filter(name="markdown")
 def markdown_filter(text):
-    md = markdown.Markdown()
+    md = markdown.Markdown(safe_mode=True, extensions=["extra", "mdx_linkify"])
     return mark_safe(md.convert(text))
 
 
@@ -87,7 +86,7 @@ def checks_badge(checks):
 
 
 @register.simple_tag(name="qs")
-def qs(request, **overrides):
+def qs(request, override_key, override_value):
     """
     A tag that generates a query string based on the current request.
 
@@ -107,18 +106,16 @@ def qs(request, **overrides):
         if v is not None:
             qs[k] = convert(v)
 
-    for k, v in overrides.items():
-        if not v and k in qs:
-            del qs[k]
-        elif v:
-            qs[k] = convert(v)
+    if not override_value and override_key in qs:
+        del qs[override_key]
+    elif override_value:
+        qs[override_key] = convert(override_value)
 
     # Since this is the default, no point in passing it around.
     for k, v in default_query_params.items():
         if v is not None and k in qs:
             if qs[k] == v:
                 del qs[k]
-
     return "?" + urlencode(qs) if qs else "?"
 
 
@@ -166,3 +163,10 @@ def at_url(request, url):
 @register.filter
 def pretty_json(value):
     return json.dumps(value, indent=4)
+
+
+@register.filter
+def yesno_if_boolean(value):
+    if isinstance(value, bool):
+        return "yes" if value else "no"
+    return value
