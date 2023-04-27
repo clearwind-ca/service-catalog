@@ -8,9 +8,9 @@
 {% endblock %}
 
 {% block top %}
-    <h4>Event: {{ event.slug }}</h4>
+    <h4>{{ event.name }}</h4>
     {% include "active.html" with active=event.active %}
-    {% include "customers.html" with affects=event.customers %}
+    {% include "customers.html" with impacts=event.customers %}
     {{ event.description|markdown }}
 {% endblock %}
 
@@ -20,7 +20,7 @@
     {% if event.start and event.end %}
     <dd>{{ event.start }} to {{ event.end }}</dd>
     {% else %}
-    <dd>{{ event.start }}</dd>
+    <dd>{% include "since.html" with since=event.start %}</dd>
     {% endif %}
 </dl>
 
@@ -55,14 +55,14 @@
 {% block sidebar %}
 <div class="pb-3">
     <h6 class="text-muted border-bottom">Info</h6>
-    <p>Slug: <code>{{ event.slug }}</code></p>
+    <p>Primary key: <code>{{ event.pk }}</code></p>
 </div>
 
 <div class="pb-3">
     <h6 class="text-muted border-bottom">Logs</h6>
     {% if log %}
         <p>{{ log.get_action_display|capfirst }} {% include "since.html" with since=log.timestamp %}</p>
-        <p><a href="{% url 'logs:log-list' %}?slug={{ source.slug }}&type=source">View more</a></p>
+        <p><a href="{% url 'logs:log-list' %}?pk={{ event.pk }}&type=event">View more</a></p>
     {% else %}
         <p>{% octicon "deny" %} No logs found for this event.</p>
     {% endif %}
@@ -70,6 +70,6 @@
 
 <div>
     <h6 class="text-muted border-bottom">Admin</h6>
-    <p><a href="{% url 'events:events-update' event.slug %}">Update this event</a></p>
+    <p><a href="{% url 'events:events-update' event.pk %}">Update this event</a></p>
 </div>
 {% endblock %}

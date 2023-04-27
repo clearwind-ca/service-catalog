@@ -1,5 +1,5 @@
-{% load static %}
 {% load octicons %}
-<div class="m-3">
-    <div>{% octicon "deny" %}&nbsp;{{ message }}</div>
+<div>
+    {% octicon "deny" %}&nbsp;{{ message }}
+    {% if filters %}It could be because the filters have excluded any results.{% endif %}
 </div>

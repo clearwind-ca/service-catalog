@@ -52,7 +52,7 @@
         <div class="card-header fw-bold">Upcoming Events</div>
         <div class="card-body">
             {% include "events.html" with service=service %}
-            <p class="form-text pt-3">{% octicon "info" %} Showing just the <i>upcoming</i> planned events. 
+            <p class="form-text pt-3">{% octicon "info" %} Showing just the <i>upcoming</i> events. 
                 <a href="{% url 'events:events-list' %}?service={{ service.slug }}">View all upcoming events</a> &bull;
                 <a href="{% url 'events:events-list' %}?service={{ service.slug }}&when=past">View all past events</a>
             </p>

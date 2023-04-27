@@ -1,5 +1,5 @@
 from auditlog.models import LogEntry
-
+from django.conf import settings
 
 def attempt_int(value):
     try:
@@ -45,6 +45,7 @@ default_query_params = {
     "per_page": 10,
     "page": 1,
     "active": True,
+    "when": "future"
 }
 
 
@@ -61,6 +62,7 @@ def process_query_params(func):
         parsed["level"] = attempt_int(request.GET.get("level"))
         parsed["priority"] = attempt_int(request.GET.get("priority"))
         parsed["action"] = attempt_choices(request.GET.get("action"))
+        parsed["when"] = request.GET.get("when", "future")
         for key in request.GET.keys():
             if key in parsed.keys():
                 continue
@@ -85,5 +87,8 @@ def site_context(request):
     """
     return {
         # Set to true, and then override in views to False to hide breadcrumbs.
-        "breadcrumbs": True
+        "breadcrumbs": True,
+        "settings": {
+            "timezone": settings.TIME_ZONE,
+        }
     }

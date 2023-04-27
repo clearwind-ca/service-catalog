@@ -66,26 +66,18 @@ class Event(models.Model):
 
     customers = models.BooleanField(
         default=False,
-        verbose_name="Affects customers",
-        help_text="Whether this event is affecting external customers.",
+        verbose_name="Impacts customers",
+        help_text="Whether this event is impacts customers of the service.",
     )
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    slug = models.SlugField(max_length=100, unique=True)
 
     active = models.BooleanField(default=True)
 
-    def save(self, *args, **kwargs):
-        # Ensure that changing the name does not change the slug.
-        if not self.slug:
-            self.slug = slugify(f"{self.name} {self.start}")
-
-        super().save(*args, **kwargs)
-
     def __str__(self):
-        return self.slug
+        return f'{self.name} - {self.type}'
 
 
 auditlog.register(Event)

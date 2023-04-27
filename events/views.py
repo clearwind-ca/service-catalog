@@ -30,8 +30,8 @@ def events_add(request):
 
 
 @login_required
-def events_detail(request, slug):
-    event = get_object_or_404(Event, slug=slug)
+def events_detail(request, pk):
+    event = get_object_or_404(Event, pk=pk)
     context = {
         "event": event,
         "log": LogEntry.objects.get_for_object(event).order_by("-timestamp").first(),
@@ -40,8 +40,8 @@ def events_detail(request, slug):
 
 
 @login_required
-def events_update(request, slug):
-    event = get_object_or_404(Event, slug=slug)
+def events_update(request, pk):
+    event = get_object_or_404(Event, pk=pk)
     if request.POST:
         form = EventForm(request.POST, instance=event)
         if form.is_valid():
@@ -84,7 +84,11 @@ def events_list(request):
         filters["services__in"] = [service]
         display_filters["service"] = get["service"]
 
-    results = Event.objects.filter(**filters).order_by("-start")
+    ordering = "-start"
+    if get.get("when") in ["future", "soon"]:
+        ordering = "start"
+
+    results = Event.objects.filter(**filters).order_by(ordering)
 
     paginator = Paginator(results, per_page=get["per_page"])
     page_number = get["page"]
@@ -98,5 +102,6 @@ def events_list(request):
         "when": ["future", "soon", "past"],
         "active": ["yes", "no"],
         "customers": ["yes", "no"],
+        "ordering": "ordering",
     }
     return render(request, "events-list.html", context)

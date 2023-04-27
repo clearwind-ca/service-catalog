@@ -40,8 +40,13 @@ def log_list(request):
 
     if get.get("slug"):
         _object = _model.objects.get(slug=get["slug"])
-        filters["object_id"] = _object.pk
         display_filters["target"] = _object.slug
+        filters["object_id"] = _object.pk
+
+    if get.get("pk"):
+        _object = _model.objects.get(pk=get["pk"])
+        display_filters["target"] = _object.pk
+        filters["object_id"] = _object.pk
 
     sources = LogEntry.objects.filter(**filters).order_by("-timestamp")
     paginator = Paginator(sources, per_page=get["per_page"])
