@@ -12,11 +12,11 @@ from faker import Faker
 
 from catalog.errors import FetchError
 from catalog.helpers.tests import WithUser
+from services.tests import create_service, create_source
 from web.shortcuts import get_object_or_None
 
-from .models import Event
 from . import forms, models
-from services.tests import create_service, create_source
+from .models import Event
 
 fake = Faker()
 
@@ -30,7 +30,7 @@ class TestEvents(WithUser):
             self.services.append(create_service(self.source))
         self.services_pks = [s.pk for s in self.services]
 
-    def get_event_data(self): 
+    def get_event_data(self):
         return {
             "name": fake.name(),
             "description": fake.text(),
@@ -42,11 +42,13 @@ class TestEvents(WithUser):
             "external_source": fake.text(),
             "external_id": fake.text(),
             "customers": fake.boolean(),
-            "services": fake.random_elements(self.services_pks, length=2, unique=True),
         }
-    
-    def create_event():
-        return models.Event.objects.create(**self.get_event_data())
+
+    def create_event(self):
+        event = models.Event.objects.create(**self.get_event_data())
+        for service in fake.random_elements(self.services_pks, length=2, unique=True):
+            event.services.add(service)
+        return event
 
     def test_create_event_login_required(self):
         """Test that we need to post to create."""
@@ -58,6 +60,15 @@ class TestEvents(WithUser):
     def test_create_event(self):
         """Test that we can post an event."""
         self.url = reverse("events:events-add")
+        self.client.force_login(user=self.user)
+        res = self.client.post(self.url, data=self.get_event_data())
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(Event.objects.count(), 1)
+
+    def test_update_event(self):
+        """Test that we can update an event."""
+        event = self.create_event()
+        self.url = reverse("events:events-update", kwargs={"pk": event.pk})
         self.client.force_login(user=self.user)
         res = self.client.post(self.url, data=self.get_event_data())
         self.assertEqual(res.status_code, 302)

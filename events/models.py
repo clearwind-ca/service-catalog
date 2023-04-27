@@ -73,11 +73,10 @@ class Event(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-
     active = models.BooleanField(default=True)
 
     def __str__(self):
-        return f'{self.name} - {self.type}'
+        return f"{self.name} - {self.type}"
 
 
 auditlog.register(Event)

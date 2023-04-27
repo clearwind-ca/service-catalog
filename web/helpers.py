@@ -1,6 +1,7 @@
 from auditlog.models import LogEntry
 from django.conf import settings
 
+
 def attempt_int(value):
     try:
         return int(value)
@@ -41,12 +42,7 @@ def attempt_choices(value):
     return choices.get(value, None)
 
 
-default_query_params = {
-    "per_page": 10,
-    "page": 1,
-    "active": True,
-    "when": "future"
-}
+default_query_params = {"per_page": 10, "page": 1, "active": True, "when": "future"}
 
 
 def process_query_params(func):
@@ -90,5 +86,5 @@ def site_context(request):
         "breadcrumbs": True,
         "settings": {
             "timezone": settings.TIME_ZONE,
-        }
+        },
     }

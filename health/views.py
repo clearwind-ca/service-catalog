@@ -1,5 +1,6 @@
 from auditlog.models import LogEntry
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import redirect, render
@@ -12,7 +13,6 @@ from rest_framework.response import Response
 from catalog.errors import NoRepository, SendError
 from gh import send
 from services.models import Service
-from systemlogs.models import add_error, add_info
 from web.helpers import process_query_params
 
 from .forms import CheckForm
@@ -50,7 +50,7 @@ def checks_add(request):
         form = CheckForm(request.POST)
         if form.is_valid():
             check = form.save()
-            add_info(request, f"Added health check `{check.name}`")
+            messages.info(request, f"Added health check `{check.name}`")
             return redirect(reverse("health:checks-list"))
     else:
         form = CheckForm()
@@ -74,7 +74,7 @@ def checks_update(request, slug):
         form = CheckForm(request.POST, instance=check)
         if form.is_valid():
             check = form.save()
-            add_info(request, f"Updated health check `{check.name}`")
+            messages.info(request, f"Updated health check `{check.name}`")
             return redirect(reverse("health:checks-list"))
         return render(request, "checks-update.html", {"check": check, "form": form})
 
@@ -86,7 +86,7 @@ def checks_update(request, slug):
 @require_POST
 def checks_delete(request, slug):
     Check.objects.get(slug=slug).delete()
-    add_info(request, f"Health check `{slug}` and matching results deleted")
+    messages.info(request, f"Health check `{slug}` and matching results deleted")
     return redirect(reverse("health:checks-list"))
 
 
@@ -116,10 +116,10 @@ def checks_run(request, slug):
     try:
         adhoc_run(request, check)
     except (SendError, NoRepository) as error:
-        add_error(request, f"Failed to send health check: `{error.message}`")
+        messages.error(request, f"Failed to send health check: `{error.message}`")
         return redirect(reverse("health:checks-detail", kwargs={"slug": slug}))
 
-    add_info(request, f"Health check `{slug}` run for all services.")
+    messages.info(request, f"Health check `{slug}` run for all services.")
     return redirect(reverse("health:checks-detail", kwargs={"slug": slug}))
 
 

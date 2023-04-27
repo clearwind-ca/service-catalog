@@ -1,14 +1,15 @@
 from datetime import timedelta
 
 from auditlog.models import LogEntry
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from services.models import Service
-from systemlogs.models import add_info
 from web.helpers import process_query_params
 
 from .forms import EventForm
@@ -21,7 +22,7 @@ def events_add(request):
         form = EventForm(request.POST)
         if form.is_valid():
             form.save()
-            add_info(request, "Event created successfully")
+            messages.info(request, "Event created successfully")
             return redirect(reverse("events:events-list"))
     else:
         form = EventForm()
@@ -40,13 +41,22 @@ def events_detail(request, pk):
 
 
 @login_required
+@require_POST
+def events_delete(request, pk):
+    event = get_object_or_404(Event, pk=pk)
+    event.delete()
+    messages.info(request, f"Event `{event.name}` successfully deleted")
+    return redirect(request, "events-list.html")
+
+
+@login_required
 def events_update(request, pk):
     event = get_object_or_404(Event, pk=pk)
     if request.POST:
         form = EventForm(request.POST, instance=event)
         if form.is_valid():
             form.save()
-            add_info(request, "Event updated successfully")
+            messages.info(request, "Event updated successfully")
             return redirect(reverse("events:events-list"))
     else:
         form = EventForm(instance=event)
