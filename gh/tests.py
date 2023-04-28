@@ -11,7 +11,14 @@ from catalog import errors
 from health.tests import create_health_check, create_health_check_result
 from services.models import Source
 
-from .fetch import file_paths, get, get_file, get_file_from_list, login_as_user, url_to_nwo
+from .fetch import (
+    file_paths,
+    get,
+    get_file,
+    get_file_from_list,
+    login_as_user,
+    url_to_nwo,
+)
 from .send import dispatch
 
 fake = Faker("en_US")
@@ -158,6 +165,7 @@ class TestSend(WithGitHubUser):
             errors.SendError("")
         )
         self.assertRaises(errors.SendError, dispatch, self.user, result)
+
 
 class Test(TestCase):
     def test_nwo(self):

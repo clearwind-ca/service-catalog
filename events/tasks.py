@@ -1,15 +1,15 @@
 from catalog.celery import app
-
+from events.models import Event
 from gh import fetch
 from services.models import Service
-from events.models import Event
 from web.shortcuts import get_object_or_None
+
 
 @app.task
 def get_deployments(username, service_slug):
     service = Service.objects.get(slug=service_slug)
     deployments = fetch.get_deployments(username, service.source)
-    
+
     # Limit to the last 20 deployments per repo, for now.
     for deployment in deployments[:20]:
         statuses = deployment.get_statuses()
@@ -33,13 +33,13 @@ def get_deployments(username, service_slug):
         description = f"There was a deployment to {deployment.environment} by {deployment.creator.login}. For more information see: {service.source.url}/deployments."
         event = Event(
             type="Deployment",
-            name=f'Deploy to {deployment.environment}',
+            name=f"Deploy to {deployment.environment}",
             description=description,
-            source='GitHub deployment',
+            source="GitHub deployment",
             external_id=deployment.id,
             url=deployment.url,
             status=latest_status.state,
-            start=deployment.created_at
+            start=deployment.created_at,
         )
         event.save()
         event.services.set([service])
@@ -49,4 +49,5 @@ def get_deployments(username, service_slug):
 @app.task
 def get_all_active_deployments(username):
     for service in Service.objects.filter(active=True):
-        get_deployments.delay(username, service.slug)
+        if service.events and "deployments" in service.events:
+            get_deployments.delay(username, service.slug)

@@ -73,6 +73,7 @@ def url_to_nwo(url):
     organization, repo = path.split("/")
     return organization, repo
 
+
 def get_repo(gh, organization, repo):
     try:
         user = gh.get_user(organization)
@@ -85,6 +86,7 @@ def get_repo(gh, organization, repo):
         raise NoRepository(f"Unable to access the repository at: `{repo}`.")
 
     return repo
+
 
 def get(user, source):
     gh = login_as_user(user)

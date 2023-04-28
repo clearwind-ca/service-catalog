@@ -120,7 +120,9 @@ def events_list(request):
         "events": page_obj,
         "filters": display_filters,
         "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
-        "types": sorted(Event.objects.filter(type__gt='').values_list('type', flat=True).distinct()),
+        "types": sorted(
+            Event.objects.filter(type__gt="").values_list("type", flat=True).distinct()
+        ),
         "when": ["future", "recent", "past"],
         "active": ["yes", "no"],
         "customers": ["yes", "no"],

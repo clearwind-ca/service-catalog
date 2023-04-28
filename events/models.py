@@ -38,7 +38,7 @@ class Event(models.Model):
         null=True,
         help_text="If the source of his event is external, enter the source.",
     )
-    
+
     external_id = models.CharField(
         max_length=255,
         blank=True,
@@ -47,7 +47,7 @@ class Event(models.Model):
         help_text="Any external ID for this event.",
         unique=True,
     )
-    
+
     url = models.URLField(
         max_length=255,
         blank=True,
@@ -55,7 +55,7 @@ class Event(models.Model):
         verbose_name="External URL",
         help_text="Any external URL for this event.",
     )
-    
+
     status = models.CharField(
         max_length=255,
         blank=True,

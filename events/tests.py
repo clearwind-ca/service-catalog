@@ -1,4 +1,5 @@
 from datetime import timedelta
+from unittest.mock import Mock, patch
 from urllib.parse import urlencode
 
 from django.urls import reverse
@@ -11,7 +12,6 @@ from services.tests import create_service, create_source
 from . import models
 from .models import Event
 from .tasks import get_all_active_deployments, get_deployments
-from unittest.mock import patch, Mock
 
 fake = Faker()
 
@@ -63,6 +63,7 @@ class WithEvents(WithUser):
             url = f"{url}?{urlencode(params)}"
         self.client.force_login(user=self.user)
         return self.client.get(url)
+
 
 class TestEventList(WithEvents):
     def test_create_event_login_required(self):
@@ -189,6 +190,19 @@ class TestDeployments(WithEvents):
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
             get_all_active_deployments(self.username)
         self.assertEqual(mock_fetch.get_deployments.call_count, 2)
+
+    @patch("events.tasks.fetch")
+    def test_get_only_deployment(self, mock_fetch):
+        """Test that we only get services that have deployments"""
+        self.service.active = False
+        self.service.save()
+
+        self.services[1].events = []
+        self.services[1].save()
+
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            get_all_active_deployments(self.username)
+        self.assertEqual(mock_fetch.get_deployments.call_count, 1)
 
     def setupMocks(self):
         status = Mock()
