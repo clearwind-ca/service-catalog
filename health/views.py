@@ -3,21 +3,27 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
-from catalog.errors import NoRepository, SendError
 
-from web.helpers import process_query_params
+from catalog.errors import NoRepository, SendError
 from services.models import Service
-from .tasks import send_to_github
+from web.helpers import process_query_params
+
 from .forms import CheckForm
-from .models import RESULT_CHOICES, STATUS_CHOICES, Check, CheckResult, FREQUENCY_CHOICES
+from .models import (
+    FREQUENCY_CHOICES,
+    RESULT_CHOICES,
+    STATUS_CHOICES,
+    Check,
+    CheckResult,
+)
 from .serializers import CheckResultSerializer, CheckSerializer
+from .tasks import send_to_github
 
 
 @login_required
@@ -28,7 +34,7 @@ def checks(request):
     for param, lookup in (
         ("active", "active"),
         ("frequency", "frequency"),
-        ):
+    ):
         if get.get(param) is not None:
             filters[lookup] = get[param]
 

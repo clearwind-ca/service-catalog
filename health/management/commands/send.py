@@ -1,11 +1,13 @@
 import os
+
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from health.models import Check, CheckResult
-from services.models import Service
 from health.tasks import send_to_github
+from services.models import Service
+
 
 def should_run(check, service, quiet=False):
     now = timezone.now()
@@ -101,7 +103,6 @@ class Command(BaseCommand):
 
         if options.get("service"):
             service_queryset = Service.objects.filter(slug=options.get("service"))
-
 
         k = 0
         for check in check_queryset:

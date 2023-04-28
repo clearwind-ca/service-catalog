@@ -36,9 +36,9 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 CATALOG_ENV = env
-CELERY_BROKER_URL=os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
-CELERY_RESULT_BACKEND=os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
-CELERY_TASK_RESULT_EXPIRES = 18000 # 5 hours
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+CELERY_TASK_RESULT_EXPIRES = 18000  # 5 hours
 
 # Default timeout 6 hours.
 CHECKS_TIMEOUT_HOURS = os.environ.get("CHECKS_TIMEOUT_HOURS", 6)
