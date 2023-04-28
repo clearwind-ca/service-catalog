@@ -47,7 +47,7 @@ class Command(BaseCommand):
             raise ValueError(
                 "User must be set either using `--user` or `CRON_USER` as the username of a user with a GitHub login."
             )
-        
+
         user = User.objects.get(username=username)
 
         if not options.get("check") and not options.get("all_checks"):
@@ -69,6 +69,7 @@ class Command(BaseCommand):
             service_queryset = Service.objects.filter(slug=options.get("service"))
 
         k = 0
+
         for check in check_queryset:
             for service in service_queryset:
                 if not should_run(check, service, quiet=quiet):

@@ -138,19 +138,22 @@ class TestSend(WithHealthCheck):
         """Test the username from the command, and checks it fails"""
         self.assertRaises(User.DoesNotExist, self.command, user="nope")
 
-    @patch("health.tasks.send")
-    def test_log_errors(self, mock_send):
-        """Test that repeated errors are logged"""
-        Check.objects.create(name=fake.name())
-        mock_send.dispatch.side_effect = NoRepository("Nope")
-        kwargs = {
+
+    def kwargs(self):
+        return {
             "all_checks": True,
             "all_services": True,
             "user": self.user.username,
             "quiet": True,
         }
+    
+    @patch("health.tasks.send")
+    def test_log_errors(self, mock_send):
+        """Test that repeated errors are logged"""
+        Check.objects.create(name=fake.name())
+        mock_send.dispatch.side_effect = NoRepository("Nope")
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
-            self.command(**kwargs)
+            self.command(**self.kwargs())
         self.assertEqual(mock_send.dispatch.call_count, 2)
         results = CheckResult.objects.all()
         for result in results:
@@ -161,20 +164,32 @@ class TestSend(WithHealthCheck):
         """Test sends one"""
         Check.objects.create(name=fake.name())
         mock_send.dispatch.return_value = True
-        kwargs = {
-            "all_checks": True,
-            "all_services": True,
-            "user": self.user.username,
-            "quiet": True,
-        }
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
-            self.command(**kwargs)
+            self.command(**self.kwargs())
         # 1 Service and 2 Checks, means 2 calls.
         self.assertEqual(mock_send.dispatch.call_count, 2)
         self.assertEqual(CheckResult.objects.count(), 2)
         for result in CheckResult.objects.all():
             self.assertEqual(result.status, "sent")
             self.assertEqual(result.result, "unknown")
+
+    @patch("health.tasks.send")
+    def test_ignore_inactive_check(self, mock_send):
+        """Test that it will ignore inactive checks"""
+        self.health_check.active = False
+        self.health_check.save()
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            self.command(**self.kwargs())
+        self.assertEqual(mock_send.dispatch.call_count, 0)
+
+    @patch("health.tasks.send")
+    def test_ignore_inactive_service(self, mock_send):
+        """Test that it will ignore inactive services"""
+        self.service.active = False
+        self.service.save()
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            self.command(**self.kwargs())
+        self.assertEqual(mock_send.dispatch.call_count, 0) 
 
 
 class TestSendFrequency(WithHealthCheck):
