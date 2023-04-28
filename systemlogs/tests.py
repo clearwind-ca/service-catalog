@@ -26,7 +26,8 @@ class TestTruncate(WithSource):
 
     def test_truncate_ignores_newer_logs(self):
         LogEntry.objects.log_create(instance=self.source)
-        self.command(ago=1, quiet=True)
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            self.command(ago=1, quiet=True)
         self.assertEqual(LogEntry.objects.count(), 1)
 
     def test_truncates(self):
