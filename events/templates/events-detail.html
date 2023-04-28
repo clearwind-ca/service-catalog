@@ -11,7 +11,7 @@
     <h4>{{ event.name }}</h4>
     {% include "active.html" with active=event.active %}
     {% include "customers.html" with impacts=event.customers %}
-    {{ event.description|markdown }}
+    {{ event.description|markdown|safe }}
 {% endblock %}
 
 {% block main %}
@@ -21,6 +21,10 @@
     <dd>{{ event.start }} to {{ event.end }}</dd>
     {% else %}
     <dd>{% include "since.html" with since=event.start %}</dd>
+    {% endif %}
+    {% if event.status %}
+    <dt>Status</dt>
+    <dd>{{ event.status }}</dd>
     {% endif %}
 </dl>
 
@@ -43,12 +47,10 @@
     <dd>{{ event.customers|yesno|capfirst }}</dd>
     <dt>Type</dt>
     <dd>{{ event.type|capfirst }}</dd>
-    <dt>External Source</dt>
-    <dd>{{ event.external_source }}</dd>
-    <dt>External ID</dt>
-    <dd>{{ event.external_id }}</dd>
-    <dt>External URL</dt>
-    <dd>{{ event.external_url|urlize }}</dd>
+    <dt>Source</dt>
+    <dd>{{ event.source }}</dd>
+    <dt>URL</dt>
+    <dd>{{ event.url|urlize }}</dd>
 </dl>
 {% endblock %}
 
@@ -56,6 +58,9 @@
 <div class="pb-3">
     <h6 class="text-muted border-bottom">Info</h6>
     <p>Primary key: <code>{{ event.pk }}</code></p>
+    {% if event.external_id %}
+    <p>External id: <code>{{ event.external_id }}</code></p>
+    {% endif %}
 </div>
 
 <div class="pb-3">

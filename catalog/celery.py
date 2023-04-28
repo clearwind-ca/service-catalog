@@ -32,4 +32,9 @@ app.conf.beat_schedule = {
         "schedule": 60 * 5,  # Every hour.
         "args": (os.environ.get("CRON_USER"),),
     },
+    "get-active-services-deployments": {
+        "task": "events.tasks.get_all_active_deployments",
+        "schedule": 60 * 5,  # Every hour.
+        "args": (os.environ.get("CRON_USER"),),
+    },
 }

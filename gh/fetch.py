@@ -58,14 +58,22 @@ def get_file_from_list(repo, paths):
     )
 
 
-def get(user, source):
-    gh = login_as_user(user)
-    path = urlparse(source.url).path
+def url_to_nwo(url):
+    path = urlparse(url).path
     # Remove the leading slash.
     if path.startswith("/"):
         path = path[1:]
 
+    if path.endswith("/"):
+        path = path[:-1]
+
+    if path.count("/") != 1:
+        raise ValueError(f"Can't parse {url}.")
+
     organization, repo = path.split("/")
+    return organization, repo
+
+def get_repo(gh, organization, repo):
     try:
         user = gh.get_user(organization)
     except UnknownObjectException:
@@ -75,6 +83,13 @@ def get(user, source):
         repo = user.get_repo(repo)
     except UnknownObjectException:
         raise NoRepository(f"Unable to access the repository at: `{repo}`.")
+
+    return repo
+
+def get(user, source):
+    gh = login_as_user(user)
+    organization, repo = url_to_nwo(source.url)
+    repo = get_repo(gh, organization, repo)
 
     results = []
     already_fetched = []
@@ -94,3 +109,12 @@ def get(user, source):
     results.append(result)
     recursive_get_files(result["contents"].get("files", []))
     return results
+
+
+def get_deployments(user, source):
+    gh = login_as_user(user)
+    organization, repo = url_to_nwo(source.url)
+    repo = get_repo(gh, organization, repo)
+
+    deployments = repo.get_deployments()
+    return deployments

@@ -81,7 +81,7 @@ def service_detail(request, slug):
         ),
         "checks": service.latest_results(),
         "log": LogEntry.objects.get_for_object(service).order_by("-timestamp").first(),
-        "events": Event.objects.filter(services__in=[service]).order_by("start")[:3],
+        "events": Event.objects.filter(services__in=[service], start__gt=timezone.now()).order_by("start")[:3],
     }
     return render(request, "service-detail.html", context)
 

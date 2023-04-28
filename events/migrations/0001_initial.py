@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("description", models.TextField()),
-                ("external_source", models.CharField(blank=True, max_length=255, null=True)),
+                ("source", models.CharField(blank=True, max_length=255, null=True)),
                 ("external_uuid", models.CharField(blank=True, max_length=255, null=True)),
                 ("created", models.DateTimeField(auto_now_add=True)),
                 ("updated", models.DateTimeField(auto_now=True)),
