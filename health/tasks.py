@@ -1,9 +1,10 @@
+from django.utils import timezone
+
 from catalog.celery import app
 from catalog.errors import NoRepository, SendError
 from gh import send
 from health.models import Check, CheckResult
 from services.models import Service
-from django.utils import timezone
 
 
 def should_run(check, service, quiet=False):
@@ -63,7 +64,7 @@ def send_to_github(username, check_slug, service_slug):
 def send_active_to_github(username):
     if not username:
         raise ValueError("Username is required to send active checks to GitHub.")
-    
+
     check_queryset = Check.objects.filter(active=True)
     service_queryset = Service.objects.filter(active=True)
     for check in check_queryset:

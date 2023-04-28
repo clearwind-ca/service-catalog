@@ -47,11 +47,8 @@ class Command(BaseCommand):
             raise ValueError(
                 "User must be set either using `--user` or `CRON_USER` as the username of a user with a GitHub login."
             )
+        
         user = User.objects.get(username=username)
-
-        class requestStub:
-            def __init__(self, user):
-                self.user = user
 
         if not options.get("check") and not options.get("all_checks"):
             raise ValueError("Either `--check` or `--all-checks` must be set.")
