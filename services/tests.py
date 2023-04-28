@@ -22,9 +22,10 @@ fake = Faker("en_US")
 
 def create_source():
     """Create a source."""
-    return forms.SourceForm(
-        {"url": f"https://github.com/{fake.user_name()}/{fake.user_name()}"}
-    ).save()
+    return forms.SourceForm({
+        "url": f"https://github.com/{fake.user_name()}/{fake.user_name()}",
+        "active": True
+    }).save()
 
 
 def create_service(source):
@@ -457,26 +458,40 @@ class TestManagementRefresh(WithUser):
         """Test fails if no source"""
         self.assertRaises(ValueError, self.command.handle, user=self.user.username)
 
-    @patch("services.management.commands.refresh.fetch")
+    @patch("services.tasks.fetch")
     def test_refresh_all(self, mock_fetch):
         """Test refreshes all"""
         create_source()
         create_source()
         mock_fetch.get.return_value = sample_response()
-        self.command.handle(user=self.user.username, all=True, quiet=True)
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            self.command.handle(user=self.user.username, all=True, quiet=True)
         self.assertEquals(models.Service.objects.all().count(), 1)
         self.assertEquals(mock_fetch.get.call_count, 2)
 
-    @patch("services.management.commands.refresh.fetch")
+    @patch("services.tasks.fetch")
     def test_refresh_some(self, mock_fetch):
         """Test refreshes some"""
         create_source()  # Will not be refreshed.
         second = create_source()  # Will be refreshed.
         mock_fetch.get.return_value = sample_response()
-        self.command.handle(user=self.user.username, source=second.slug, quiet=True)
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            self.command.handle(user=self.user.username, source=second.slug, quiet=True)
         self.assertEquals(models.Service.objects.all().count(), 1)
         self.assertEquals(mock_fetch.get.call_count, 1)
 
+    @patch("services.tasks.fetch")
+    def test_refresh_active_only(self, mock_fetch):
+        """Test refreshes all"""
+        source = create_source()
+        source.active = False
+        source.save()
+
+        mock_fetch.get.return_value = sample_response()
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            self.command.handle(user=self.user.username, all=True, quiet=True)
+
+        self.assertEquals(mock_fetch.get.call_count, 0)
 
 class TestServiceForm(WithUser):
     def setUp(self):

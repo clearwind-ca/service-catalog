@@ -1,4 +1,5 @@
 from django.utils import timezone
+from datetime import timedelta
 
 from catalog.celery import app
 from catalog.errors import NoRepository, SendError
@@ -10,6 +11,9 @@ from services.models import Service
 def should_run(check, service, quiet=False):
     now = timezone.now()
     frequency = check.frequency
+    if frequency not in ["hourly", "daily", "weekly"]:
+        return False 
+
     recent_result = (
         CheckResult.objects.filter(health_check=check, service=service).order_by("-created").first()
     )
@@ -25,11 +29,11 @@ def should_run(check, service, quiet=False):
         if (now - most_recent).seconds > 3600:
             return True
 
-    if frequency == "daily":
+    elif frequency == "daily":
         if (now - most_recent).days > 0:
             return True
 
-    if frequency == "weekly":
+    elif frequency == "weekly":
         if (now - most_recent).days >= 7:
             return True
 
@@ -70,3 +74,14 @@ def send_active_to_github(username):
         for service in service_queryset:
             if should_run(check, service):
                 send_to_github.delay(username, check.slug, service.slug)
+
+
+@app.task
+def timeout(ago):
+    check_queryset = CheckResult.objects.filter(
+        updated__lt=timezone.now() - timedelta(hours=ago),
+        status__in=["sent"],
+    )
+    for check in check_queryset:
+        check.status = "timed-out"
+        check.save()

@@ -1,5 +1,0 @@
-12 3 * * * python /code/manage.py refresh --all
-12 20 * * * python /code/manage.py truncate --ago 30
-5 */1 * * * python /code/manage.py timeout --ago 6
-
-* * * * * python /code/manage.py send --all-checks --all-services

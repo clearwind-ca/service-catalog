@@ -138,7 +138,6 @@ class TestSend(WithHealthCheck):
         """Test the username from the command, and checks it fails"""
         self.assertRaises(User.DoesNotExist, self.command, user="nope")
 
-
     def kwargs(self):
         return {
             "all_checks": True,
@@ -146,7 +145,7 @@ class TestSend(WithHealthCheck):
             "user": self.user.username,
             "quiet": True,
         }
-    
+
     @patch("health.tasks.send")
     def test_log_errors(self, mock_send):
         """Test that repeated errors are logged"""
@@ -189,7 +188,16 @@ class TestSend(WithHealthCheck):
         self.service.save()
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
             self.command(**self.kwargs())
-        self.assertEqual(mock_send.dispatch.call_count, 0) 
+        self.assertEqual(mock_send.dispatch.call_count, 0)
+
+    @patch("health.tasks.send")
+    def test_ignore_adhoc(self, mock_send):
+        """Test that it will adhoc checks"""
+        self.health_check.frequency = "adhoc"
+        self.health_check.save()
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            self.command(**self.kwargs())
+        self.assertEqual(mock_send.dispatch.call_count, 0)
 
 
 class TestSendFrequency(WithHealthCheck):
@@ -247,13 +255,14 @@ class TestTimeout(WithHealthCheck):
         # Set the result to be 12 hours old.
         CheckResult.objects.update(updated=timezone.now() - timedelta(hours=12))
 
-        # This times out things older than 13 hours.
-        self.command(quiet=True, ago=13)
-        self.assertEquals(CheckResult.objects.filter(status="sent").count(), 1)
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            # This times out things older than 13 hours.
+            self.command(quiet=True, ago=13)
+            self.assertEquals(CheckResult.objects.filter(status="sent").count(), 1)
 
-        # This times out things older than 11 hours, our check result.
-        self.command(quiet=True, ago=11)
-        self.assertEquals(CheckResult.objects.filter(status="timed-out").count(), 1)
+            # This times out things older than 11 hours, our check result.
+            self.command(quiet=True, ago=11)
+            self.assertEquals(CheckResult.objects.filter(status="timed-out").count(), 1)
 
 
 class TestAdHoc(WithHealthCheck):

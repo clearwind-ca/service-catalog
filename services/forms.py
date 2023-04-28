@@ -18,7 +18,7 @@ class BaseForm:
 class SourceForm(forms.ModelForm, BaseForm):
     class Meta:
         model = models.Source
-        fields = ("url",)
+        exclude = ["created", "modified", "slug"]
 
     def clean_url(self):
         url = self.data["url"]
@@ -27,8 +27,6 @@ class SourceForm(forms.ModelForm, BaseForm):
             raise forms.ValidationError("URL must be HTTP or HTTPS.")
         if not parsed.path:
             raise forms.ValidationError("URL must include a path to the repository.")
-        if models.Source.objects.filter(slug=models.slugify_source(url)).count():
-            raise forms.ValidationError(f"Source: `{url}` already exists.")
 
         return url
 
