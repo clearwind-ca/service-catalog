@@ -119,8 +119,6 @@ class TestSend(WithHealthCheck):
     def setUp(self):
         super().setUp()
         self.command = send.Command().handle
-        if "CRON_USER" in os.environ:
-            del os.environ["CRON_USER"]
 
     def test_arg_combos_fails(self):
         for params in [
@@ -133,9 +131,8 @@ class TestSend(WithHealthCheck):
 
     def test_no_user(self):
         """Takes the username from the environment, and checks it fails"""
-        os.environ["CRON_USER"] = "nope"
-        self.assertRaises(User.DoesNotExist, self.command)
-        del os.environ["CRON_USER"]
+        with self.settings(CRON_USER="nope"):
+            self.assertRaises(User.DoesNotExist, self.command)
 
     def test_refresh_fails_with_wrong_command_user(self):
         """Test the username from the command, and checks it fails"""

@@ -1,43 +1,10 @@
-import os
-
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
-from django.utils import timezone
 
-from health.models import Check, CheckResult
-from health.tasks import send_to_github
+from health.models import Check
+from health.tasks import send_to_github, should_run
 from services.models import Service
-
-
-def should_run(check, service, quiet=False):
-    now = timezone.now()
-    frequency = check.frequency
-    recent_result = (
-        CheckResult.objects.filter(health_check=check, service=service).order_by("-created").first()
-    )
-
-    # If this has never been run, then we should run it.
-    if recent_result is None:
-        return True
-
-    most_recent = recent_result.created
-
-    # If this has been run more than an hour ago, then we should run it.
-    if frequency == "hourly":
-        if (now - most_recent).seconds > 3600:
-            return True
-
-    if frequency == "daily":
-        if (now - most_recent).days > 0:
-            return True
-
-    if frequency == "weekly":
-        if (now - most_recent).days >= 7:
-            return True
-
-    if not quiet:
-        print(f"Check {check.slug} at frequency {frequency} has been run recently, skipping.")
-    return False
 
 
 class Command(BaseCommand):
@@ -74,7 +41,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        username = options.get("user") or os.environ.get("CRON_USER")
+        username = options.get("user") or settings.CRON_USER
         quiet = options.get("quiet", False)
         if not username:
             raise ValueError(
@@ -93,13 +60,13 @@ class Command(BaseCommand):
             raise ValueError("Either `--service` or `--all-services` must be set.")
 
         if options.get("all_checks"):
-            check_queryset = Check.objects.all()
+            check_queryset = Check.objects.filter(active=True)
 
         if options.get("check"):
             check_queryset = Check.objects.filter(slug=options.get("check"))
 
         if options.get("all_services"):
-            service_queryset = Service.objects.all()
+            service_queryset = Service.objects.filter(active=True)
 
         if options.get("service"):
             service_queryset = Service.objects.filter(slug=options.get("service"))
