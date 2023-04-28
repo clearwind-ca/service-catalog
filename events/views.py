@@ -14,7 +14,7 @@ from services.models import Service
 from web.helpers import process_query_params
 
 from .forms import EventForm
-from .models import EVENT_TYPES, Event
+from .models import Event
 from .serializers import EventSerializer
 
 
@@ -106,9 +106,9 @@ def events_list(request):
         filters["services__in"] = [service]
         display_filters["service"] = get["service"]
 
-    ordering = "start"
-    if get.get("when") == "past":
-        ordering = "-start"
+    ordering = "-start"
+    if get.get("when") in ["future"]:
+        ordering = "start"
 
     results = Event.objects.filter(**filters).order_by(ordering)
 
@@ -120,7 +120,9 @@ def events_list(request):
         "events": page_obj,
         "filters": display_filters,
         "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
-        "types": dict(EVENT_TYPES).keys(),
+        "types": sorted(
+            Event.objects.filter(type__gt="").values_list("type", flat=True).distinct()
+        ),
         "when": ["future", "recent", "past"],
         "active": ["yes", "no"],
         "customers": ["yes", "no"],

@@ -1,6 +1,5 @@
 import base64
 import json
-import logging
 import random
 from unittest.mock import patch
 
@@ -12,7 +11,14 @@ from catalog import errors
 from health.tests import create_health_check, create_health_check_result
 from services.models import Source
 
-from .fetch import file_paths, get, get_file, get_file_from_list, login_as_user
+from .fetch import (
+    file_paths,
+    get,
+    get_file,
+    get_file_from_list,
+    login_as_user,
+    url_to_nwo,
+)
 from .send import dispatch
 
 fake = Faker("en_US")
@@ -159,3 +165,24 @@ class TestSend(WithGitHubUser):
             errors.SendError("")
         )
         self.assertRaises(errors.SendError, dispatch, self.user, result)
+
+
+class Test(TestCase):
+    def test_nwo(self):
+        """
+        Test that the nwo function returns the right values
+        """
+        for x, y in [
+            ["https://github.com/andymckay/blog", ("andymckay", "blog")],
+            ["foo/bar", ("foo", "bar")],
+            ["/foo/bar", ("foo", "bar")],
+            ["/foo/bar/", ("foo", "bar")],
+        ]:
+            self.assertEqual(url_to_nwo(x), y)
+
+    def test_nwo_errors(self):
+        """
+        Test that NWO errors when it should.
+        """
+        for x in ["foo/bar/baz", "/foo", "foo", "http://github.com"]:
+            self.assertRaises(ValueError, url_to_nwo, x)

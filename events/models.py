@@ -4,27 +4,6 @@ from auditlog.registry import auditlog
 from django.db import models
 from django.template.defaultfilters import slugify
 
-EVENT_TYPES = (
-    ("backup", "Backup"),
-    ("configuration", "Configuration"),
-    ("deploy", "Deployment"),
-    ("deprovision", "Deprovision"),
-    ("downgrade", "Downgrade"),
-    ("incident", "Incident"),
-    ("maintenance", "Maintenance"),
-    ("migration", "Migration"),
-    ("patch", "Patch"),
-    ("provision", "Provision"),
-    ("reboot", "Reboot"),
-    ("release", "Release"),
-    ("restore", "Restore"),
-    ("rollback", "Rollback"),
-    ("scale", "Scale"),
-    ("snapshot", "Snapshot"),
-    ("upgrade", "Upgrade"),
-    ("other", "Other"),
-)
-
 
 class Event(models.Model):
     name = models.CharField(max_length=255)
@@ -37,8 +16,8 @@ class Event(models.Model):
         help_text="If the event is a singular point in time, leave the end date and time blank.",
     )
 
-    type = models.CharField(max_length=100, choices=EVENT_TYPES, help_text="The type of event.")
-    description = models.TextField(help_text="Markdown is supported.", blank=True)
+    type = models.CharField(max_length=100, help_text="The type of event.")
+    description = models.TextField(help_text="Markdown is supported.", blank=True, null=True)
 
     services = models.ManyToManyField(
         "services.Service", blank=True, help_text="The services affected by this event."
@@ -53,25 +32,36 @@ class Event(models.Model):
     active = models.BooleanField(default=True)
 
     # Fields that external things might set.
-    external_source = models.CharField(
+    source = models.CharField(
         max_length=255,
         blank=True,
         null=True,
         help_text="If the source of his event is external, enter the source.",
     )
+
     external_id = models.CharField(
         max_length=255,
         blank=True,
         null=True,
         verbose_name="External ID",
         help_text="Any external ID for this event.",
+        unique=True,
     )
-    external_url = models.URLField(
+
+    url = models.URLField(
         max_length=255,
         blank=True,
         null=True,
         verbose_name="External URL",
         help_text="Any external URL for this event.",
+    )
+
+    status = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="External status",
+        help_text="Any external status for this event.",
     )
 
     created = models.DateTimeField(auto_now_add=True)

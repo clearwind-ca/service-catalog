@@ -44,6 +44,8 @@ class Service(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    events = models.JSONField(blank=True, null=True)
+
     def logs(self):
         return LogEntry.objects.get_for_object(self)
 

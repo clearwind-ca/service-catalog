@@ -35,6 +35,7 @@ def create_service(source):
         type="application",
         source=source,
         meta={"foo": "bar"},
+        events=["deployments"],
     )
 
 

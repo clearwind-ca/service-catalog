@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="event",
-            name="external_url",
+            name="url",
             field=models.URLField(
                 blank=True,
                 help_text="Any external URL for this event.",
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name="event",
-            name="external_source",
+            name="source",
             field=models.CharField(
                 blank=True,
                 help_text="If the source of his event is external, enter the source.",

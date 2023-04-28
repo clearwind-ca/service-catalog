@@ -68,6 +68,15 @@
     </div>
 
     <div class="pb-3">
+        <h6 class="text-muted border-bottom">Events</h6>
+        {% if service.events %}
+            <p>Events: {% for event in service.events %}<code>{{ event }}</code>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+        {% else %}
+            <p>Not configured to automatically pull any events.</p>
+        {% endif %}
+    </div>
+
+    <div class="pb-3">
         <h6 class="text-muted border-bottom">Logs</h6>
         {% if log %}
             <p>{{ log.get_action_display|capfirst }} {% include "since.html" with since=log.timestamp %}</p>

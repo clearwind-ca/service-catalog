@@ -31,7 +31,7 @@
                 {% for event in events %}
                     <tr>
                         <td>
-                            <a href="{% url 'events:events-detail' event.pk %}">{{ event.name }}</a>
+                            <a href="{% url 'events:events-detail' event.pk %}">{% if event.name %}{{ event.name }}{% else %}(empty){% endif %}</a>
                             {% include "active.html" with active=event.active show_inactive_only=True %}
                         </td>
                         <td>{% include "since.html" with since=event.start %}</td>
@@ -57,7 +57,7 @@
         </div>
     {% endif %}
 
-    {% if logs %}
+    {% if events %}
         {% include "pagination.html" with objects=events %}
     {% endif %}
 
