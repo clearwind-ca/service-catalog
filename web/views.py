@@ -26,23 +26,24 @@ def logout(request):
 def debug(request):
     get = os.environ.get
 
-    def truncate(key):
-        value = get(key)
+    def truncate(value):
         if not value:
             return "Empty"
-        return value[:2] + "..."
+        return value[:5] + "..."
 
     selected_envs = {
         "CATALOG_ENV": get("CATALOG_ENV"),
         "CRON_USER": get("CRON_USER"),
-        "DATABASE_URL": truncate("DATABASE_URL"),
+        "DATABASE_URL": truncate(get("DATABASE_URL")),
         "ALLOWED_HOSTS": get("ALLOWED_HOSTS"),
-        "GITHUB_APP_ID": truncate("GITHUB_APP_ID"),
-        "GITHUB_CLIENT_ID": truncate("GITHUB_CLIENT_ID"),
-        "GITHUB_CLIENT_SECRET": truncate("GITHUB_CLIENT_SECRET"),
+        "GITHUB_APP_ID": truncate(get("GITHUB_APP_ID")),
+        "GITHUB_CLIENT_ID": truncate(get("GITHUB_CLIENT_ID")),
+        "GITHUB_CLIENT_SECRET": truncate(get("GITHUB_CLIENT_SECRET")),
     }
     selected_settings = {
         "CATALOG_ENV": settings.CATALOG_ENV,
+        "CELERY_BROKER_URL": truncate(settings.CELERY_BROKER_URL),
+        "CELERY_RESULT_BACKEND": truncate(settings.CELERY_RESULT_BACKEND),
         "DEBUG": settings.DEBUG,
         "GITHUB_CHECK_REPOSITORY": settings.GITHUB_CHECK_REPOSITORY,
         "GITHUB_DEBUG": settings.GITHUB_DEBUG,

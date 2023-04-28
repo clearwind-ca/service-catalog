@@ -2,6 +2,7 @@
 {% load helpers %}
 {% load humanize %}
 {% load octicons %}
+
 {% block breadcrumbs %}
     <li class="breadcrumb-item"><a href="{% url 'services:service-list' %}">{% octicon "dashboard" %} Sources</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{ source.slug }}</li>
@@ -9,6 +10,7 @@
 
 {% block top %}
     <h3>Source: {{ source.slug }}</h3>
+    {% include "active.html" with active=source.active %}
 {% endblock %}
 
 {% block main %}
@@ -45,6 +47,7 @@
     <div>
         <h6 class="text-muted border-bottom">Admin</h6>
         <p><a href="{% url 'services:source-refresh' source.slug %}">Refresh this source</a></p>
+        <p><a href="{% url 'services:source-update' source.slug %}">Edit this source</a></p>
         <p><a href="{% url 'services:source-validate' source.slug %}">Validate the JSON</a></p>
         <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete from the catalog</a>
     </div>

@@ -3,9 +3,8 @@ import os
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 
-from catalog.errors import FetchError
-from gh import fetch
-from services import forms, models
+from services import models
+from services.tasks import refresh_from_github
 
 
 class Command(BaseCommand):
@@ -41,36 +40,17 @@ class Command(BaseCommand):
 
         user = User.objects.get(username=username)
 
-        class requestStub:
-            def __init__(self, user):
-                self.user = user
-
         if not options.get("source") and not options.get("all"):
             raise ValueError("Either `--source` or `--all` must be set.")
 
         if options.get("all"):
-            queryset = models.Source.objects.all()
+            queryset = models.Source.objects.filter(active=True)
 
         if options.get("source"):
             queryset = models.Source.objects.filter(slug=options.get("source"))
 
-        request = requestStub(user)
-        outputs = []
-
         for source in queryset:
-            try:
-                results = fetch.get(user, source)
-            except FetchError as error:
-                continue
-
-            for data in results:
-                form = forms.ServiceForm({"data": data["contents"]})
-                form.source = source
-                if not form.is_valid():
-                    continue
-
-                output = form.save()
-                outputs.append(output)
+            refresh_from_github.delay(user.username, source.slug)
 
         if not quiet:
             print(f"Processed {queryset.count()} sources.")

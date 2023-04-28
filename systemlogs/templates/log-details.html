@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base-two-column.html" %}
 {% load helpers %}
 {% load humanize %}
 {% load octicons %}
@@ -6,75 +6,67 @@
     <li class="breadcrumb-item"><a href="{% url 'logs:log-list' %}">{% octicon "scrum" %} Logs</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{ log.pk }}</li>
 {% endblock %}
-{% block content %}
 
+{% block top %}
     <h3>Log details: {{ log.pk }}</h3>
+{% endblock %}
 
-
-    <div class="row align-items-start">
-        <div class="col-md-8">
-            <div class="card mt-3 mb-3">
-                <div class="card-header fw-bold">Details</div>
-                <div class="card-body">
-                    <dl>
-                        <dt>Action</dt>
-                        <dd>{{ log.get_action_display|capfirst }}</dd>
-                        <dt>Type</dt>
-                        <dd>{{ log.content_type.name|capfirst }}</dd>
-                        <dt>Representation</dt>
-                        <dd><code>{{ log.object_repr }}</code>
-                            <p class="form-text">Usually this is also the slug for the item.</p>
-                        </dd>
-                        <dt>Timestamp</dt>
-                        <dd>{{ log.timestamp }} &bull; {% include "since.html" with since=log.timestamp %}</dd>
-                        <dt>Primary key</dt>
-                        <dd>{{ log.object_pk }}</dd>
-                    </dl>
-                </div>
-            </div>
-
-            <div class="card mt-3 mb-3">
-                <div class="card-header fw-bold">Changes</div>
-                <div class="card-body">
-                    <table class="table table-hover table-bordered">
-                        <thead>
-                        <tr>
-                            <th>Field</th>
-                            <th>From</th>
-                            <th>To</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for key, value in log.changes_dict.items %}
-                        <tr>
-                            <td>{{ key }}</td>
-                            <td>{{ value.0|default:"None" }}</td>
-                            <td>{{ value.1|default:"None" }}</td>
-                        </tr>
-                        {% empty %}
-                        <p>No history for this item has been logged yet.</p>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
- 
-        <div class="col-md-4 sidebar p-3"> 
-            <div class="pb-3">
-                <h6 class="text-muted border-bottom">Info</h6>
-                <p>No extra info.</p>
-            </div>
-        
-            <div>
-                <h6 class="text-muted border-bottom">Admin</h6>
-                <p>No admin options.</a>
-            </div>
+{% block main %}
+    <div class="card mt-3 mb-3">
+        <div class="card-header fw-bold">Details</div>
+        <div class="card-body">
+            <dl>
+                <dt>Action</dt>
+                <dd>{{ log.get_action_display|capfirst }}</dd>
+                <dt>Type</dt>
+                <dd>{{ log.content_type.name|capfirst }}</dd>
+                <dt>Representation</dt>
+                <dd><code>{{ log.object_repr }}</code>
+                    <p class="form-text">Usually this is also the slug for the item.</p>
+                </dd>
+                <dt>Timestamp</dt>
+                <dd>{{ log.timestamp }} &bull; {% include "since.html" with since=log.timestamp %}</dd>
+                <dt>Primary key</dt>
+                <dd>{{ log.object_pk }}</dd>
+            </dl>
         </div>
     </div>
 
+    <div class="card mt-3 mb-3">
+        <div class="card-header fw-bold">Changes</div>
+        <div class="card-body">
+            <table class="table table-hover table-bordered">
+                <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>From</th>
+                    <th>To</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for key, value in log.changes_dict.items %}
+                <tr>
+                    <td>{{ key }}</td>
+                    <td>{{ value.0|default:"None" }}</td>
+                    <td>{{ value.1|default:"None" }}</td>
+                </tr>
+                {% empty %}
+                <p>No history for this item has been logged yet.</p>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+ 
+{% block sidebar %}
+    <div class="pb-3">
+        <h6 class="text-muted border-bottom">Info</h6>
+        <p>No extra info.</p>
+    </div>
 
-
-
-</div>
+    <div>
+        <h6 class="text-muted border-bottom">Admin</h6>
+        <p>No admin options.</a>
+    </div>
 {% endblock %}

@@ -1,8 +1,8 @@
 from datetime import timedelta
 
-from auditlog.models import LogEntry
 from django.core.management.base import BaseCommand
-from django.utils import timezone
+
+from systemlogs.tasks import truncate
 
 
 class Command(BaseCommand):
@@ -26,8 +26,6 @@ class Command(BaseCommand):
                 "You must specify `--ago` as the number of days to delete logs older than."
             )
 
-        queryset = LogEntry.objects.filter(timestamp__lt=timezone.now() - timedelta(days=ago))
-        count = queryset.count()
-        queryset.delete()
+        truncate.delay(ago)
         if not quiet:
-            print(f"Deleted {count} logs.")
+            print(f"Queued truncating logs, older than {ago} days.")

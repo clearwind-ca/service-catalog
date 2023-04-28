@@ -1,5 +1,4 @@
-from auditlog.models import LogEntry, LogEntryManager
-from django.contrib import messages
+from auditlog.models import LogEntry
 from django.urls import reverse
 from faker import Faker
 
@@ -27,12 +26,14 @@ class TestTruncate(WithSource):
 
     def test_truncate_ignores_newer_logs(self):
         LogEntry.objects.log_create(instance=self.source)
-        self.command(ago=1, quiet=True)
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            self.command(ago=1, quiet=True)
         self.assertEqual(LogEntry.objects.count(), 1)
 
     def test_truncates(self):
         LogEntry.objects.log_create(self.source)
-        self.command(ago=0, quiet=True)
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            self.command(ago=0, quiet=True)
         self.assertEqual(LogEntry.objects.count(), 0)
 
 

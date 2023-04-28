@@ -34,11 +34,17 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": f"{auth_pwd}.CommonPasswordValidator"},
     {"NAME": f"{auth_pwd}.NumericPasswordValidator"},
 ]
+
 CATALOG_ENV = env
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+CELERY_TASK_RESULT_EXPIRES = 18000  # 5 hours
+
 # Default timeout 6 hours.
 CHECKS_TIMEOUT_HOURS = os.environ.get("CHECKS_TIMEOUT_HOURS", 6)
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+CRON_USER = os.environ.get("CRON_USER")
 DEBUG = os.environ.get("DEBUG")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 if os.environ.get("CI"):
@@ -50,6 +56,9 @@ if os.environ.get("CI"):
     }
 else:
     DATABASES = {"default": dj_database_url.config(conn_max_age=600, conn_health_checks=True)}
+
+GITHUB_CHECK_REPOSITORY = os.environ.get("GITHUB_CHECK_REPOSITORY", None)
+GITHUB_DEBUG = False
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -135,7 +144,7 @@ SERVICE_SCHEMA = os.environ.get(
 )
 SECRET_KEY = os.environ.get("SECRET_KEY")
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SEND_CHECKS_DELAY = 10
+
 SERVER_URL = os.environ.get("SERVER_URL")
 STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, "web", "static"))
 STATIC_URL = "static/"
@@ -159,8 +168,7 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 WSGI_APPLICATION = "catalog.wsgi.application"
-GITHUB_CHECK_REPOSITORY = os.environ.get("GITHUB_CHECK_REPOSITORY", None)
-GITHUB_DEBUG = DEBUG
+
 
 # Monkeypatch inputs so we get a good HTML date and time picker by default.
 if DateInput.input_type != "date":
@@ -171,12 +179,3 @@ if TimeInput.input_type != "time":
 
 if DateTimeInput.input_type != "datetime-local":
     DateTimeInput.input_type = "datetime-local"
-
-
-def render_options(self, selected_choices):
-    self.choices = sorted(self.choices)
-    self.choices.sort(key=lambda x: x[1])
-    return super(SelectMultiple, self).render_options(selected_choices)
-
-
-SelectMultiple.render_options = render_options

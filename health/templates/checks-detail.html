@@ -33,30 +33,29 @@
 
 {% block sidebar %}
     <div class="pb-3">
-            <h6 class="text-muted border-bottom">Info</h6>
-            <p>Slug: <code>{{ check.slug }}</code></p>
-        </div>
+        <h6 class="text-muted border-bottom">Info</h6>
+        <p>Slug: <code>{{ check.slug }}</code></p>
+    </div>
 
-        <div class="pb-3">
-            <h6 class="text-muted border-bottom">Results</h6>
-            <p><a href="{% url 'health:results-list' %}{% qs request check check.slug %}">View results</a></p>
-        </div>
+    <div class="pb-3">
+        <h6 class="text-muted border-bottom">Results</h6>
+        <p><a href="{% url 'health:results-list' %}{% qs request check check.slug %}">View results</a></p>
+    </div>
 
-        <div class="pb-3">
-            <h6 class="text-muted border-bottom">Logs</h6>
-            {% if log %}
-                <p>{{ log.get_action_display|capfirst }} {% include "since.html" with since=log.timestamp %}</p>
-                <p><a href="{% url 'logs:log-list' %}?slug={{ check.slug }}&type=check">View more</a></p>
-            {% else %}
-                <p>{% octicon "deny" %} No logs found for this service.</p>
-            {% endif %}
-        </div>
-        <div class="pb-3">
-            <h6 class="text-muted border-bottom">Admin</h6>
-            <p><a href="#" data-bs-toggle="modal" data-bs-target="#run-modal">Run this check now</a></p>
-            <p><a href="{% url 'health:checks-update' check.slug %}">Edit this check</a></p>
-            <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete this check</a></p>
-        </div>
+    <div class="pb-3">
+        <h6 class="text-muted border-bottom">Logs</h6>
+        {% if log %}
+            <p>{{ log.get_action_display|capfirst }} {% include "since.html" with since=log.timestamp %}</p>
+            <p><a href="{% url 'logs:log-list' %}?slug={{ check.slug }}&type=check">View more</a></p>
+        {% else %}
+            <p>{% octicon "deny" %} No logs found for this service.</p>
+        {% endif %}
+    </div>
+    <div class="pb-3">
+        <h6 class="text-muted border-bottom">Admin</h6>
+        <p><a href="#" data-bs-toggle="modal" data-bs-target="#run-modal">Run this check now</a></p>
+        <p><a href="{% url 'health:checks-update' check.slug %}">Edit this check</a></p>
+        <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete this check</a></p>
     </div>
 {% endblock %}
 

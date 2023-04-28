@@ -85,8 +85,11 @@ class Source(models.Model):
         max_length=100,
         verbose_name="Repository URL",
         help_text="The URL to the repository on GitHub that contains the service catalog files.",
+        unique=True,
     )
     slug = models.SlugField(max_length=100, unique=True)
+
+    active = models.BooleanField(default=True)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

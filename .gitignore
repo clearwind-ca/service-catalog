@@ -7,3 +7,4 @@ db.sqlite3
 .DS_Store
 fly.toml
 api-example.py
+celerybeat-schedule.db

@@ -147,6 +147,8 @@ def refresh_results(results, source, request):
     """
     A helper that takes the list of results from gh fetch and runs
     them through the service form, logging any output.
+
+    Should we do this in background? Maybe, but it gives direct feedback to the user, so going to leave it for now.
     """
     for data in results:
         form = ServiceForm({"data": data["contents"]})
@@ -199,6 +201,21 @@ def source_delete(request, slug):
     messages.info(request, f"Source `{source.slug}` successfully deleted")
     source.delete()
     return redirect("services:source-list")
+
+
+@login_required
+def source_update(request, slug):
+    source = get_object_or_404(slug=slug, klass=Source)
+    if request.POST:
+        form = SourceForm(request.POST, instance=source)
+        if form.is_valid():
+            source = form.save()
+            messages.info(request, f"Source `{source.slug}` successfully updated")
+            return redirect("services:source-detail", slug=source.slug)
+    else:
+        form = SourceForm(instance=source)
+
+    return render(request, "source-update.html", context={"form": form, "source": source})
 
 
 @login_required

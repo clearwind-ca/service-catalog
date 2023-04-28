@@ -119,8 +119,6 @@ class TestSend(WithHealthCheck):
     def setUp(self):
         super().setUp()
         self.command = send.Command().handle
-        if "CRON_USER" in os.environ:
-            del os.environ["CRON_USER"]
 
     def test_arg_combos_fails(self):
         for params in [
@@ -133,50 +131,73 @@ class TestSend(WithHealthCheck):
 
     def test_no_user(self):
         """Takes the username from the environment, and checks it fails"""
-        os.environ["CRON_USER"] = "nope"
-        self.assertRaises(User.DoesNotExist, self.command)
-        del os.environ["CRON_USER"]
+        with self.settings(CRON_USER="nope"):
+            self.assertRaises(User.DoesNotExist, self.command)
 
     def test_refresh_fails_with_wrong_command_user(self):
         """Test the username from the command, and checks it fails"""
         self.assertRaises(User.DoesNotExist, self.command, user="nope")
 
-    @patch("health.management.commands.send.send")
-    def test_logs_and_stops(self, mock_send):
-        """A fatal error stops the process"""
-        Check.objects.create(name=fake.name())
-        mock_send.dispatch.side_effect = NoRepository("Nope")
-        kwargs = {
+    def kwargs(self):
+        return {
             "all_checks": True,
             "all_services": True,
             "user": self.user.username,
             "quiet": True,
         }
-        with self.settings(SEND_CHECKS_DELAY=0):
-            self.assertRaises(NoRepository, self.command, **kwargs)
-        self.assertEqual(mock_send.dispatch.call_count, 1)
-        result = CheckResult.objects.get()
-        self.assertEqual(result.status, "error")
 
-    @patch("health.management.commands.send.send")
+    @patch("health.tasks.send")
+    def test_log_errors(self, mock_send):
+        """Test that repeated errors are logged"""
+        Check.objects.create(name=fake.name())
+        mock_send.dispatch.side_effect = NoRepository("Nope")
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            self.command(**self.kwargs())
+        self.assertEqual(mock_send.dispatch.call_count, 2)
+        results = CheckResult.objects.all()
+        for result in results:
+            self.assertEqual(result.status, "error")
+
+    @patch("health.tasks.send")
     def test_send_one(self, mock_send):
         """Test sends one"""
         Check.objects.create(name=fake.name())
         mock_send.dispatch.return_value = True
-        kwargs = {
-            "all_checks": True,
-            "all_services": True,
-            "user": self.user.username,
-            "quiet": True,
-        }
-        with self.settings(SEND_CHECKS_DELAY=0):
-            self.command(**kwargs)
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            self.command(**self.kwargs())
         # 1 Service and 2 Checks, means 2 calls.
         self.assertEqual(mock_send.dispatch.call_count, 2)
         self.assertEqual(CheckResult.objects.count(), 2)
         for result in CheckResult.objects.all():
             self.assertEqual(result.status, "sent")
             self.assertEqual(result.result, "unknown")
+
+    @patch("health.tasks.send")
+    def test_ignore_inactive_check(self, mock_send):
+        """Test that it will ignore inactive checks"""
+        self.health_check.active = False
+        self.health_check.save()
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            self.command(**self.kwargs())
+        self.assertEqual(mock_send.dispatch.call_count, 0)
+
+    @patch("health.tasks.send")
+    def test_ignore_inactive_service(self, mock_send):
+        """Test that it will ignore inactive services"""
+        self.service.active = False
+        self.service.save()
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            self.command(**self.kwargs())
+        self.assertEqual(mock_send.dispatch.call_count, 0)
+
+    @patch("health.tasks.send")
+    def test_ignore_adhoc(self, mock_send):
+        """Test that it will adhoc checks"""
+        self.health_check.frequency = "adhoc"
+        self.health_check.save()
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            self.command(**self.kwargs())
+        self.assertEqual(mock_send.dispatch.call_count, 0)
 
 
 class TestSendFrequency(WithHealthCheck):
@@ -234,13 +255,14 @@ class TestTimeout(WithHealthCheck):
         # Set the result to be 12 hours old.
         CheckResult.objects.update(updated=timezone.now() - timedelta(hours=12))
 
-        # This times out things older than 13 hours.
-        self.command(quiet=True, ago=13)
-        self.assertEquals(CheckResult.objects.filter(status="sent").count(), 1)
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            # This times out things older than 13 hours.
+            self.command(quiet=True, ago=13)
+            self.assertEquals(CheckResult.objects.filter(status="sent").count(), 1)
 
-        # This times out things older than 11 hours, our check result.
-        self.command(quiet=True, ago=11)
-        self.assertEquals(CheckResult.objects.filter(status="timed-out").count(), 1)
+            # This times out things older than 11 hours, our check result.
+            self.command(quiet=True, ago=11)
+            self.assertEquals(CheckResult.objects.filter(status="timed-out").count(), 1)
 
 
 class TestAdHoc(WithHealthCheck):
@@ -254,7 +276,7 @@ class TestAdHoc(WithHealthCheck):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 405)
 
-    @patch("health.views.send")
+    @patch("health.tasks.send")
     def test_post(self, mock_send):
         """Test the view works if a POST"""
         mock_send.dispatch.return_value = True
@@ -263,16 +285,17 @@ class TestAdHoc(WithHealthCheck):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(CheckResult.objects.filter(status="sent").count(), 1)
 
-    @patch("health.views.send")
+    @patch("health.tasks.send")
     def test_post(self, mock_send):
         """Test the view works if a POST"""
         mock_send.dispatch.side_effect = NoRepository("Nope")
         self.client.force_login(self.user)
-        response = self.client.post(self.url)
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            response = self.client.post(self.url)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(CheckResult.objects.filter(status="error").count(), 1)
 
-    @patch("health.views.send")
+    @patch("health.tasks.send")
     def test_api_post(self, mock_send):
         """Test the view works if as a POST in the API"""
         self.url = reverse("health:api-checks-run", args=[self.health_check.pk])
@@ -281,7 +304,7 @@ class TestAdHoc(WithHealthCheck):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(CheckResult.objects.filter(status="sent").count(), 1)
 
-    @patch("health.views.send")
+    @patch("health.tasks.send")
     def test_api_post(self, mock_send):
         """Test the view fails if as an anonymous POST in the API"""
         self.url = reverse("health:api-checks-run", args=[self.health_check.pk])

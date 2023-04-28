@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from rest_framework import permissions, viewsets
@@ -11,13 +11,19 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from catalog.errors import NoRepository, SendError
-from gh import send
 from services.models import Service
 from web.helpers import process_query_params
 
 from .forms import CheckForm
-from .models import RESULT_CHOICES, STATUS_CHOICES, Check, CheckResult
+from .models import (
+    FREQUENCY_CHOICES,
+    RESULT_CHOICES,
+    STATUS_CHOICES,
+    Check,
+    CheckResult,
+)
 from .serializers import CheckResultSerializer, CheckSerializer
+from .tasks import send_to_github
 
 
 @login_required
@@ -25,7 +31,10 @@ from .serializers import CheckResultSerializer, CheckSerializer
 def checks(request):
     filters = {}
     get = request.GET
-    for param, lookup in (("active", "active"),):
+    for param, lookup in (
+        ("active", "active"),
+        ("frequency", "frequency"),
+    ):
         if get.get(param) is not None:
             filters[lookup] = get[param]
 
@@ -40,6 +49,7 @@ def checks(request):
         "filters": filters,
         "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
         "active": ["yes", "no"],
+        "frequency": dict(FREQUENCY_CHOICES).keys(),
     }
     return render(request, "checks-list.html", context)
 
@@ -85,52 +95,30 @@ def checks_update(request, slug):
 @login_required
 @require_POST
 def checks_delete(request, slug):
-    Check.objects.get(slug=slug).delete()
+    get_object_or_404(Check, slug=slug).delete()
     messages.info(request, f"Health check `{slug}` and matching results deleted")
     return redirect(reverse("health:checks-list"))
 
 
-def adhoc_run(request, check):
+def send(username, check):
     service_queryset = Service.objects.all()
     for service in service_queryset:
-        result = CheckResult.objects.create(
-            health_check=check,
-            status="sent",
-            service=service,
-        )
-        try:
-            # Should this use the cron user?
-            send.dispatch(request.user, result)
-        except (SendError, NoRepository) as error:
-            # Fatal error, they are all going to fail.
-            # Should we log here?
-            result.status = "error"
-            result.save()
-            raise error
+        send_to_github.delay(username, check.slug, service.slug)
 
 
 @login_required
 @require_POST
 def checks_run(request, slug):
-    check = Check.objects.get(slug=slug)
-    try:
-        adhoc_run(request, check)
-    except (SendError, NoRepository) as error:
-        messages.error(request, f"Failed to send health check: `{error.message}`")
-        return redirect(reverse("health:checks-detail", kwargs={"slug": slug}))
-
-    messages.info(request, f"Health check `{slug}` run for all services.")
+    check = get_object_or_404(Check, slug=slug)
+    send(request.user.username, check)
+    messages.info(request, f"Health check `{slug}` queued for all services.")
     return redirect(reverse("health:checks-detail", kwargs={"slug": slug}))
 
 
 @api_view(["POST"])
 def api_checks_run(request, pk):
-    check = Check.objects.get(pk=pk)
-    try:
-        adhoc_run(request, check)
-    except (SendError, NoRepository) as error:
-        return Response({"success": False}, status=status.HTTP_502_BAD_GATEWAY)
-
+    check = get_object_or_404(Check, pk=pk)
+    send(request.user.username, check)
     return Response({"success": True})
 
 
