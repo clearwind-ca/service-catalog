@@ -34,7 +34,12 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": f"{auth_pwd}.CommonPasswordValidator"},
     {"NAME": f"{auth_pwd}.NumericPasswordValidator"},
 ]
+
 CATALOG_ENV = env
+CELERY_BROKER_URL=os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND=os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+CELERY_TASK_RESULT_EXPIRES = 18000 # 5 hours
+
 # Default timeout 6 hours.
 CHECKS_TIMEOUT_HOURS = os.environ.get("CHECKS_TIMEOUT_HOURS", 6)
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
@@ -135,7 +140,7 @@ SERVICE_SCHEMA = os.environ.get(
 )
 SECRET_KEY = os.environ.get("SECRET_KEY")
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SEND_CHECKS_DELAY = 10
+
 SERVER_URL = os.environ.get("SERVER_URL")
 STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, "web", "static"))
 STATIC_URL = "static/"

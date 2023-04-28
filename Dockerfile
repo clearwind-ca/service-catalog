@@ -22,14 +22,11 @@ RUN apt-get update && \
     apt-get install -y \
         postgresql-client \
         supervisor \
+        redis-server \
         cron
 
 
 COPY . /code/
-
-# Copy the crontab into place and set permissions.
-COPY catalog/crontab /etc/cron.d/catalog-cron
-RUN chmod 0644 /etc/cron.d/catalog-cron
 
 # Then run the server.
 CMD supervisord -c /code/catalog/supervisord.conf

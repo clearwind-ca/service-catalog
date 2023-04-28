@@ -8,6 +8,7 @@
 <div>
     <div class="btn-group" role="group">
         {% include "filters-dropdown.html" with list=active all="all" key="active" in_request=request.GET.key %}
+        {% include "filters-dropdown.html" with list=frequency all="all" key="frequency" in_request=request.GET.key %}
     </div>
 
     {% include "filters-text.html" with reset="health:checks-list" %}

@@ -1,16 +1,11 @@
 import os
-import time
-
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from catalog.errors import NoRepository, SendError
-from gh import send
 from health.models import Check, CheckResult
 from services.models import Service
-
+from health.tasks import send_to_github
 
 def should_run(check, service, quiet=False):
     now = timezone.now()
@@ -81,7 +76,7 @@ class Command(BaseCommand):
         quiet = options.get("quiet", False)
         if not username:
             raise ValueError(
-                "User must be set either using `--cron-user` or `CRON_USER` as the username of a user with a GitHub login."
+                "User must be set either using `--user` or `CRON_USER` as the username of a user with a GitHub login."
             )
         user = User.objects.get(username=username)
 
@@ -107,30 +102,15 @@ class Command(BaseCommand):
         if options.get("service"):
             service_queryset = Service.objects.filter(slug=options.get("service"))
 
-        request = requestStub(user)
-        k = 0
 
+        k = 0
         for check in check_queryset:
             for service in service_queryset:
                 if not should_run(check, service, quiet=quiet):
                     continue
 
-                result = CheckResult.objects.create(
-                    health_check=check,
-                    status="sent",
-                    service=service,
-                )
-                try:
-                    send.dispatch(user, result)
-                except (SendError, NoRepository) as error:
-                    # Fatal error, they are all going to fail.
-                    # Should we log here?
-                    result.status = "error"
-                    result.save()
-                    raise error
-
                 k += 1
-                time.sleep(settings.SEND_CHECKS_DELAY)
+                send_to_github.delay(user.username, check.slug, service.slug)
 
         if not quiet:
-            print(f"Sent {k} checks to GitHub.")
+            print(f"Queued {k} checks to send to GitHub.")
