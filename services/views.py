@@ -38,7 +38,7 @@ def service_list(request):
         if get.get(param) is not None:
             filters[lookup] = get[param]
 
-    services = Service.objects.filter(**filters).order_by("name")
+    services = Service.objects.filter(**filters).order_by("priority", "name")
 
     paginator = Paginator(services, per_page=get["per_page"])
     page_number = get["page"]
@@ -186,7 +186,7 @@ def source_add(request):
         else:
             messages.error(request, form.nice_errors())
 
-        return render(request, "source-add.html")
+    return redirect("services:source-list")
 
 
 @login_required

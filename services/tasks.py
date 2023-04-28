@@ -2,7 +2,7 @@ from catalog.celery import app
 from gh import fetch
 from services import forms
 from services.models import Source
-
+from catalog.errors import FetchError
 
 @app.task
 def refresh_from_github(username, source_slug):
