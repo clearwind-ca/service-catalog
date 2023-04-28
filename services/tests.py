@@ -22,10 +22,9 @@ fake = Faker("en_US")
 
 def create_source():
     """Create a source."""
-    return forms.SourceForm({
-        "url": f"https://github.com/{fake.user_name()}/{fake.user_name()}",
-        "active": True
-    }).save()
+    return forms.SourceForm(
+        {"url": f"https://github.com/{fake.user_name()}/{fake.user_name()}", "active": True}
+    ).save()
 
 
 def create_service(source):
@@ -492,6 +491,7 @@ class TestManagementRefresh(WithUser):
             self.command.handle(user=self.user.username, all=True, quiet=True)
 
         self.assertEquals(mock_fetch.get.call_count, 0)
+
 
 class TestServiceForm(WithUser):
     def setUp(self):

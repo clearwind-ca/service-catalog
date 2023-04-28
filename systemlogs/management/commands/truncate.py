@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.core.management.base import BaseCommand
+
 from systemlogs.tasks import truncate
 
 
@@ -24,8 +25,7 @@ class Command(BaseCommand):
             raise ValueError(
                 "You must specify `--ago` as the number of days to delete logs older than."
             )
-    
+
         truncate.delay(ago)
         if not quiet:
             print(f"Queued truncating logs, older than {ago} days.")
-

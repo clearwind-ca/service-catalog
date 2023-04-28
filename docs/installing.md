@@ -1,8 +1,9 @@
 The Service Catalog is a Django project and installable pretty much anywhere that can meet the requirements.
 
 Requirements:
-* Python 3.9+
-* Postgres database 14.6+
+* [Python](https://www.python.org/) 3.9+
+* [Postgres](https://www.postgresql.org/) database 14.6+
+* [Celery](https://docs.celeryq.dev/en/stable/)
 
 ## Dockerfile
 
@@ -15,6 +16,8 @@ docker run -t service-catalog
 
 You will also need a Postgres container to persist your data.
 
+Tasks are managed through a celery backend. The docker container installs a non-persisted Redis instance in the container. However you could connect to another celery backend elsewhere.
+
 ## Environment variables
 
 Where possible configuration is done through environment variables which alter the settings files. Some of these settings are specific to the Service Catalog, but some are [common to all Django projects and the documentation](https://docs.djangoproject.com/en/4.1/ref/settings/) covers those.
@@ -23,6 +26,7 @@ Where possible configuration is done through environment variables which alter t
 |-|-|-|-|
 |ALLOWED_HOSTS|Override the Django `ALLOWED_HOSTS` setting.|Yes, for browser access if not in `DEBUG` mode.|Empty|
 |CATALOG_ENV|The path to a file of enviroment variables to load. Environment variables loaded from this file will override variables loaded elsewhere.|No|(see notes below)|
+|CELERY_BROKER_URL|The celery broker backend to connect to|No|`redis://localhost:6379/0`|
 |CRON_USER|The username for a user logged into the Catalog to run background updates against GitHub.|No, however background updates will fail without it|Empty|
 |DATABASE_URL|The connection string to the [database using dj-database-url](https://pypi.org/project/dj-database-url/#url-schema)|Yes|Empty|
 |DEBUG|Set the Django `DEBUG` mode.|No|False|
@@ -83,17 +87,17 @@ To check that your settings are good, a page at `/debug` [^1] is provided that w
 
 ## Background jobs
 
-There are multiple background jobs in the system. If you are using the Dockerfile, then these are set up automatically for you, by installing the `catalog/crontab`.
+There are multiple background jobs in the system. If you are using the Dockerfile, then these are set up automatically for you and run through Celery regularly.
 
-If you are not using the Dockerfile, then you will need to create these manually.
+You can also run these jobs through management commands.
+
+See [the code for default job schedules and values](catalog/celery.py).
 
 ### Refresh
 
 Command: `python manage.py refresh`
 
 Runs through all the sources in the Catalog and re-fetches the data from GitHub and updates it in the Catalog. It's the same process as hitting the `Refresh` button on the `Source` page.
-
-By default run once per day.
 
 Arguments:
 

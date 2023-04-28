@@ -1,5 +1,6 @@
-from django.utils import timezone
 from datetime import timedelta
+
+from django.utils import timezone
 
 from catalog.celery import app
 from catalog.errors import NoRepository, SendError
@@ -12,7 +13,7 @@ def should_run(check, service, quiet=False):
     now = timezone.now()
     frequency = check.frequency
     if frequency not in ["hourly", "daily", "weekly"]:
-        return False 
+        return False
 
     recent_result = (
         CheckResult.objects.filter(health_check=check, service=service).order_by("-created").first()

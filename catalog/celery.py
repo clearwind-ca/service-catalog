@@ -20,16 +20,16 @@ app.conf.beat_schedule = {
     "timeout-health-checks": {
         "task": "health.tasks.timeout",
         "schedule": 60 * 60,  # Every hour.
-        "args": (6,), # Timeout health check results older than 6 hours.
+        "args": (6,),  # Timeout health check results older than 6 hours.
     },
-    'truncate-logs': {
+    "truncate-logs": {
         "task": "systemlogs.tasks.truncate",
-        "schedule": 60 * 60 * 24, # Every 24 hours.
-        "args": (30,), # Truncate logs older than 30 days.
+        "schedule": 60 * 60 * 24,  # Every 24 hours.
+        "args": (30,),  # Truncate logs older than 30 days.
     },
-    'refresh-active-services-from-github': {
-        'task': 'services.tasks.refresh_active_from_github',
-        'schedule': 60 * 5, # Every hour.
-        'args': (os.environ.get('CRON_USER'),),
+    "refresh-active-services-from-github": {
+        "task": "services.tasks.refresh_active_from_github",
+        "schedule": 60 * 5,  # Every hour.
+        "args": (os.environ.get("CRON_USER"),),
     },
 }
