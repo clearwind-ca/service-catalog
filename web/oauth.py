@@ -1,13 +1,15 @@
 import datetime
 
 import requests
+from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 from oauthlogin.exceptions import OAuthError
 from oauthlogin.providers import OAuthProvider, OAuthToken, OAuthUser
+
 from gh import user
 from services.models import Organization
 from web.shortcuts import get_object_or_None
-from django.core.exceptions import PermissionDenied
+
 
 class GitHubOAuthProvider(OAuthProvider):
     authorization_url = "https://github.com/login/oauth/authorize"

@@ -85,5 +85,5 @@ def site_context(request):
         "breadcrumbs": True,
         "settings": {
             "timezone": settings.TIME_ZONE,
-        }
+        },
     }
