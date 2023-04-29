@@ -16,6 +16,7 @@ urlpatterns = [
     path("schema/", views.schema_detail, name="schema-detail"),
     path("sources/", views.source_list, name="source-list"),
     path("sources/add/", views.source_add, name="source-add"),
+    path("org/add/", views.org_add, name="org-add"),
     path("sources/<str:slug>/", views.source_detail, name="source-detail"),
     path("sources/<str:slug>/validate/", views.source_validate, name="source-validate"),
     path("sources/<str:slug>/refresh/", views.source_refresh, name="source-refresh"),

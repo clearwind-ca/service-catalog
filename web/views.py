@@ -10,12 +10,16 @@ from rest_framework.authtoken.models import Token
 from .shortcuts import get_object_or_None
 
 
+def handler403(request, exception):
+    return render(request, "custom-403.html", status=403, context={"hide_login": True})
+
+
 def handler404(request, exception):
-    return render(request, "404.html", status=404)
+    return render(request, "404.html", status=404, context={"hide_login": True})
 
 
 def handler500(request):
-    return render(request, "500.html", status=500)
+    return render(request, "500.html", status=500, context={"hide_login": True})
 
 
 def logout(request):

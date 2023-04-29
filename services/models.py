@@ -110,6 +110,20 @@ class Source(models.Model):
         return reverse("services:source-detail", kwargs={"slug": self.slug})
 
 
+class Organization(models.Model):
+    """
+    An organization which then has sources.
+    """
+    name = models.CharField(max_length=100)
+    auto_add_sources = models.BooleanField(default=True, help_text="Automatically add sources from the organization.")
+
+    active = models.BooleanField(default=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
 def slugify_service(name):
     return slugify(name)
 

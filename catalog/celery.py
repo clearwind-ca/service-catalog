@@ -37,4 +37,9 @@ app.conf.beat_schedule = {
         "schedule": 60 * 5,  # Every hour.
         "args": (os.environ.get("CRON_USER"),),
     },
+    "get-sources-from-organisation": {
+        "task": "events.tasks.refresh_org_from_github",
+        "schedule": 60 * 5,  # Every hour.
+        "args": (os.environ.get("CRON_USER"),),
+    },
 }

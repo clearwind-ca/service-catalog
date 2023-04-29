@@ -25,3 +25,8 @@ urlpatterns = [
         name="api-docs-ui",
     ),
 ]
+
+
+handler403 = "web.views.handler403"
+handler404 = "web.views.handler404"
+handler500 = "web.views.handler500"

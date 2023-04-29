@@ -28,6 +28,12 @@
             "items": {
                 "type": "string"
             }
+        },
+        "events": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
         }
     },
     "required": ["priority", "type", "name"]

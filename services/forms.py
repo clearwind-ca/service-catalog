@@ -14,6 +14,15 @@ class BaseForm:
     def nice_errors(self):
         return ". ".join([". ".join(v) for k, v in self.errors.items()])
 
+class OrgForm(forms.ModelForm):
+    class Meta:
+        model = models.Organization
+        exclude = ["created", "modified", "active"]
+
+    def clean(self):
+        if models.Organization.objects.exists():
+            raise ValueError("Only one organization can be created.")
+        return super().clean()
 
 class SourceForm(forms.ModelForm, BaseForm):
     class Meta:

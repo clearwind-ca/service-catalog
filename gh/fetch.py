@@ -73,7 +73,6 @@ def url_to_nwo(url):
     organization, repo = path.split("/")
     return organization, repo
 
-
 def get_repo(gh, organization, repo):
     try:
         user = gh.get_user(organization)
@@ -86,7 +85,6 @@ def get_repo(gh, organization, repo):
         raise NoRepository(f"Unable to access the repository at: `{repo}`.")
 
     return repo
-
 
 def get(user, source):
     gh = login_as_user(user)
@@ -117,6 +115,13 @@ def get_deployments(user, source):
     gh = login_as_user(user)
     organization, repo = url_to_nwo(source.url)
     repo = get_repo(gh, organization, repo)
+    return repo.get_deployments()
 
-    deployments = repo.get_deployments()
-    return deployments
+
+def get_repositories(user, org_name):
+    gh = login_as_user(user)
+    try:
+        gh_org = gh.get_organization(org_name)
+    except UnknownObjectException:
+        raise NoRepository(f"Unable to access theorganization: `{org_name}`.")
+    return gh_org.get_repos()

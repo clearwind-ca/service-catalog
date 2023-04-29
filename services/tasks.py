@@ -2,7 +2,7 @@ from catalog.celery import app
 from catalog.errors import FetchError
 from gh import fetch
 from services import forms
-from services.models import Source
+from services.models import Source, Organization
 
 
 @app.task
@@ -27,3 +27,24 @@ def refresh_from_github(username, source_slug):
 def refresh_active_from_github(username):
     for source in Source.objects.filter(active=True):
         refresh_from_github.delay(username, source.slug)
+
+
+@app.task
+def refresh_sources_from_github(username, org_slug):
+    try:
+        results = fetch.get_repositories(username, org_slug)
+    except FetchError as error:
+        return False
+    
+    for repo in results:
+        form = forms.SourceForm({"url": repo.html_url, "active": True})
+        if not form.is_valid():
+            print(form.errors)
+            continue
+
+        form.save()
+
+@app.task
+def refresh_org_from_github(username):
+    for org in Organization.objects.filter(active=True, auto_add_sources=True):
+        refresh_sources_from_github.delay(username, org.name)

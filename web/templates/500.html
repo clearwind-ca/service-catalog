@@ -1,6 +1,12 @@
-{% extends "base-one-column.html" %}
-{% block content %}
+{% extends "base-two-column.html" %}
+{% load static %}
+{% block main %} 
 <div class="row pt-5">
-    <h2>500</h2>
+    <h2>Sad server error</h2>
+    <p>Something went wrong there. If you are the administrator, check out the logs. The AI generated cat is quite sad too, it probably wants to go out into the metaverse or something. Don't worry cat, that's a pretty sad place too.</p>
 </div>
+{% endblock %}
+
+{% block sidebar %}
+    <img src="{% static 'cats/sad.jpg' %}" alt="Sad cat" style="float: right">
 {% endblock %}

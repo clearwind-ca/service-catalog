@@ -4,7 +4,10 @@ import requests
 from django.utils import timezone
 from oauthlogin.exceptions import OAuthError
 from oauthlogin.providers import OAuthProvider, OAuthToken, OAuthUser
-
+from gh import user
+from services.models import Organization
+from web.shortcuts import get_object_or_None
+from django.core.exceptions import PermissionDenied
 
 class GitHubOAuthProvider(OAuthProvider):
     authorization_url = "https://github.com/login/oauth/authorize"
@@ -91,6 +94,12 @@ class GitHubOAuthProvider(OAuthProvider):
             ][0]
         except IndexError:
             raise OAuthError("A verified primary email address is required on GitHub")
+
+        org = get_object_or_None(Organization)
+        if org:
+            check = user.check_org_membership(username, org.name)
+            if not check:
+                raise OAuthError("User is not a member of the organization")
 
         return OAuthUser(
             id=user_id,

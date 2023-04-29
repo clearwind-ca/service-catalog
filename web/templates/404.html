@@ -1,6 +1,12 @@
-{% extends "base-one-column.html" %}
-{% block content %}
+{% extends "base-two-column.html" %}
+{% load static %}
+{% block main %} 
 <div class="row pt-5">
-    <h2>404: Not found</h2>
+    <h2>Not found</h2>
+    <p>That wasn't found, or perhaps you aren't meant to see it. We aren't telling. The AI generated cat was looking in the fictional box for something and didn't find anything either. There is no box. Or spoon. One of those.</p>
 </div>
+{% endblock %}
+
+{% block sidebar %}
+    <img src="{% static 'cats/box.jpg' %}" alt="Confused cat" style="float: right">
 {% endblock %}

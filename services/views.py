@@ -20,8 +20,8 @@ from events.models import Event
 from gh import fetch
 from web.helpers import process_query_params
 
-from .forms import ServiceForm, SourceForm, get_schema
-from .models import Service, Source
+from .forms import ServiceForm, SourceForm, get_schema, OrgForm
+from .models import Service, Source, Organization
 from .serializers import ServiceSerializer, SourceSerializer
 
 
@@ -101,6 +101,7 @@ def source_list(request):
     context = {
         "sources": page_obj,
         "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
+        "orgs": Organization.objects.all()
     }
     return render(request, "source-list.html", context)
 
@@ -190,6 +191,25 @@ def source_add(request):
 
     return redirect("services:source-list")
 
+
+@login_required
+def org_add(request):
+    if request.method == "GET":
+        orgs = Organization.objects.count()
+        if orgs:
+            messages.error(request, "Only one organization is allowed at this time.")
+        return render(
+            request,
+            "org-add.html",
+            context={"form": OrgForm(), "orgs": orgs },
+        )
+    else:
+        form = OrgForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("services:source-list")
+
+    return redirect("services:source-list")
 
 @login_required
 @require_POST

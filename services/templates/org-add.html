@@ -2,22 +2,22 @@
 {% load octicons %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item"><a href="{% url 'services:source-list' %}">{% octicon "dashboard" %}Sources</a></li>
-    <li class="breadcrumb-item">Add</li>
+    <li class="breadcrumb-item">Add organization</li>
 {% endblock %}
 {% load helpers %}
 {% load crispy_forms_tags %}
 {% block top %}
-<h4>Add a source</h4>
+<h4>Add an organization</h4>
 {% endblock %}
 
 {% block main %}
 <div class="card mt-3 mb-3">
-    <form method="post" action="{% url 'services:source-add' %}" class="m-3">
+    <form method="post" action="{% url 'services:org-add' %}" class="m-3">
         {% csrf_token %}
         <div class="mb-3">
             {{ form|crispy }}
         </div>
-        <button type="submit" class="btn btn-outline-primary">Add source</button>
+        <button type="submit" class="btn btn-outline-primary" {% if orgs %}disabled="disabled"{% endif %}>Add organization</button>
     </form>
 </div>
 {% endblock %}
@@ -25,11 +25,8 @@
 {% block sidebar %}
 <div class="pb-3">
     <h6 class="text-muted border-bottom">Info</h6>
-    <p>A source is a GitHub repository containing a entry for the service catalog in one of the following file paths:
-    {% for path in file_paths %}<code>{{ path }}</code>{% if not forloop.last %}, {% endif %}{% endfor %}. Once added
-    it will be updated from the source regularly.
+    <p>An organization is a GitHub organization. Adding one will add in all the repositories in the organization as sources and enforce that the user has access to the organization.</p>
     </p>
-    <p>A source can be outside of the organisations that have been added.</p>
 </div>
 
 {% endblock %}
