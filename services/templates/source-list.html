@@ -11,7 +11,7 @@
         <table class="table table-hover my-3">
             <thead>
                 <tr>
-                    <th>Source</th>
+                    <th>Repository</th>
                     <th>Services</th>
                     <th>{% octicon "past" %} Updated</th>
                 </tr>
@@ -19,7 +19,10 @@
             <tbody>    
                 {% for source in sources %}
                     <tr>
-                        <td><a href="{% url 'services:source-detail' source.slug %}">{{ source.slug }}</a></td>
+                        <td>
+                            <a href="{% url 'services:source-detail' source.slug %}">{{ source.slug }}</a>
+                            {% include "active.html" with active=source.active show_inactive_only=True %}
+                        </td>
                         <td>{{ source.services.count }}</td>
                         <td>{% include "since.html" with since=source.updated %}</td>
                     </tr>
@@ -56,7 +59,11 @@
         {% include "pagination.html" with objects=sources %}
     {% endif %}
     <p><a href="{% url 'services:source-add' %}">{% octicon 'plus' %} Add in a new source</a></p>
-    <p><a href="{% url 'services:org-add' %}">{% octicon 'plus' %} Add in a new organization</a></p>
+    <hr>
+    <p>Organisations and sources are automatically pulled from GitHub at intervals. You can trigger these events manually if you'd like 👇</p>
+    <form action="{% url 'services:org-refresh' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-primary">Trigger GitHub refresh</button>
     <hr>
     <p class="form-text">The data being pulled is validated using <a href="{% url 'services:schema-detail' %}">this schema.</p>
 </div>

@@ -1,0 +1,87 @@
+{% extends "base-one-column.html" %}
+{% load octicons %}
+{% load crispy_forms_tags %}
+{% block content %} 
+    <h2>Setup</h2>
+    <p>This page allows you to check key environment variables for the project and create a new GitHub app. <a href="https://github.com/clearwind-ca/service-catalog/blob/main/docs/installing.md#environment-variables">More information</a>.</p>
+
+    <h4>Step 1: Django configuration</h4>
+    {% if steps.django %}
+        <p><span class="fill-success">{% octicon "verified" %}</span> Django environment setup 👍.</p>
+    {% else %}
+        <p>Environment variables that need to be setup in the Django instance. Documentation on the <a href="https://github.com/clearwind-ca/service-catalog/blob/main/docs/installing.md#environment-variables">environment variables for the service catalog</a> and the matching <a href="https://docs.djangoproject.com/en/dev/ref/settings/">Django documentation</a>. You might need to restart your Django instance to have them take affect.</p>
+    {% endif %}
+    <table class="table table-hover">
+        <tr>
+            <th></th>
+            <th>Variable name</th>
+            <th>Value</th>
+        </tr>
+        {% for k, v in keys.django.items %}
+        <tr>
+            <td>
+                {% if v %}
+                    <span class="fill-success">{% octicon "verified" %}</span>
+                {% else %}
+                    <span class="fill-danger">{% octicon "x" %}</span>
+                {% endif %}
+            </td>
+            <td><code>{{ k }}</code></td>
+            <td><code>{{ v }}</code></td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h4>Step 2: GitHub app setup</h4>
+    {% if steps.github %}
+        <p><span class="fill-success">{% octicon "verified" %}</span> GitHub app setup 👍. You should be good to go.</p>
+        <p><b>Note:</b> To allow users to login you must give the GitHub app access to `Account Permissions` 👉 `Email addresses` 👉 `Access: Read-only`. Currently this does not seem possible to set from the manifest.</p>
+    {% else %}
+        <p>This form will guide you through the flow and give you the outputs needed to populate the Environment variables.</p>
+        {% if app %}
+            <p>Copy the following values into the environment variables and then restart. You can reset them at any time by accessing the <a href="{{ app.html_url }}">GitHub app page</a>.</p>
+            <dl>
+                <dt><code>GITHUB_APP_ID</code></dt>
+                <dd><code>{{ app.id }}</code></dd>
+                <dt><code>GITHUB_CLIENT_ID</code></dt>
+                <dd><code>{{ app.client_id }}</code></dd>
+                <dt><code>GITHUB_CLIENT_SECRET</code></dt>
+                <dd><code>{{ app.client_secret }}</code></dd>
+                <dt><code>GITHUB_PEM</code></dt>
+                <dd><pre>{{ app.pem }}</pre></dd>
+            </dl>
+        {% else %}
+            <p>Create a GitHub app for your organization. This will allow you to populate the Environment variables. If you already have an existing Service Catalog GitHub app ready to go, you can just skip straight to setting up the appropriate environment variables.</p>
+            <div class="card mt-3 mb-3">
+                <form method="post" data-action="https://github.com/organizations/ORGANIZATION/settings/apps/new?state=abc123" id="create-app" class="m-3">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <input type="manifest" name="manifest" hidden="hidden">
+                    <button type="submit" class="btn btn-outline-primary">Create GitHub App</button>
+                </form>
+            </div>
+        {% endif %}
+    {% endif %}
+    {% if not app %}
+    <table class="table table-hover">
+        <tr>
+            <th></th>
+            <th>Variable name</th>
+            <th>Value</th>
+        </tr>
+        {% for k, v in keys.github.items %}
+        <tr>
+            <td>
+                {% if v %}
+                    <span class="fill-success">{% octicon "verified" %}</span>
+                {% else %}
+                    <span class="fill-danger">{% octicon "x" %}</span>
+                {% endif %}
+            </td>
+            <td><code>{{ k }}</code></td>
+            <td><code>{{ v }}</code></td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+{% endblock %}

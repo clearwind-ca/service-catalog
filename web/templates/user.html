@@ -2,6 +2,7 @@
 <ul class="dropdown-menu">
     {% if user.is_superuser %}
     <li><a class="dropdown-item" href="{% url 'admin:index' %}">{% octicon "book" %} Admin</a></li>
+    <li><a class="dropdown-item" href="{% url 'web:setup' %}">{% octicon "book" %} Setup</a></li>
     {% endif %}
     <li><a class="dropdown-item" href="{% url 'web:api' %}">{% octicon "blast" %} API Token</a></li>
     <li><hr></li>

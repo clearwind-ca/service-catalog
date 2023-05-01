@@ -10,7 +10,6 @@ from rest_framework import permissions, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from catalog.errors import NoRepository, SendError
 from services.models import Service
 from web.helpers import process_query_params
 
@@ -29,6 +28,9 @@ from .tasks import send_to_github
 @login_required
 @process_query_params
 def checks(request):
+    if not settings.GITHUB_CHECK_REPOSITORY:
+        messages.error(request, 'The "GITHUB_CHECK_REPOSITORY" environment variable is not set. Health Checks will not run.')
+
     filters = {}
     get = request.GET
     for param, lookup in (

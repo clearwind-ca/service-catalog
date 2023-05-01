@@ -1,8 +1,15 @@
+import os
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from github import Github, enable_console_debug_logging
+from github import Github, GithubIntegration, enable_console_debug_logging
 from oauthlogin.models import OAuthConnection
 
+if settings.GITHUB_DEBUG:
+    enable_console_debug_logging()
+
+def login_as_app():
+    """Login as the app."""
+    return GithubIntegration(os.environ.get("GITHUB_APP_ID"), os.environ.get("GITHUB_PEM"))
 
 def login_as_user(user):
     """Login as the user."""
@@ -13,10 +20,12 @@ def login_as_user(user):
     if connection.access_token_expired():
         connection.refresh_access_token()
 
-    if settings.GITHUB_DEBUG:
-        enable_console_debug_logging()
     return Github(connection.access_token)
 
+def login_as_installation(github_integration, installation):
+    """Login as installation"""
+    access_token = github_integration.get_access_token(installation.id)
+    return Github(access_token.token)
 
 def check_org_membership(username, org):
     gh = login_as_user(settings.CRON_USER)

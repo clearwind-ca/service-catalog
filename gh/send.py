@@ -9,18 +9,11 @@ from catalog.errors import NoRepository, SendError
 from health.serializers import CheckResultSerializer, CheckSerializer
 from services.serializers import ServiceSerializer, SourceSerializer
 
-from .user import login_as_user
+from .fetch import get_repo_installation, url_to_nwo
 
-
-def dispatch(user, result):
+def dispatch(result):
     """Send checks to GitHub as repository dispatch"""
-    gh = login_as_user(user)
-    try:
-        repo = gh.get_repo(settings.GITHUB_CHECK_REPOSITORY)
-    except UnknownObjectException:
-        raise NoRepository(
-            f"Unable to access the repository at: `{settings.GITHUB_CHECK_REPOSITORY}`."
-        )
+    repo = get_repo_installation(url_to_nwo(settings.GITHUB_CHECK_REPOSITORY))
 
     # The general principle here is to send as much data as possible so that the API
     # has to do as little as possible work to call back to the service catalog to decide

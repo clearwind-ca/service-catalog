@@ -8,10 +8,10 @@ app_name = "web"  # pylint: disable=invalid-name
 urlpatterns = [
     path("", TemplateView.as_view(template_name="home.html")),
     path("api/", views.api, name="api"),
-    path("api/create", views.api_create, name="api-create"),
-    path("api/delete", views.api_delete, name="api-delete"),
-    path("debug/", views.debug, name="debug"),
-    path("logout", views.logout, name="logout"),
+    path("api/create/", views.api_create, name="api-create"),
+    path("api/delete/", views.api_delete, name="api-delete"),
+    path("setup/", views.setup, name="setup"),
+    path("logout/", views.logout, name="logout"),
 ]
 
 handler403 = "web.views.handler403"
