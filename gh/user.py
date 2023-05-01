@@ -33,10 +33,11 @@ def login_as_installation(github_integration, installation):
 
 
 def check_org_membership(username, org):
-    gh = login_as_user(settings.CRON_USER)
+    gh = login_as_user(username)
     try:
+        user = gh.get_user(username)
         org_object = gh.get_organization(org)
-        org_object.has_in_members(username)
+        org_object.has_in_members(user)
         return True
     except AssertionError:
         return False
