@@ -6,7 +6,7 @@ from github import GithubException, UnknownObjectException
 
 from catalog.errors import NoEntryFound, NoRepository, SchemaError
 
-from .user import login_as_user, login_as_app, login_as_installation
+from .user import login_as_app, login_as_installation, login_as_user
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +89,7 @@ def get(source):
 
     results = []
     already_fetched = []
+
     def recursive_get_files(paths):
         for file in paths:
             # Try and prevent recursion, just silently skip.
@@ -119,7 +120,9 @@ def get_repo_installation(org_name, repo_name):
         gh_installation = login_as_installation(gh, installation)
         return gh_installation.get_repo(f"{org_name}/{repo_name}")
     except UnknownObjectException:
-        raise NoRepository(f"GitHub app is unable to access the repository: `{org_name}/{repo_name}`.")
+        raise NoRepository(
+            f"GitHub app is unable to access the repository: `{org_name}/{repo_name}`."
+        )
 
 
 def get_repositories(org_name):
@@ -142,6 +145,7 @@ def get_repositories(org_name):
                     repos.append(repo)
 
     return repos
+
 
 def get_orgs():
     gh = login_as_app()

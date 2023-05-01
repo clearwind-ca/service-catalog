@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from services import models
-from services.tasks import refresh_sources_from_github
+from services.tasks import refresh_service_from_github
 
 
 class Command(BaseCommand):
@@ -35,7 +35,7 @@ class Command(BaseCommand):
             queryset = models.Source.objects.filter(slug=options.get("source"))
 
         for source in queryset:
-            refresh_sources_from_github.delay(source.slug)
+            refresh_service_from_github.delay(source.slug)
 
         if not quiet:
             print(f"Processed {queryset.count()} sources.")

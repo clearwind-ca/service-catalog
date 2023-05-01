@@ -22,10 +22,12 @@ def login_as_user(user):
 
     return Github(connection.access_token)
 
+
 def login_as_installation(github_integration, installation):
     """Login as installation"""
     access_token = github_integration.get_access_token(installation.id)
     return Github(access_token.token)
+
 
 def check_org_membership(username, org):
     gh = login_as_user(settings.CRON_USER)

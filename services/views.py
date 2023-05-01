@@ -20,10 +20,10 @@ from events.models import Event
 from gh import fetch
 from web.helpers import process_query_params
 
-from .tasks import refresh_orgs_from_github
 from .forms import ServiceForm, SourceForm, get_schema
 from .models import Organization, Service, Source
 from .serializers import ServiceSerializer, SourceSerializer
+from .tasks import refresh_orgs_from_github
 
 
 @login_required
@@ -131,12 +131,14 @@ def source_refresh(request, slug):
     refresh_results(results, source, request)
     return redirect("services:source-detail", slug=source.slug)
 
+
 @login_required
 @require_POST
 def org_refresh(request):
     refresh_orgs_from_github.delay()
     messages.info(request, "Refresh of data from GitHub successfully queued.")
     return redirect("services:source-list")
+
 
 @api_view(["POST"])
 def api_source_refresh(request, pk):

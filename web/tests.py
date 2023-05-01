@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
+from faker import Faker
 from rest_framework.authtoken.models import Token
 
 from .helpers import process_query_params
@@ -12,8 +13,6 @@ from .templatetags.helpers import (
     strip_format,
     yesno_if_boolean,
 )
-
-from faker import Faker
 
 fake = Faker("en_US")
 

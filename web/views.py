@@ -1,6 +1,7 @@
-import os
-import requests
 import json
+import os
+
+import requests
 from django.conf import settings
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
@@ -8,8 +9,8 @@ from django.shortcuts import redirect, render, reverse
 from django.views.decorators.http import require_POST
 from rest_framework.authtoken.models import Token
 
-from .shortcuts import get_object_or_None
 from .forms import CreateAppForm
+from .shortcuts import get_object_or_None
 
 
 def handler403(request, exception):

@@ -94,22 +94,23 @@ class TestFetch(WithGitHubUser):
         get_file(repo, "catalog.json")
         assert get_contents_mock.call_count
 
-    @patch("gh.user.Github")
+    @patch("gh.fetch.login_as_app")
+    @patch("gh.fetch.login_as_installation")
     @patch("gh.fetch.get_contents")
-    def test_get_data(self, get_contents_mock, gh_mock):
+    def test_get_data(self, get_contents_mock, as_installation_mock, as_app_mock):
         """
         Test that if nothing goes wrong, we get back some data from the server.
         """
         data = {"contents": self.simple_data, "path": "catalog.json"}
-        gh_mock.get_user.return_value = None
         get_contents_mock.return_value = self.simple_data
-        result = get(self.user, self.source)
+        result = get(self.source)
         self.assertEquals(len(result), 1)
         self.assertEquals(result[0], data)
 
-    @patch("gh.user.Github")
+    @patch("gh.fetch.login_as_app")
+    @patch("gh.fetch.login_as_installation")
     @patch("gh.fetch.get_contents")
-    def test_get_data_more_files(self, get_contents_mock, gh_mock):
+    def test_get_data_more_files(self, get_contents_mock, as_installation_mock, as_app_mock):
         """
         Test that it looks up file contents for all the files.
         """
@@ -119,9 +120,8 @@ class TestFetch(WithGitHubUser):
             "type": "widget",
             "files": ["catalog2.json"],
         }
-        gh_mock.get_user.return_value = None
         get_contents_mock.return_value = data
-        result = get(self.user, self.source)
+        result = get(self.source)
         self.assertEquals(len(result), 2)
         self.assertEquals(result[1], {"contents": data, "path": "catalog2.json"})
 
@@ -131,40 +131,34 @@ def unpack_payload(payload):
 
 
 class TestSend(WithGitHubUser):
-    @patch("gh.user.Github")
-    def test_dispatch_no_repo(self, gh_mock):
-        """
-        Fail if the repository isn't there
-        """
-        gh_mock.return_value.get_repo.side_effect = UnknownObjectException(404, "Not Found", {})
-        self.assertRaises(errors.NoRepository, dispatch, self.user, None)
-
-    @patch("gh.user.Github")
-    def test_dispatch_created(self, gh_mock):
+    @patch("gh.send.get_repo_installation")
+    def test_dispatch_created(self, login_mock):
         """
         Sends a dispatch event to the repository
         """
         objects = create_health_check()
         result = create_health_check_result(objects["health_check"], objects["service"])
-        dispatch(self.user, result)
-        args = gh_mock.return_value.get_repo.return_value.create_repository_dispatch.call_args
+        with self.settings(GITHUB_CHECK_REPOSITORY="https://github.com/foo/bar"):
+            dispatch(result)
+        args = login_mock.return_value.create_repository_dispatch.call_args
         self.assertEqual(args[1]["event_type"], "check")
 
         payload = unpack_payload(args[1]["client_payload"]["data"])
         assert isinstance(payload, dict)
         assert "server" in payload.keys()
 
-    @patch("gh.user.Github")
+    @patch("gh.fetch.login_as_app")
     def test_dispatch_failed(self, gh_mock):
         """
         Test error when the repo fails on the dispatch call
         """
         objects = create_health_check()
         result = create_health_check_result(objects["health_check"], objects["service"])
-        gh_mock.return_value.get_repo.return_value.create_repository_dispatch.side_effect = (
-            errors.SendError("")
+        gh_mock.return_value.get_repo_installation.side_effect = (
+            UnknownObjectException("", "data", {})
         )
-        self.assertRaises(errors.SendError, dispatch, self.user, result)
+        with self.settings(GITHUB_CHECK_REPOSITORY="https://github.com/foo/bar"):
+            self.assertRaises(errors.NoRepository, dispatch, result)
 
 
 class Test(TestCase):

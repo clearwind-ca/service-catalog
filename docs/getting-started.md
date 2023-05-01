@@ -4,6 +4,14 @@ Once you've completed installation, you can start to add in entries into your re
 
 An [example organization](https://github.com/service-catalog-testing/) is available to highlight all the possible options that might exist for you. The fictional company `Burnt Tomatoes` will be used repeatedly throughout these examples.
 
+## GitHub app
+
+The [GitHub app added](installing.md) provides the interface for adding repositories to the Service Catalog. To use the Service Catalog, the app should be installed in a repository in the organization.
+
+To add in every repository for an organisation, install the Service Catalog app in GitHub to every repository for an organisation. Control of what repositories have access to the Service Catalog is controlled by GitHub.
+
+[Install your GitHub App on your repository](https://docs.github.com/en/apps/maintaining-github-apps/installing-github-apps#installing-your-private-github-app-on-your-repository)
+
 ## Source
 
 For the Catalog, a source is a repository that hosts the configuration that it will read into the Catalog. Each source can contain any number of configuration files.

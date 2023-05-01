@@ -5,6 +5,7 @@ from services import forms
 from services.models import Organization, Source
 from web.shortcuts import get_object_or_None
 
+
 @app.task
 def refresh_service_from_github(source_slug):
     source = Source.objects.get(slug=source_slug)
@@ -59,5 +60,5 @@ def refresh_orgs_from_github():
         org_obj = get_object_or_None(Organization, name=org)
         if not org_obj:
             Organization.objects.create(name=org, active=True, auto_add_sources=True)
-    
+
     refresh_sources_from_orgs.delay()

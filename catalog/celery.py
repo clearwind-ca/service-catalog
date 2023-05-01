@@ -24,7 +24,6 @@ app.conf.beat_schedule = {
     "get-active-services-deployments": {
         "task": "events.tasks.get_all_active_deployments",
         "schedule": 60 * 60,  # Every hour.
-        "args": (os.environ.get("CRON_USER"),),
     },
     "get-organisations-from-github": {
         "task": "services.tasks.refresh_orgs_from_github",
@@ -35,5 +34,4 @@ app.conf.beat_schedule = {
         "schedule": 60 * 60 * 24,  # Every 24 hours.
         "args": (30,),  # Truncate logs older than 30 days.
     },
-
 }
