@@ -45,7 +45,7 @@ def should_run(check, service, quiet=False):
 
 
 @app.task
-def send_to_github(username, check_slug, service_slug):
+def send_to_github(check_slug, service_slug):
     check = Check.objects.get(slug=check_slug)
     service = Service.objects.get(slug=service_slug)
     result = CheckResult.objects.create(
@@ -55,7 +55,7 @@ def send_to_github(username, check_slug, service_slug):
     )
     try:
         # Should this use the cron user?
-        send.dispatch(username, result)
+        send.dispatch(result)
     except (SendError, NoRepository) as error:
         # Fatal error, they are all going to fail.
         # Should we log here?
@@ -65,16 +65,13 @@ def send_to_github(username, check_slug, service_slug):
 
 
 @app.task
-def send_active_to_github(username):
-    if not username:
-        raise ValueError("Username is required to send active checks to GitHub.")
-
+def send_active_to_github():
     check_queryset = Check.objects.filter(active=True)
     service_queryset = Service.objects.filter(active=True)
     for check in check_queryset:
         for service in service_queryset:
             if should_run(check, service):
-                send_to_github.delay(username, check.slug, service.slug)
+                send_to_github.delay(check.slug, service.slug)
 
 
 @app.task

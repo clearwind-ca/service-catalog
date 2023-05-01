@@ -34,21 +34,9 @@ class Command(BaseCommand):
             action="store_true",
             help="Print out less.",
         )
-        parser.add_argument(
-            "--user",
-            type=str,
-            help="The username of a user with a GitHub login.",
-        )
 
     def handle(self, *args, **options):
-        username = options.get("user") or settings.CRON_USER
         quiet = options.get("quiet", False)
-        if not username:
-            raise ValueError(
-                "User must be set either using `--user` or `CRON_USER` as the username of a user with a GitHub login."
-            )
-
-        user = User.objects.get(username=username)
 
         if not options.get("check") and not options.get("all_checks"):
             raise ValueError("Either `--check` or `--all-checks` must be set.")
@@ -76,7 +64,7 @@ class Command(BaseCommand):
                     continue
 
                 k += 1
-                send_to_github.delay(user.username, check.slug, service.slug)
+                send_to_github.delay(check.slug, service.slug)
 
         if not quiet:
             print(f"Queued {k} checks to send to GitHub.")

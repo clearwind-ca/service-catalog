@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
+from faker import Faker
 from rest_framework.authtoken.models import Token
 
 from .helpers import process_query_params
@@ -12,6 +13,24 @@ from .templatetags.helpers import (
     strip_format,
     yesno_if_boolean,
 )
+
+fake = Faker("en_US")
+
+# Truncated....
+example_app_response = {
+    "id": fake.random_int(),
+    "slug": fake.slug(),
+    "node_id": fake.uuid4(),
+    "owner": {},
+    "name": fake.name(),
+    "html_url": "https://github.com/apps/catalog-for-burnt-tomatoes3",
+    "created_at": fake.date_time(),
+    "updated_at": fake.date_time(),
+    "client_id": fake.text(),
+    "webhook_secret": None,
+    "pem": fake.text(),
+    "client_secret": fake.text(),
+}
 
 
 class TestProcessQueryParams(TestCase):

@@ -123,26 +123,16 @@ class TestSend(WithHealthCheck):
     def test_arg_combos_fails(self):
         for params in [
             {"user": None},
-            {"all_checks": False, "check": False, "user": self.user.username},
-            {"all_services": False, "service": False, "user": self.user.username},
+            {"all_checks": False, "check": False},
+            {"all_services": False, "service": False},
         ]:
             with self.assertRaises(ValueError):
                 self.command(**params)
-
-    def test_no_user(self):
-        """Takes the username from the environment, and checks it fails"""
-        with self.settings(CRON_USER="nope"):
-            self.assertRaises(User.DoesNotExist, self.command)
-
-    def test_refresh_fails_with_wrong_command_user(self):
-        """Test the username from the command, and checks it fails"""
-        self.assertRaises(User.DoesNotExist, self.command, user="nope")
 
     def kwargs(self):
         return {
             "all_checks": True,
             "all_services": True,
-            "user": self.user.username,
             "quiet": True,
         }
 

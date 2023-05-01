@@ -49,6 +49,39 @@ svg {
     margin-left: 0.5rem;
 }
 
+/* See https://getbootstrap.com/docs/5.3/utilities/colors/#sass-variables */
+.fill-primary {
+    fill: var(--bs-primary);
+}
+
+.fill-secondary { 
+    fill: var(--bs-seconday);
+}
+
+.fill-success { 
+    fill: var(--bs-success);
+}
+
+.fill-info { 
+    fill: var(--bs-info);
+}
+
+.fill-warning { 
+    fill: var(--bs-warning);
+}
+
+.fill-danger {
+    fill: var(--bs-danger);
+}
+
+.fill-light {
+    fill: var(--bs-light);
+}
+
+.fill-dark {
+    fill: var(--bs-dark)
+}
+
 .new-line {
     display: block;
     margin-top: 0.3em;

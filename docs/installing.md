@@ -22,18 +22,29 @@ Tasks are managed through a celery backend. The docker container installs a non-
 
 Where possible configuration is done through environment variables which alter the settings files. Some of these settings are specific to the Service Catalog, but some are [common to all Django projects and the documentation](https://docs.djangoproject.com/en/4.1/ref/settings/) covers those.
 
+### Setup page
+
+You will need set the following environment variables for Django to run:
+
+|Variable|Effect|Required|Default if not set|
+|-|-|-|-|
+|ALLOWED_HOSTS|Override the Django `ALLOWED_HOSTS` setting.|Yes, for browser access if not in `DEBUG` mode.|Empty|
+|SECRET_KEY|Set the Django `SECRET_KEY` variable.|Yes|Empty|
+
+Once these are done, you can access the setup page at: `/setup/` on your catalog instance. This will page will guide you through the next steps.
+
+### Environment variables 
+
+The following environment variables provide access to site functionality:
+
 |Variable|Effect|Required|Default if not set|
 |-|-|-|-|
 |ALLOWED_HOSTS|Override the Django `ALLOWED_HOSTS` setting.|Yes, for browser access if not in `DEBUG` mode.|Empty|
 |CATALOG_ENV|The path to a file of enviroment variables to load. Environment variables loaded from this file will override variables loaded elsewhere.|No|(see notes below)|
 |CELERY_BROKER_URL|The celery broker backend to connect to|No|`redis://localhost:6379/0`|
-|CRON_USER|The username for a user logged into the Catalog to run background updates against GitHub.|No, however background updates will fail without it|Empty|
 |DATABASE_URL|The connection string to the [database using dj-database-url](https://pypi.org/project/dj-database-url/#url-schema)|Yes|Empty|
 |DEBUG|Set the Django `DEBUG` mode.|No|False|
-|GITHUB_APP_ID|The GitHub app configuration.|Yes|Empty|
-|GITHUB_CLIENT_ID|As above.|Yes|Empty|
-|GITHUB_CLIENT_SECRET|As above.|Yes|Empty|
-|GITHUB_CHECK_REPOSITORY|The repository to send health checks to.|Yes|Otherwise health checks won't work|
+|GITHUB_CHECK_REPOSITORY|The repository to send health checks to, see [health checks for more](health-checks.md)|No|Health checks won't work|
 |SECRET_KEY|Set the Django `SECRET_KEY` variable.|Yes|Empty|
 |SERVICE_SCHEMA|Path on the filesystem to the schema|No|`catalog/schemas/service.json`|
 
@@ -53,43 +64,28 @@ If running in continuous integrations, such as Actions, where the `CI` environme
 
 If no other environment variable is set then it will use the file `envs/development.env` will be used. This does not exist in source code and is where you can place any local development configuration.
 
-## GitHub App
+### GitHub App
 
 To interact with GitHub you will need to create a GitHub App. This will allow you to login to the catalog, read information from GitHub and so on.
 
-To create an app, follow the documentation on the [GitHub website](https://docs.github.com/en/apps/creating-github-apps/creating-github-apps/creating-a-github-app).
+Visiting `/setup/` will provide you with a form to create the GitHub App and then you need to populate following environment variables:
 
-Key settings:
+|Variable|Effect|Required|Default if not set|
+|-|-|-|-|
+|GITHUB_APP_ID|The GitHub app configuration.|Yes|Empty|
+|GITHUB_CLIENT_ID|As above.|Yes|Empty|
+|GITHUB_CLIENT_SECRET|As above.|Yes|Empty|
+|GITHUB_PEM|As above.|Yes|Empty|
 
-* `GitHub App name`: whatever makes sense for you.
-* `Homepage URL`: absolute URL to the Service Catalog that is accessible to the user.
-* `Callback URL`: same as above, with the following appended to the URL `/oauth/github/callback`.
+**Note:** To allow users to login you must give the GitHub app access to `Account Permissions` 👉 `Email addresses` 👉 `Access: Read-only`. Currently this does not seem possible to set from the manifest process and must be done on https://github.com.
 
-Under `Permissions & events`:
-
-* `Repository permissions` 👉 `Contents` 👉 `Access: Read-only`
-* `Repository permissions` 👉 `Metadata` 👉 `Access: Read-only`
-* `Account permissions` 👉 `Email addresses` 👉 `Access: Read-only`
-
-Once complete, `Generate a new client secret` and the copy the following settings into the environment variables:
-
-* `App ID` into `GITHUB_APP_ID`
-* `Client ID` into `GITHUB_CLIENT_ID`
-* `Client secret` into `GITHUB_CLIENT_SECRET`
-
-Restart your Service Catalog for the settings to take effect.
-
-## Debug page
-
-To check that your settings are good, a page at `/debug` [^1] is provided that will help you understand what the values of key settings and environment variables are.
-
-[^1]: See [example](https://service-catalog.fly.dev/debug/)
+By default, the app is set to private. See [Making a GitHub App public or private](https://docs.github.com/en/apps/creating-github-apps/setting-up-a-github-app/making-a-github-app-public-or-private) for more information.
 
 ## Background jobs
 
 There are multiple background jobs in the system. If you are using the Dockerfile, then these are set up automatically for you and run through Celery regularly.
 
-You can also run these jobs through management commands.
+You can also run some of these jobs through management commands.
 
 See [the code for default job schedules and values](catalog/celery.py).
 
@@ -103,12 +99,7 @@ Arguments:
 
 * `--all`: runs through all the sources and refreshes them all from GitHub.
 * `--source [SOURCE_SLUG]`: just refreshes the source matching the `SOURCE_SLUG` given.
-* `--user`: the username of a user to connect to GitHub, this is the GitHub handle for that user.
 * `--quiet`: less logging.
-
-Environment variables:
-
-* `CRON_USER`: If `--user` is not specified, then the command will check to see if the environment variable `CRON_USER` is set and use that.
 
 ### Send
 
@@ -122,7 +113,6 @@ Arguments:
 * `--all-checks`: send all checks. Either `--check` or `--all-checks` must be specified.
 * `--service`: the slug of the service to send checks for.
 * `--all-services`: send all services. Either `--service` or `--all-services` must be specified.
-* `--user`: the username of a user to connect to GitHub, this is the GitHub handle for that user.
 * `--quiet`: less logging. 
 
 As an example: `python manage.py send --all-checks --all-services` will run every health check on every service and `python manage.py send --check Log4J --service Website` will only send the health check for `Log4J` for the `Website` service.

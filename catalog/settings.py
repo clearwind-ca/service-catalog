@@ -44,7 +44,6 @@ CELERY_TASK_RESULT_EXPIRES = 18000  # 5 hours
 CHECKS_TIMEOUT_HOURS = os.environ.get("CHECKS_TIMEOUT_HOURS", 6)
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
-CRON_USER = os.environ.get("CRON_USER")
 DEBUG = os.environ.get("DEBUG")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 if os.environ.get("CI"):

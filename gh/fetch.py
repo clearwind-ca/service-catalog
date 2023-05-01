@@ -6,7 +6,7 @@ from github import GithubException, UnknownObjectException
 
 from catalog.errors import NoEntryFound, NoRepository, SchemaError
 
-from .user import login_as_user
+from .user import login_as_app, login_as_installation, login_as_user
 
 logger = logging.getLogger(__name__)
 
@@ -74,24 +74,18 @@ def url_to_nwo(url):
     return organization, repo
 
 
-def get_repo(gh, organization, repo):
+def get_repo(gh, repo):
     try:
-        user = gh.get_user(organization)
-    except UnknownObjectException:
-        raise NoRepository(f"Unable to access the user or organization: `{organization}`.")
-
-    try:
-        repo = user.get_repo(repo)
+        repo = gh.get_repo(repo)
     except UnknownObjectException:
         raise NoRepository(f"Unable to access the repository at: `{repo}`.")
 
     return repo
 
 
-def get(user, source):
-    gh = login_as_user(user)
+def get(source):
     organization, repo = url_to_nwo(source.url)
-    repo = get_repo(gh, organization, repo)
+    repo = get_repo_installation(organization, repo)
 
     results = []
     already_fetched = []
@@ -113,17 +107,50 @@ def get(user, source):
     return results
 
 
-def get_deployments(user, source):
-    gh = login_as_user(user)
-    organization, repo = url_to_nwo(source.url)
-    repo = get_repo(gh, organization, repo)
+def get_deployments(source):
+    org, repo = url_to_nwo(source.url)
+    repo = get_repo_installation(org, repo)
     return repo.get_deployments()
 
 
-def get_repositories(user, org_name):
-    gh = login_as_user(user)
+def get_repo_installation(org_name, repo_name):
+    gh = login_as_app()
     try:
-        gh_org = gh.get_organization(org_name)
+        installation = gh.get_repo_installation(org_name, repo_name)
+        gh_installation = login_as_installation(gh, installation)
+        return gh_installation.get_repo(f"{org_name}/{repo_name}")
     except UnknownObjectException:
-        raise NoRepository(f"Unable to access theorganization: `{org_name}`.")
-    return gh_org.get_repos()
+        raise NoRepository(
+            f"GitHub app is unable to access the repository: `{org_name}/{repo_name}`."
+        )
+
+
+def get_repositories(org_name):
+    gh = login_as_app()
+    repos = []
+    for installation in gh.get_installations():
+        if installation.target_type == "Organization":
+            if installation.raw_data["account"]["login"] != org_name:
+                break
+
+            gh_installation = login_as_installation(gh, installation)
+            try:
+                org = gh_installation.get_organization(org_name)
+            except UnknownObjectException:
+                raise NoRepository(f"Unable to access the organization: `{org_name}`.")
+
+            installations = org.get_installations()
+            for org_install in installations:
+                for repo in org_install.get_repos():
+                    repos.append(repo)
+
+    return repos
+
+
+def get_orgs():
+    gh = login_as_app()
+    orgs = []
+    for installation in gh.get_installations():
+        if installation.target_type == "Organization":
+            orgs.append(installation.raw_data["account"]["login"])
+    return orgs

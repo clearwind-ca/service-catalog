@@ -6,9 +6,9 @@ from web.shortcuts import get_object_or_None
 
 
 @app.task
-def get_deployments(username, service_slug):
+def get_deployments(service_slug):
     service = Service.objects.get(slug=service_slug)
-    deployments = fetch.get_deployments(username, service.source)
+    deployments = fetch.get_deployments(service.source)
 
     # Limit to the last 20 deployments per repo, for now.
     for deployment in deployments[:20]:
@@ -47,7 +47,7 @@ def get_deployments(username, service_slug):
 
 
 @app.task
-def get_all_active_deployments(username):
+def get_all_active_deployments():
     for service in Service.objects.filter(active=True):
         if service.events and "deployments" in service.events:
-            get_deployments.delay(username, service.slug)
+            get_deployments.delay(service.slug)

@@ -188,7 +188,7 @@ class TestDeployments(WithEvents):
         self.service.save()
 
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
-            get_all_active_deployments(self.username)
+            get_all_active_deployments()
         self.assertEqual(mock_fetch.get_deployments.call_count, 2)
 
     @patch("events.tasks.fetch")
@@ -201,7 +201,7 @@ class TestDeployments(WithEvents):
         self.services[1].save()
 
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
-            get_all_active_deployments(self.username)
+            get_all_active_deployments()
         self.assertEqual(mock_fetch.get_deployments.call_count, 1)
 
     def setupMocks(self):
@@ -226,7 +226,7 @@ class TestDeployments(WithEvents):
         mock_fetch.get_deployments.return_value = [deployment]
 
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
-            get_deployments.delay(self.username, self.service.slug)
+            get_deployments.delay(self.service.slug)
 
         self.assertEquals(Event.objects.all().count(), 1)
         event = Event.objects.get()
@@ -244,6 +244,6 @@ class TestDeployments(WithEvents):
         self.assertEquals(Event.objects.all().count(), 1)
 
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
-            get_deployments.delay(self.username, self.service.slug)
+            get_deployments.delay(self.service.slug)
 
         self.assertEquals(Event.objects.all().count(), 1)

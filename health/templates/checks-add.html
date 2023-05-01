@@ -24,7 +24,11 @@
     <h6 class="text-muted border-bottom">Info</h6>
     <p>Health checks are ways to check the overall health of a service that make sense to the organisation. They can be run on a regular basis or when needed. They call a GitHub repository using GitHub Actions.
     </p>
+    {% if repo %}
     <p>The repository called is: <code>{{ repo }}</code>.</p>
+    {% else %}
+    <p><b>No value is present for <code>GITHUB_CHECKS_REPOSITORY</code> so health checks will not work.</b></p>
+    {% endif %}
 </div>
 {% endblock %}
 

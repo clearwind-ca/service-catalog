@@ -1,5 +1,7 @@
+import json
 import os
 
+import requests
 from django.conf import settings
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
@@ -7,6 +9,7 @@ from django.shortcuts import redirect, render, reverse
 from django.views.decorators.http import require_POST
 from rest_framework.authtoken.models import Token
 
+from .forms import CreateAppForm
 from .shortcuts import get_object_or_None
 
 
@@ -27,33 +30,65 @@ def logout(request):
     return redirect("/")
 
 
-def debug(request):
-    get = os.environ.get
+def get(key):
+    return truncate(os.environ.get(key, None))
 
-    def truncate(value):
-        if not value:
-            return "Empty"
-        return value[:5] + "..."
 
-    selected_envs = {
-        "CATALOG_ENV": get("CATALOG_ENV"),
-        "CRON_USER": get("CRON_USER"),
-        "DATABASE_URL": truncate(get("DATABASE_URL")),
-        "ALLOWED_HOSTS": get("ALLOWED_HOSTS"),
-        "GITHUB_APP_ID": truncate(get("GITHUB_APP_ID")),
-        "GITHUB_CLIENT_ID": truncate(get("GITHUB_CLIENT_ID")),
-        "GITHUB_CLIENT_SECRET": truncate(get("GITHUB_CLIENT_SECRET")),
+def truncate(value):
+    if not value:
+        return None
+    return str(value)[:5] + "..."
+
+
+def setup(request):
+    form = CreateAppForm()
+    context = {
+        "keys": {
+            "django": {
+                "SECRET_KEY": get("SECRET_KEY"),
+                "DATABASE_URL": get("DATABASE_URL"),
+                "SERVER_URL": os.environ.get("SERVER_URL"),
+                "CELERY_BROKER_URL": get("CELERY_BROKER_URL"),
+                "ALLOWED_HOSTS": os.environ.get("ALLOWED_HOSTS"),
+            },
+            "github": {
+                "GITHUB_APP_ID": os.environ.get("GITHUB_APP_ID"),
+                "GITHUB_CLIENT_ID": os.environ.get("GITHUB_CLIENT_ID"),
+                "GITHUB_CLIENT_SECRET": get("GITHUB_CLIENT_SECRET"),
+                "GITHUB_PEM": get("GITHUB_PEM"),
+            },
+            "app": {},
+        },
+        "steps": {"django": False, "github": False},
+        "form": form,
     }
-    selected_settings = {
-        "CATALOG_ENV": settings.CATALOG_ENV,
-        "CELERY_BROKER_URL": truncate(settings.CELERY_BROKER_URL),
-        "CELERY_RESULT_BACKEND": truncate(settings.CELERY_RESULT_BACKEND),
-        "DEBUG": settings.DEBUG,
-        "GITHUB_CHECK_REPOSITORY": settings.GITHUB_CHECK_REPOSITORY,
-        "GITHUB_DEBUG": settings.GITHUB_DEBUG,
-        "SERVICE_SCHEMA": settings.SERVICE_SCHEMA,
-    }
-    return render(request, "debug.html", {"envs": selected_envs, "settings": selected_settings})
+    if request.GET and request.GET.get("code"):
+        headers = {
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+        }
+        res = requests.post(
+            f'https://api.github.com/app-manifests/{request.GET["code"]}/conversions',
+            headers=headers,
+        )
+        if res.status_code != 201:
+            messages.error(request, "Something went wrong creating the app.")
+
+        else:
+            context["app"] = res.json()
+            messages.info(
+                request,
+                "App successfully created. You must now copy the app values into the environment variables as shown below. <b>This is the only time they will be shown</b>.",
+            )
+
+    context["steps"]["django"] = all(
+        [context["keys"]["django"][v] for v in context["keys"]["django"]]
+    )
+    context["steps"]["github"] = all(
+        [context["keys"]["github"][v] for v in context["keys"]["github"]]
+    )
+
+    return render(request, "setup.html", context)
 
 
 @login_required

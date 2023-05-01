@@ -11,9 +11,7 @@ A health check is a peice of code, written by the organisation to examine the se
 
 ## Authentication
 
-In order to trigger the `repository_dispatch` event on GitHub, the API is called with the `CRON_USER` as specified in the configuration.
-
-In order to send a response back to the Service Catalog, you must authenticate with [the API](api.md) and to do that, add the API token for the `CRON_USER` into the Actions secrets tab. In the following example 👇, it assumes the Secret is called `SERVICE_CATALOG_TOKEN`.
+In order to send a response back to the Service Catalog, you must authenticate with [the API](api.md) and to do that, you will need the API token for a user logged into the Service Catalog. In the following example 👇, it assumes the Secret is called `SERVICE_CATALOG_TOKEN`.
 
 For the Action to report the data back to the Service Catalog, the Action Runner (either [hosted](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners) or [self-hosted](https://docs.github.com/en/actions/hosting-your-own-runners/about-self-hosted-runners)) must have network access to the Service Catalog.
 

@@ -20,9 +20,10 @@ from events.models import Event
 from gh import fetch
 from web.helpers import process_query_params
 
-from .forms import OrgForm, ServiceForm, SourceForm, get_schema
+from .forms import ServiceForm, SourceForm, get_schema
 from .models import Organization, Service, Source
 from .serializers import ServiceSerializer, SourceSerializer
+from .tasks import refresh_orgs_from_github
 
 
 @login_required
@@ -118,11 +119,10 @@ def source_detail(request, slug):
 
 
 @login_required
-@process_query_params
 def source_refresh(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
     try:
-        results = fetch.get(request.user, source)
+        results = fetch.get(source)
     except FetchError as error:
         msg = f"Error attempting to refresh: `{source.slug}` via the web. {error.message}"
         messages.error(request, msg)
@@ -132,11 +132,19 @@ def source_refresh(request, slug):
     return redirect("services:source-detail", slug=source.slug)
 
 
+@login_required
+@require_POST
+def org_refresh(request):
+    refresh_orgs_from_github.delay()
+    messages.info(request, "Refresh of data from GitHub successfully queued.")
+    return redirect("services:source-list")
+
+
 @api_view(["POST"])
 def api_source_refresh(request, pk):
     source = get_object_or_404(pk=pk, klass=Source)
     try:
-        results = fetch.get(request.user, source)
+        results = fetch.get(source)
     except FetchError as error:
         msg = f"Error attempting to refresh: `{source.slug}` via the api. {error.message}"
         messages.error(request, msg)
@@ -180,7 +188,7 @@ def source_add(request):
         if form.is_valid():
             source = form.save()
             try:
-                results = fetch.get(request.user, source)
+                results = fetch.get(source)
             except FetchError as error:
                 messages.error(request, error.message)
                 return redirect("services:source-list")
@@ -188,26 +196,6 @@ def source_add(request):
             refresh_results(results, source, request)
         else:
             messages.error(request, form.nice_errors())
-
-    return redirect("services:source-list")
-
-
-@login_required
-def org_add(request):
-    if request.method == "GET":
-        orgs = Organization.objects.count()
-        if orgs:
-            messages.error(request, "Only one organization is allowed at this time.")
-        return render(
-            request,
-            "org-add.html",
-            context={"form": OrgForm(), "orgs": orgs},
-        )
-    else:
-        form = OrgForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("services:source-list")
 
     return redirect("services:source-list")
 

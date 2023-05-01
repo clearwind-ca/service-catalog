@@ -3,13 +3,14 @@ from catalog.errors import FetchError
 from gh import fetch
 from services import forms
 from services.models import Organization, Source
+from web.shortcuts import get_object_or_None
 
 
 @app.task
-def refresh_from_github(username, source_slug):
+def refresh_service_from_github(source_slug):
     source = Source.objects.get(slug=source_slug)
     try:
-        results = fetch.get(username, source)
+        results = fetch.get(source)
     except FetchError as error:
         return False
 
@@ -24,15 +25,15 @@ def refresh_from_github(username, source_slug):
 
 
 @app.task
-def refresh_active_from_github(username):
+def refresh_services_from_github():
     for source in Source.objects.filter(active=True):
-        refresh_from_github.delay(username, source.slug)
+        refresh_service_from_github.delay(source.slug)
 
 
 @app.task
-def refresh_sources_from_github(username, org_slug):
+def refresh_sources_from_github(org_slug):
     try:
-        results = fetch.get_repositories(username, org_slug)
+        results = fetch.get_repositories(org_slug)
     except FetchError as error:
         return False
 
@@ -46,6 +47,18 @@ def refresh_sources_from_github(username, org_slug):
 
 
 @app.task
-def refresh_org_from_github(username):
+def refresh_sources_from_orgs():
     for org in Organization.objects.filter(active=True, auto_add_sources=True):
-        refresh_sources_from_github.delay(username, org.name)
+        refresh_sources_from_github.delay(org.name)
+
+    refresh_services_from_github.delay()
+
+
+@app.task
+def refresh_orgs_from_github():
+    for org in fetch.get_orgs():
+        org_obj = get_object_or_None(Organization, name=org)
+        if not org_obj:
+            Organization.objects.create(name=org, active=True, auto_add_sources=True)
+
+    refresh_sources_from_orgs.delay()

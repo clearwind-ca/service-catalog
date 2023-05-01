@@ -10,7 +10,6 @@ from rest_framework import permissions, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from catalog.errors import NoRepository, SendError
 from services.models import Service
 from web.helpers import process_query_params
 
@@ -29,6 +28,12 @@ from .tasks import send_to_github
 @login_required
 @process_query_params
 def checks(request):
+    if not settings.GITHUB_CHECK_REPOSITORY:
+        messages.error(
+            request,
+            'The "GITHUB_CHECK_REPOSITORY" environment variable is not set. Health Checks will not run.',
+        )
+
     filters = {}
     get = request.GET
     for param, lookup in (
@@ -100,17 +105,17 @@ def checks_delete(request, slug):
     return redirect(reverse("health:checks-list"))
 
 
-def send(username, check):
+def send(check):
     service_queryset = Service.objects.all()
     for service in service_queryset:
-        send_to_github.delay(username, check.slug, service.slug)
+        send_to_github.delay(check.slug, service.slug)
 
 
 @login_required
 @require_POST
 def checks_run(request, slug):
     check = get_object_or_404(Check, slug=slug)
-    send(request.user.username, check)
+    send(check)
     messages.info(request, f"Health check `{slug}` queued for all services.")
     return redirect(reverse("health:checks-detail", kwargs={"slug": slug}))
 
