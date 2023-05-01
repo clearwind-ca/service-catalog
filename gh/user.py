@@ -1,4 +1,5 @@
 import os
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from github import Github, GithubIntegration, enable_console_debug_logging
@@ -7,9 +8,11 @@ from oauthlogin.models import OAuthConnection
 if settings.GITHUB_DEBUG:
     enable_console_debug_logging()
 
+
 def login_as_app():
     """Login as the app."""
     return GithubIntegration(os.environ.get("GITHUB_APP_ID"), os.environ.get("GITHUB_PEM"))
+
 
 def login_as_user(user):
     """Login as the user."""

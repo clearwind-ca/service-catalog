@@ -463,7 +463,7 @@ class TestManagementRefresh(WithUser):
         mock_fetch.get.return_value = sample_response()
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
             self.command.handle(source=second.slug, quiet=True)
-        #self.assertEquals(models.Service.objects.all().count(), 1)
+        # self.assertEquals(models.Service.objects.all().count(), 1)
         self.assertEquals(mock_fetch.get.call_count, 1)
 
     @patch("services.tasks.fetch")

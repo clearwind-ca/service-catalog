@@ -154,8 +154,8 @@ class TestSend(WithGitHubUser):
         """
         objects = create_health_check()
         result = create_health_check_result(objects["health_check"], objects["service"])
-        gh_mock.return_value.get_repo_installation.side_effect = (
-            UnknownObjectException("", "data", {})
+        gh_mock.return_value.get_repo_installation.side_effect = UnknownObjectException(
+            "", "data", {}
         )
         with self.settings(GITHUB_CHECK_REPOSITORY="https://github.com/foo/bar"):
             self.assertRaises(errors.NoRepository, dispatch, result)
