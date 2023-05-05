@@ -7,7 +7,10 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from faker import Faker
 from rest_framework.authtoken.models import Token
+from django.shortcuts import redirect
 
+
+from django.contrib.auth import get_user_model
 from catalog.tests import BaseTestCase
 from services.models import Organization
 
@@ -145,8 +148,6 @@ class TestFormat(TestCase):
             self.assertEqual(apply_format(value, field), expectation)
 
 
-from django.contrib.auth import get_user_model
-
 
 class TestAPIToken(BaseTestCase):
     def setUp(self):
@@ -194,6 +195,7 @@ class TestMiddleware(TestCase):
         self.req = self.factory.get("/services/")
         self.user = get_user_model().objects.create_user(username="andy")
         self.check_orgs = CatalogMiddleware(Mock()).check_orgs
+        self.process_request = CatalogMiddleware(Mock()).process_request
         super().setUp()
 
     def tearDown(self):
@@ -256,3 +258,23 @@ class TestMiddleware(TestCase):
         # Second call should use cache.
         self.assertEqual(self.check_orgs(self.req), True)
         assert mock_user.check_org_membership.call_count == 1
+
+    def test_login_not_required_anon(self):
+        self.req = self.factory.get("/static/site.js")
+        self.req.user = AnonymousUser()
+        self.assertEqual(self.process_request(self.req), None)
+
+    def test_login_not_required_user(self):
+        self.req = self.factory.get("/static/site.js")
+        self.req.user = self.user
+        self.assertEqual(self.process_request(self.req), None)
+
+    def test_login_required_user(self):
+        self.req = self.factory.get("/services/")
+        self.req.user = self.user
+        self.assertEqual(self.process_request(self.req), None)
+
+    def test_login_required_anon(self):
+        self.req = self.factory.get("/services/")
+        self.req.user = AnonymousUser()
+        assert self.process_request(self.req)

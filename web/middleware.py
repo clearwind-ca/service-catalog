@@ -31,6 +31,7 @@ class CatalogMiddleware(AuthenticationMiddleware):
         """
         # Avoid a circular import.
         from rest_framework.views import APIView
+
         user = request.user
 
         # If a user is authenticated, no login_required.
@@ -47,7 +48,7 @@ class CatalogMiddleware(AuthenticationMiddleware):
             resolver = resolve(path)
         except Http404:
             return False
-        
+
         # You can decorate class based views with login_required=False to skip this middleware.
         view_func = resolver.func
         if not getattr(view_func, "login_required", True):
@@ -56,7 +57,7 @@ class CatalogMiddleware(AuthenticationMiddleware):
         view_class = getattr(view_func, "view_class", None)
         if view_class and not getattr(view_class, "login_required", True):
             return False
-        
+
         # If the resolver takes us to a view that is in the ignore list, no login required.
         if resolver.view_name in IGNORE_VIEW_NAMES:
             return False
@@ -121,12 +122,16 @@ class CatalogMiddleware(AuthenticationMiddleware):
 
         # If the user is anonymous, but a login is not required, they are good.
         if request.user.is_anonymous and not login_required:
-            return None # Good, user can continue.
-     
-        # If user is authenticated, check they are in the orgs, they are good.
-        if request.user.is_authenticated and self.check_orgs(request):
-            return None # Good, user can continue.
+            return None  # Good, user can continue.
+
+        # If user is authenticated, but we still don't need a login, they are good.
+        if request.user.is_authenticated and not login_required:
+            return None  # Good, user can continue.
+
+        # If the user is authenticated, and a login is required, then we go check the orgs.
+        if request.user.is_authenticated and login_required:
+            if self.check_orgs(request):
+                return None
 
         # Default, fail and redirect to the login-problem page.
         return redirect("web:login-problem")
-
