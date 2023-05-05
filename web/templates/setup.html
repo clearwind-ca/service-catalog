@@ -15,7 +15,6 @@
         <tr>
             <th></th>
             <th>Variable name</th>
-            <th>Value</th>
         </tr>
         {% for k, v in keys.django.items %}
         <tr>
@@ -27,7 +26,6 @@
                 {% endif %}
             </td>
             <td><code>{{ k }}</code></td>
-            <td><code>{{ v }}</code></td>
         </tr>
         {% endfor %}
     </table>
@@ -67,7 +65,6 @@
         <tr>
             <th></th>
             <th>Variable name</th>
-            <th>Value</th>
         </tr>
         {% for k, v in keys.github.items %}
         <tr>
@@ -79,13 +76,12 @@
                 {% endif %}
             </td>
             <td><code>{{ k }}</code></td>
-            <td><code>{{ v }}</code></td>
         </tr>
         {% endfor %}
     </table>
     {% endif %}
 
-    {% if permissions %}
+    {% if permissions and request.user.is_authenticated %}
     <h4>Review GitHub app permissions</h4>
     <p>Permissions we've got for the GitHub app per installation.</p>
     <table class="table table-hover">

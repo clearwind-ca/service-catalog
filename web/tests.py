@@ -3,14 +3,12 @@ from unittest.mock import Mock, patch
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.core.cache import cache
+from django.shortcuts import redirect
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from faker import Faker
 from rest_framework.authtoken.models import Token
-from django.shortcuts import redirect
 
-
-from django.contrib.auth import get_user_model
 from catalog.tests import BaseTestCase
 from services.models import Organization
 
@@ -146,7 +144,6 @@ class TestFormat(TestCase):
             ("http://foo.com", "url", '<a href="http://foo.com">http://foo.com</a>'),
         ):
             self.assertEqual(apply_format(value, field), expectation)
-
 
 
 class TestAPIToken(BaseTestCase):

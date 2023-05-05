@@ -34,13 +34,7 @@ def logout(request):
 
 
 def get(key):
-    return truncate(os.environ.get(key, None))
-
-
-def truncate(value):
-    if not value:
-        return None
-    return str(value)[:5] + "..."
+    return bool(os.environ.get(key, None))
 
 
 def setup(request):
@@ -50,13 +44,13 @@ def setup(request):
             "django": {
                 "SECRET_KEY": get("SECRET_KEY"),
                 "DATABASE_URL": get("DATABASE_URL"),
-                "SERVER_URL": os.environ.get("SERVER_URL"),
+                "SERVER_URL": get("SERVER_URL"),
                 "CELERY_BROKER_URL": get("CELERY_BROKER_URL"),
-                "ALLOWED_HOSTS": os.environ.get("ALLOWED_HOSTS"),
+                "ALLOWED_HOSTS": get("ALLOWED_HOSTS"),
             },
             "github": {
-                "GITHUB_APP_ID": os.environ.get("GITHUB_APP_ID"),
-                "GITHUB_CLIENT_ID": os.environ.get("GITHUB_CLIENT_ID"),
+                "GITHUB_APP_ID": get("GITHUB_APP_ID"),
+                "GITHUB_CLIENT_ID": get("GITHUB_CLIENT_ID"),
                 "GITHUB_CLIENT_SECRET": get("GITHUB_CLIENT_SECRET"),
                 "GITHUB_PEM": get("GITHUB_PEM"),
             },
