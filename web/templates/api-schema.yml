@@ -562,6 +562,163 @@ paths:
           description: ''
       tags:
       - api
+  /api/events/:
+    get:
+      operationId: listEvents
+      description: ''
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=4
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=2
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Event'
+          description: ''
+      tags:
+      - api
+    post:
+      operationId: createEvent
+      description: ''
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Event'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+      tags:
+      - api
+  /api/events/{id}/:
+    get:
+      operationId: retrieveEvent
+      description: ''
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this event.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+      tags:
+      - api
+    put:
+      operationId: updateEvent
+      description: ''
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this event.
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Event'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+      tags:
+      - api
+    patch:
+      operationId: partialUpdateEvent
+      description: ''
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this event.
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Event'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+      tags:
+      - api
+    delete:
+      operationId: destroyEvent
+      description: ''
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this event.
+        schema:
+          type: string
+      responses:
+        '204':
+          description: ''
+      tags:
+      - api
   /api/logs/:
     get:
       operationId: listLogEntrys
@@ -709,13 +866,20 @@ components:
         id:
           type: integer
           readOnly: true
-        url:
+        name:
           type: string
           maxLength: 100
+        url:
+          type: string
+          description: The URL to the repository on GitHub that contains the service
+            catalog files.
+          maxLength: 255
         slug:
           type: string
           readOnly: true
           pattern: ^[-a-zA-Z0-9_]+$
+        active:
+          type: boolean
         created:
           type: string
           format: date-time
@@ -724,7 +888,11 @@ components:
           type: string
           format: date-time
           readOnly: true
+        org:
+          type: integer
+          nullable: true
       required:
+      - name
       - url
     Service:
       type: object
@@ -737,7 +905,7 @@ components:
           maxLength: 100
         slug:
           type: string
-          maxLength: 100
+          readOnly: true
           pattern: ^[-a-zA-Z0-9_]+$
         description:
           type: string
@@ -764,6 +932,9 @@ components:
           type: string
           format: date-time
           readOnly: true
+        events:
+          type: object
+          nullable: true
         source:
           type: integer
         dependencies:
@@ -772,7 +943,6 @@ components:
             type: integer
       required:
       - name
-      - slug
       - description
       - path
       - type
@@ -852,6 +1022,79 @@ components:
       required:
       - service
       - health_check
+    Event:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+          nullable: true
+          description: If the event is a singular point in time, leave the end date
+            and time blank.
+        type:
+          type: string
+          description: The type of event.
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          description: Markdown is supported.
+        customers:
+          type: boolean
+          description: Whether this event impacts customers of the service.
+        active:
+          type: boolean
+        source:
+          type: string
+          nullable: true
+          description: If the source of his event is external, enter the source.
+          maxLength: 255
+        external_id:
+          type: string
+          nullable: true
+          description: Any external ID for this event.
+          maxLength: 255
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: Any external URL for this event.
+          maxLength: 255
+          pattern: "^(?:[a-z0-9.+-]*)://(?:[^\\s:@/]+(?::[^\\s:@/]*)?@)?(?:(?:0|25[0-5]|2[0-4][0-9]|1[0-9]?[0-9]?|[1-9][0-9]?)(?:\\\
+            .(?:0|25[0-5]|2[0-4][0-9]|1[0-9]?[0-9]?|[1-9][0-9]?)){3}|\\[[0-9a-f:.]+\\\
+            ]|([a-z\xA1-\uFFFF0-9](?:[a-z\xA1-\uFFFF0-9-]{0,61}[a-z\xA1-\uFFFF0-9])?(?:\\\
+            .(?!-)[a-z\xA1-\uFFFF0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z\xA1-\uFFFF-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\\
+            .?|localhost))(?::[0-9]{1,5})?(?:[/?#][^\\s]*)?\\z"
+        status:
+          type: string
+          nullable: true
+          description: Any external status for this event.
+          maxLength: 255
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        updated:
+          type: string
+          format: date-time
+          readOnly: true
+        services:
+          type: array
+          items:
+            type: integer
+          description: The services affected by this event.
+      required:
+      - name
+      - type
     LogEntry:
       type: object
       properties:
@@ -863,6 +1106,9 @@ components:
           maxLength: 255
         object_id:
           type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
           nullable: true
         object_repr:
           type: string
@@ -876,6 +1122,8 @@ components:
           - 2
           - 3
           type: integer
+          minimum: 0
+          maximum: 32767
         changes:
           type: string
         remote_addr:
