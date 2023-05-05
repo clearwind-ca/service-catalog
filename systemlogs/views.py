@@ -1,6 +1,5 @@
 from auditlog.models import LogEntry
 from django.apps import apps
-from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages import constants
 from django.core.paginator import Paginator
@@ -20,7 +19,6 @@ model_map = {
 }
 
 
-@login_required
 @process_query_params
 def log_list(request):
     get = request.GET
@@ -63,7 +61,6 @@ def log_list(request):
     return render(request, "log-list.html", context)
 
 
-@login_required
 def log_details(request, pk):
     log = LogEntry.objects.get(pk=pk)
     return render(request, "log-details.html", {"log": log})

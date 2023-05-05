@@ -48,7 +48,7 @@ def get_file_from_list(repo, paths):
     for path in paths:
         try:
             return get_file(repo, path)
-        except UnknownObjectException:
+        except (UnknownObjectException, GithubException):
             # This means the file is not found in the repo and we go onto the next one.
             continue
 

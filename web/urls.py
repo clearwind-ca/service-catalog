@@ -6,12 +6,13 @@ from . import views
 app_name = "web"  # pylint: disable=invalid-name
 
 urlpatterns = [
-    path("", TemplateView.as_view(template_name="home.html")),
+    path("", TemplateView.as_view(template_name="home.html"), name="home"),
     path("api/", views.api, name="api"),
     path("api/create/", views.api_create, name="api-create"),
     path("api/delete/", views.api_delete, name="api-delete"),
     path("setup/", views.setup, name="setup"),
     path("logout/", views.logout, name="logout"),
+    path("login-problem/", views.login_problem, name="login-problem"),
 ]
 
 handler403 = "web.views.handler403"

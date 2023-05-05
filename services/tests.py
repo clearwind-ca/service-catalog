@@ -344,6 +344,19 @@ class TestAdd(WithUser):
         self.assertTemplateUsed(response, "source-add.html")
 
     @patch("services.views.fetch")
+    @patch("web.middleware.user")
+    def test_add_with_org(self, mock_user, mock_fetch):
+        """Test the source add view with an org."""
+        mock_user.check_org_membership.return_value = True
+        self.org = models.Organization.objects.create(name="test")
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, {"url": "https://gh.com/test/gh"})
+        self.assertEqual(response.status_code, 302, response.content)
+        source = models.Source.objects.get(slug="test-gh")
+        self.assertEqual(source.name, "gh")
+        self.assertEqual(source.org, self.org)
+
+    @patch("services.views.fetch")
     def test_post(self, mock_fetch):
         """Test the source add view with a POST."""
         self.client.force_login(self.user)
@@ -520,7 +533,8 @@ class TestAPISource(WithUser):
     def test_source_unauth(self):
         """Test the source list API as an unauthed user."""
         response = self.api_client.get(self.source_list)
-        self.assertEqual(response.status_code, 401)
+        print(response.headers)
+        self.assertEqual(response.status_code, 401, response.content)
 
     def test_source_delete(self):
         """Test deleting a source."""
@@ -531,7 +545,7 @@ class TestAPISource(WithUser):
         self.assertEqual(response.status_code, 204)
         self.assertEqual(get_object_or_None(models.Source, pk=self.source.pk), None)
 
-    def test_source_delete(self):
+    def test_source_delete_with_service(self):
         """Test deleting a source with a service."""
         self.api_login()
         self.source = create_source()
@@ -543,12 +557,14 @@ class TestAPISource(WithUser):
         """Test the source list API as POST"""
         self.api_login()
         fake_url = fake.url()
-        response = self.api_client.post(self.source_list, data={"url": fake_url})
-        self.assertEqual(response.status_code, 201)
+        response = self.api_client.post(
+            self.source_list, data={"url": fake_url, "name": fake.name()}
+        )
+        self.assertEqual(response.status_code, 201, response.content)
 
         url = reverse("services:api-source-detail", kwargs={"pk": response.data["id"]})
         response = self.api_client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(response.json()["url"], fake_url)
 
     def test_refresh_unauth(self):

@@ -83,6 +83,7 @@ class Source(models.Model):
     containing the file.
     """
 
+    name = models.CharField(max_length=100)
     url = models.CharField(
         max_length=100,
         verbose_name="Repository URL",
@@ -96,6 +97,14 @@ class Source(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    org = models.ForeignKey(
+        "Organization",
+        on_delete=models.PROTECT,
+        related_name="sources",
+        null=True,
+        blank=True,
+    )
+
     def logs(self):
         return LogEntry.objects.get_for_object(self)
 
@@ -103,7 +112,8 @@ class Source(models.Model):
         return self.slug
 
     def save(self, *args, **kwargs):
-        self.slug = slugify_source(self.url)
+        if not self.slug:
+            self.slug = slugify_source(self.url)
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):

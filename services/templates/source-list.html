@@ -20,7 +20,7 @@
                 {% for source in sources %}
                     <tr>
                         <td>
-                            <a href="{% url 'services:source-detail' source.slug %}">{{ source.slug }}</a>
+                            <a href="{% url 'services:source-detail' source.slug %}">{{ source.name }}</a>
                             {% include "active.html" with active=source.active show_inactive_only=True %}
                         </td>
                         <td>{{ source.services.count }}</td>

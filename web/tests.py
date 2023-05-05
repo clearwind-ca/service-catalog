@@ -1,9 +1,12 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from faker import Faker
+from django.core.cache import cache
 from rest_framework.authtoken.models import Token
-
+from django.test import RequestFactory
+from .middleware import CatalogMiddleware
 from .helpers import process_query_params
 from .templatetags.helpers import (
     apply_format,
@@ -13,7 +16,8 @@ from .templatetags.helpers import (
     strip_format,
     yesno_if_boolean,
 )
-
+from services.models import Organization
+from unittest.mock import Mock, patch
 fake = Faker("en_US")
 
 # Truncated....
@@ -65,7 +69,7 @@ class TestHomePage(TestCase):
     def test_home_page(self):
         """Test the home page loads."""
         response = self.client.get("/")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, response.headers)
         self.assertTemplateUsed(response, "home.html")
 
 
@@ -180,3 +184,73 @@ class TestAPIToken(TestCase):
         assert Token.objects.filter(user=self.user).exists()
         self.client.post(reverse("web:api-delete"))
         self.assertEquals(Token.objects.filter(user=self.user).exists(), False)
+
+
+class TestMiddleware(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.req = self.factory.get("/services/")
+        self.user = get_user_model().objects.create_user(username="andy")
+        self.check_orgs = CatalogMiddleware(Mock()).check_orgs
+        super().setUp()
+
+    def tearDown(self):
+        super().tearDown()
+        cache.clear()
+
+    @patch("web.middleware.user")
+    def test_orgs_anon_not_member(self, mock_user):
+        """
+        There are orgs, and the user isnt a member of any of them, but
+        the URL has been added to the allow list for anonymous users.
+        """
+        self.req = self.factory.get("/")
+        Organization.objects.create(name="foo")
+        self.req.user = self.user
+        mock_user.check_org_membership.return_value = False
+        self.assertEqual(self.check_orgs(self.req), True)
+
+    def test_no_orgs_anon(self):
+        self.req.user = AnonymousUser()
+        self.assertEquals(self.check_orgs(self.req), False)
+
+    def test_no_orgs_user(self):
+        self.req.user = self.user
+        self.assertEquals(self.check_orgs(self.req), True)
+
+    def test_orgs_anon(self):
+        Organization.objects.create(name="foo")
+        self.req.user = AnonymousUser()
+        self.assertEqual(self.check_orgs(self.req), False)
+
+    def test_orgs_anon(self):
+        Organization.objects.create(name="foo")
+        self.req.user = AnonymousUser()
+        self.assertEqual(self.check_orgs(self.req), False)
+
+    @patch("web.middleware.user")
+    def test_orgs_not_member(self, mock_user):
+        Organization.objects.create(name="foo")
+        self.req.user = self.user
+        mock_user.check_org_membership.return_value = False
+        print(mock_user.check_org_membership())
+        self.assertEqual(self.check_orgs(self.req), False)
+
+    @patch("web.middleware.user")
+    def test_orgs_member(self, mock_user):
+        Organization.objects.create(name="foo")
+        self.req.user = self.user
+        mock_user.check_org_membership.return_value = True
+        self.assertEqual(self.check_orgs(self.req), True)
+
+    @patch("web.middleware.user")
+    def test_orgs_uses_cache(self, mock_user):
+        Organization.objects.create(name="foo")
+        self.req.user = self.user
+        mock_user.check_org_membership.return_value = True
+        self.assertEqual(self.check_orgs(self.req), True)
+        assert mock_user.check_org_membership.call_count == 1
+
+        # Second call should use cache.
+        self.assertEqual(self.check_orgs(self.req), True)
+        assert mock_user.check_org_membership.call_count == 1

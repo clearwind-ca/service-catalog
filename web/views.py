@@ -1,10 +1,7 @@
-import json
 import os
 
 import requests
-from django.conf import settings
 from django.contrib import auth, messages
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render, reverse
 from django.views.decorators.http import require_POST
 from rest_framework.authtoken.models import Token
@@ -13,8 +10,12 @@ from .forms import CreateAppForm
 from .shortcuts import get_object_or_None
 
 
+def login_problem(request):
+    return render(request, "403.html")
+
+
 def handler403(request, exception):
-    return render(request, "custom-403.html", status=403, context={"hide_login": True})
+    return render(request, "403.html", status=403, context={"hide_login": True})
 
 
 def handler404(request, exception):
@@ -91,14 +92,12 @@ def setup(request):
     return render(request, "setup.html", context)
 
 
-@login_required
 def api(request):
     token = get_object_or_None(Token, user=request.user)
     if request.method == "GET":
         return render(request, "api.html", {"token": token})
 
 
-@login_required
 @require_POST
 def api_create(request):
     if Token.objects.filter(user=request.user).exists():
@@ -114,7 +113,6 @@ def api_create(request):
     return render(request, "api.html", {"token": token})
 
 
-@login_required
 @require_POST
 def api_delete(request):
     Token.objects.filter(user=request.user).delete()

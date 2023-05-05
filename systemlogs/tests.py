@@ -25,10 +25,10 @@ class TestTruncate(WithSource):
         self.assertRaises(ValueError, self.command)
 
     def test_truncate_ignores_newer_logs(self):
-        LogEntry.objects.log_create(instance=self.source)
+        entries = LogEntry.objects.count()
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
             self.command(ago=1, quiet=True)
-        self.assertEqual(LogEntry.objects.count(), 1)
+        self.assertEqual(LogEntry.objects.count(), entries)
 
     def test_truncates(self):
         LogEntry.objects.log_create(self.source)
