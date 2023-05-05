@@ -14,6 +14,7 @@
                     <th>Repository</th>
                     <th>Services</th>
                     <th>{% octicon "past" %} Updated</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>    
@@ -25,6 +26,14 @@
                         </td>
                         <td>{{ source.services.count }}</td>
                         <td>{% include "since.html" with since=source.updated %}</td>
+                        <td>
+                            <span class="dropdown-toggle" type="button"data-bs-toggle="dropdown" aria-expanded="false">
+                                {% octicon "hamburger" %}
+                             </span>
+                             <ul class="dropdown-menu">
+                                 <li><a class="dropdown-item" href="{{ source.url }}">{% octicon "link-external" %} View on GitHub</a></li>
+                             </ul>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -41,6 +50,8 @@
             <tr>
                 <th>Organization</th>
                 <th>Automatically add sources</th>
+                <th>{% octicon "past" %} Updated</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>    
@@ -48,6 +59,15 @@
                 <tr>
                     <td>{{ org.name }}</a></td>
                     <td>{{ org.auto_add_sources|yesno }}</td>
+                    <td>{% include "since.html" with since=org.updated %}</td>
+                    <td>
+                        <span class="dropdown-toggle" type="button"data-bs-toggle="dropdown" aria-expanded="false">
+                            {% octicon "hamburger" %}
+                         </span>
+                         <ul class="dropdown-menu">
+                             <li><a class="dropdown-item" href="{{ org.url }}">{% octicon "link-external" %} View on GitHub</a></li>
+                         </ul>
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>

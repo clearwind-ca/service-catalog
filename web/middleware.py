@@ -67,6 +67,9 @@ class CatalogMiddleware(AuthenticationMiddleware):
         return redirect("web:login-problem")
 
     def check_orgs(self, request):
+        if not settings.ENFORCE_ORG_MEMBERSHIP:
+            return True
+
         if request.user.is_anonymous:
             return False
 
@@ -78,6 +81,10 @@ class CatalogMiddleware(AuthenticationMiddleware):
 
         # First, something in the cache for this user?
         names = Organization.objects.values_list("name", flat=True)
+        if not names:
+            logger.error(f"Check-Orgs: No orgs found to check membership against.")
+            return False
+
         # Include the org names in the key, so that if the orgs change we
         # end up with a stale result.
         key = f"orgs:{request.user.pk}:{','.join(names)}"

@@ -41,7 +41,6 @@ def check_org_membership(username, org):
         gh = login_as_user(username)
         user = gh.get_user(username)
         org_object = gh.get_organization(org)
-        print(user, org_object.has_in_members(user))
         return org_object.has_in_members(user)
     except ObjectDoesNotExist:
         logger.error(f"Check-Org-Membership: No user object: {username}")

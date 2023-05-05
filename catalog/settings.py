@@ -50,6 +50,7 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 DEBUG = os.environ.get("DEBUG")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+ENFORCE_ORG_MEMBERSHIP = True
 if os.environ.get("CI"):
     DATABASES = {
         "default": {

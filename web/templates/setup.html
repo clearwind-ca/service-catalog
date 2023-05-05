@@ -35,7 +35,7 @@
     <h4>Step 2: GitHub app setup</h4>
     {% if steps.github %}
         <p><span class="fill-success">{% octicon "verified" %}</span> GitHub app setup 👍. You should be good to go.</p>
-        <p><b>Note:</b> To allow users to login you must give the GitHub app access to `Account Permissions` 👉 `Email addresses` 👉 `Access: Read-only`. Currently this does not seem possible to set from the manifest.</p>
+        <p><b>Note:</b> To allow users to login you must give the GitHub app access to <code>Account Permissions</code> 👉 <code>Email addresses</code> 👉 <code>Access: Read-only</code>. Currently this does not seem possible to set from the manifest.</p>
     {% else %}
         <p>This form will guide you through the flow and give you the outputs needed to populate the Environment variables.</p>
         {% if app %}
@@ -81,6 +81,27 @@
             <td><code>{{ k }}</code></td>
             <td><code>{{ v }}</code></td>
         </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+
+    {% if permissions %}
+    <h4>Review GitHub app permissions</h4>
+    <p>Permissions we've got for the GitHub app per installation.</p>
+    <table class="table table-hover">
+        <tr>
+            <th>Installation</th>
+            <th>Permission</th>
+            <th>Value</th>
+        </tr>
+        {% for installation, permissions in permissions.items %}
+            {% for k, v in permissions.items %}
+                <tr>
+                    <td><code>{{ installation }}</code></td>
+                    <td><code>{{ k }}</code></td>
+                    <td><code>{{ v }}</code></td>
+                </tr>
+            {% endfor %}
         {% endfor %}
     </table>
     {% endif %}

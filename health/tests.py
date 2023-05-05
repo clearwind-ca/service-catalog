@@ -8,7 +8,7 @@ from django.utils import timezone
 from faker import Faker
 
 from catalog.errors import NoRepository
-from catalog.helpers.tests import WithUser
+from catalog.tests import BaseTestCase
 from services.tests import create_service, create_source
 
 from .management.commands import send, timeout
@@ -31,7 +31,7 @@ def create_health_check_result(health_check, service):
     )
 
 
-class WithHealthCheck(WithUser):
+class WithHealthCheck(BaseTestCase):
     def setUp(self):
         super().setUp()
         created = create_health_check()
@@ -40,7 +40,7 @@ class WithHealthCheck(WithUser):
         self.health_check = created["health_check"]
 
 
-class TestAPICheck(WithUser):
+class TestAPICheck(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.source = create_source()

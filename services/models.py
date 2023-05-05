@@ -85,12 +85,12 @@ class Source(models.Model):
 
     name = models.CharField(max_length=100)
     url = models.CharField(
-        max_length=100,
+        max_length=255,
         verbose_name="Repository URL",
         help_text="The URL to the repository on GitHub that contains the service catalog files.",
         unique=True,
     )
-    slug = models.SlugField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=255, unique=True)
 
     active = models.BooleanField(default=True)
 
@@ -125,9 +125,14 @@ class Organization(models.Model):
     An organization which then has sources.
     """
 
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=255)
     auto_add_sources = models.BooleanField(
         default=True, help_text="Automatically add sources from the organization."
+    )
+    url = models.CharField(
+        max_length=255,
+        verbose_name="Organization URL",
+        unique=True,
     )
 
     active = models.BooleanField(default=True)

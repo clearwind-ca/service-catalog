@@ -44,6 +44,7 @@ def refresh_sources_from_github(org_slug):
             continue
 
         form.save()
+        refresh_service_from_github.delay(form.instance.slug)
 
 
 @app.task
@@ -57,8 +58,10 @@ def refresh_sources_from_orgs():
 @app.task
 def refresh_orgs_from_github():
     for org in fetch.get_orgs():
-        org_obj = get_object_or_None(Organization, name=org)
+        org_obj = get_object_or_None(Organization, name=org["login"])
         if not org_obj:
-            Organization.objects.create(name=org, active=True, auto_add_sources=True)
+            Organization.objects.create(
+                name=org["login"], active=True, auto_add_sources=True, url=org["html_url"]
+            )
 
     refresh_sources_from_orgs.delay()

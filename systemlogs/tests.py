@@ -2,7 +2,7 @@ from auditlog.models import LogEntry
 from django.urls import reverse
 from faker import Faker
 
-from catalog.helpers.tests import WithUser
+from catalog.tests import BaseTestCase
 from services.tests import create_source
 
 from .management.commands import truncate
@@ -10,7 +10,7 @@ from .management.commands import truncate
 fake = Faker("en_US")
 
 
-class WithSource(WithUser):
+class WithSource(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.source = create_source()
