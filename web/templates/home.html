@@ -2,7 +2,11 @@
 {% block content %}
 {% load octicons %}
 <h2>👋 Hi there</h2>
-<p>Welcome to the service catalog. This is a tool to track services across the organization. To continue you'll need to login using GitHub. For more information on the service catalog check out <a href="https://github.com/clearwind-ca/service-catalog">the repository on {% octicon "mark-github" %} GitHub</a>.</p>
-<p>For information on how to use the service catalog, check out <a href="https://github.com/clearwind-ca/service-catalog/blob/main/docs/getting-started.md">the documentation to get started</a>.</p>
+<p>This is a tool to track services across your organization.
+    {% if not user.is_authenticated %}
+        Before you can use the service catalog you <i>must login</i>.
+    {% endif %}
+</p>
+<p>For more information on the service catalog check out <a href="https://github.com/clearwind-ca/service-catalog">the repository on {% octicon "mark-github" %} GitHub</a> or <a href="https://github.com/clearwind-ca/service-catalog/blob/main/docs/getting-started.md">the documentation to get started</a>.</p>
 <p class="form-text">The service catalog is written by <a href="https://clearwind.ca">Clearwind</a> and its contributors.</p>
 {% endblock %}
