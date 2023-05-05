@@ -1,17 +1,17 @@
+import logging
 import re
-from django.core.cache import cache
+
 from django.conf import settings
 from django.contrib.auth.middleware import AuthenticationMiddleware
 from django.contrib.auth.views import redirect_to_login
+from django.core.cache import cache
 from django.http import Http404
-from django.urls import resolve
-
 from django.shortcuts import redirect
+from django.urls import resolve
 
 from gh import user
 from services.models import Organization
 
-import logging
 logger = logging.getLogger(__name__)
 
 IGNORE_PATHS = [re.compile(url) for url in settings.LOGIN_REQUIRED_IGNORE_PATHS]
@@ -20,6 +20,7 @@ REDIRECT_FIELD_NAME = settings.LOGIN_REQUIRED_REDIRECT_FIELD_NAME
 
 # See https://github.com/CleitonDeLima/django-login-required-middleware/blob/master/login_required/middleware.py for the
 # source of this, with the changes to add in DRF.
+
 
 class CatalogMiddleware(AuthenticationMiddleware):
     def _login_required(self, request):
@@ -37,7 +38,7 @@ class CatalogMiddleware(AuthenticationMiddleware):
         try:
             resolver = resolve(path)
         except Http404:
-            return redirect('web:login-problem')
+            return redirect("web:login-problem")
 
         view_func = resolver.func
 
@@ -50,7 +51,7 @@ class CatalogMiddleware(AuthenticationMiddleware):
 
         if resolver.view_name in IGNORE_VIEW_NAMES:
             return user
-        
+
         # See if this is DRF View Set
         view_func_cls = getattr(view_func, "cls", None)
         if view_func_cls:
@@ -63,33 +64,33 @@ class CatalogMiddleware(AuthenticationMiddleware):
                 drf_request.user.is_authenticated
                 return drf_request.user
 
-        return redirect('web:login-problem')
-    
+        return redirect("web:login-problem")
+
     def check_orgs(self, request):
         if request.user.is_anonymous:
             return False
-        
+
         # Don't check on pages that are meant to be anonymous.
         resolver = resolve(request.path)
         if resolver.view_name in IGNORE_VIEW_NAMES:
-            logger.info(f'Check-Orgs: Ignoring view name {resolver.view_name}')
+            logger.info(f"Check-Orgs: Ignoring view name {resolver.view_name}")
             return True
-        
+
         # First, something in the cache for this user?
-        names = Organization.objects.values_list('name', flat=True)
+        names = Organization.objects.values_list("name", flat=True)
         # Include the org names in the key, so that if the orgs change we
         # end up with a stale result.
         key = f"orgs:{request.user.pk}:{','.join(names)}"
         result = cache.get(key)
         # If it's none there was nothing in the cache.
         if result in [True, False]:
-            logger.error(f'Check-Orgs: Cache hit for {key} with {result}')
+            logger.error(f"Check-Orgs: Cache hit for {key} with {result}")
             return result
 
         # Next, check the database.
         valid = all([user.check_org_membership(request.user.username, name) for name in names])
-        cache.set(key, valid, 60 * 5) # 5 minutes
-        logger.error(f'Check-Orgs: Cache set for {key} with {valid}')
+        cache.set(key, valid, 60 * 5)  # 5 minutes
+        logger.error(f"Check-Orgs: Cache set for {key} with {valid}")
         return valid
 
     def process_request(self, request):
@@ -102,5 +103,5 @@ class CatalogMiddleware(AuthenticationMiddleware):
             if self.check_orgs(request):
                 return None
 
-            return redirect('web:login-problem')
+            return redirect("web:login-problem")
         return res

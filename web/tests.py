@@ -1,13 +1,17 @@
+from unittest.mock import Mock, patch
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
+from django.core.cache import cache
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from faker import Faker
-from django.core.cache import cache
 from rest_framework.authtoken.models import Token
-from django.test import RequestFactory
-from .middleware import CatalogMiddleware
+
+from services.models import Organization
+
 from .helpers import process_query_params
+from .middleware import CatalogMiddleware
 from .templatetags.helpers import (
     apply_format,
     markdown_filter,
@@ -16,8 +20,7 @@ from .templatetags.helpers import (
     strip_format,
     yesno_if_boolean,
 )
-from services.models import Organization
-from unittest.mock import Mock, patch
+
 fake = Faker("en_US")
 
 # Truncated....
