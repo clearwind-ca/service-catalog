@@ -8,9 +8,11 @@
 
 
 {% block top %}
-    <h4>Edit this event</h4>
-    {% include "active.html" with active=event.active %}
-    {% include "customers.html" with impacts=event.customers %}
+    <h2>Edit this event</h2>
+    <h4>
+        {% include "active.html" with active=event.active %}
+        {% include "customers.html" with impacts=event.customers %}
+    </h4>
 {% endblock %}
 
 {% block main %}

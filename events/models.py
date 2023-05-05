@@ -45,7 +45,6 @@ class Event(models.Model):
         null=True,
         verbose_name="External ID",
         help_text="Any external ID for this event.",
-        unique=True,
     )
 
     url = models.URLField(

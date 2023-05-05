@@ -8,12 +8,12 @@
 {% endblock %}
 
 {% block top %}
-    <h3>{{ service.name }}</h3>
-    <p>
+    <h2>{{ service.name }}</h2>
+    <h4>
         {% include "priority.html" with priority=service.priority %}
         {% include "active.html" with active=service.active %}
         {% include "health-check-badge.html" with checks=checks %}
-    </p>
+    </h4>
     {{ service.description|markdown|safe }}
 {% endblock %}
     

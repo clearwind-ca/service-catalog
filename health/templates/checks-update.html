@@ -10,10 +10,10 @@
 {% endblock %}
 
 {% block top %}
-    <h3>{{ check.name }}</h3>
-    <p>
+    <h2>{{ check.name }}</h2>
+    <h4>
         {% include "active.html" with active=check.active %}
-    </p>
+    </h4>
 {% endblock %}
 
 {% block main %}

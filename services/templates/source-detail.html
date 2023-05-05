@@ -9,8 +9,10 @@
 {% endblock %}
 
 {% block top %}
-    <h3>{{ source.name }}</h3>
-    {% include "active.html" with active=source.active %}
+    <h2>{{ source.name }}</h2>
+    <h4>
+        {% include "active.html" with active=source.active %}
+    </h4>
 {% endblock %}
 
 {% block main %}

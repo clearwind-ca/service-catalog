@@ -8,10 +8,12 @@
 {% endblock %}
 
 {% block top %}
-    <h4>{{ event.name }}</h4>
-    {% include "active.html" with active=event.active %}
-    {% include "customers.html" with impacts=event.customers %}
-    {{ event.description|markdown|safe }}
+    <h2>{{ event.name }}</h2>
+    <h4>
+        {% include "active.html" with active=event.active %}
+        {% include "customers.html" with impacts=event.customers %}
+        {{ event.description|markdown|safe }}
+    </h4>
 {% endblock %}
 
 {% block main %}
