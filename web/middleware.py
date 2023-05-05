@@ -24,35 +24,45 @@ REDIRECT_FIELD_NAME = settings.LOGIN_REQUIRED_REDIRECT_FIELD_NAME
 
 class CatalogMiddleware(AuthenticationMiddleware):
     def _login_required(self, request):
+        """
+        Check to see if a login is required for this path.
+        * True: a login will be required.
+        * False: it won't.
+        """
         # Avoid a circular import.
-        user = request.user
         from rest_framework.views import APIView
+        user = request.user
 
+        # If a user is authenticated, no login_required.
         if user.is_authenticated:
-            return user
+            return False
 
+        # If the URL is in an IGNORE_PATH, no login_required.
         path = request.path
         if any(url.match(path) for url in IGNORE_PATHS):
-            return user
+            return False
 
+        # If it's a 404, no login required.
         try:
             resolver = resolve(path)
         except Http404:
-            return redirect("web:login-problem")
-
+            return False
+        
+        # You can decorate class based views with login_required=False to skip this middleware.
         view_func = resolver.func
-
         if not getattr(view_func, "login_required", True):
-            return user
+            return False
 
         view_class = getattr(view_func, "view_class", None)
         if view_class and not getattr(view_class, "login_required", True):
-            return user
-
+            return False
+        
+        # If the resolver takes us to a view that is in the ignore list, no login required.
         if resolver.view_name in IGNORE_VIEW_NAMES:
-            return user
+            return False
 
-        # See if this is DRF View Set
+        # See if this is DRF View Set and if so, let DRF Token Auth try to log the user in.
+        # If they are logged in we are good and we can pass off to DRF to Authenticate them as needed.
         view_func_cls = getattr(view_func, "cls", None)
         if view_func_cls:
             auth_cls = getattr(view_func_cls, "authentication_classes", None)
@@ -62,14 +72,17 @@ class CatalogMiddleware(AuthenticationMiddleware):
                 drf_request = drf_view.initialize_request(request)
                 # Raises AuthenticationFailed if not successful
                 drf_request.user.is_authenticated
-                return drf_request.user
+                return False
 
-        return redirect("web:login-problem")
+        # If none of the above are met, we need the user to login.
+        return True
 
     def check_orgs(self, request):
+        # This should only be used in tests and not changed.
         if not settings.ENFORCE_ORG_MEMBERSHIP:
             return True
 
+        # If the user is anonymous, they can't be in an org, so we can exit early.
         if request.user.is_anonymous:
             return False
 
@@ -89,26 +102,31 @@ class CatalogMiddleware(AuthenticationMiddleware):
         # end up with a stale result.
         key = f"orgs:{request.user.pk}:{','.join(names)}"
         result = cache.get(key)
-        # If it's none there was nothing in the cache.
+
+        # If it's none there was nothing in the cache, so let's check True/False explicitly.
         if result in [True, False]:
             logger.error(f"Check-Orgs: Cache hit for {key} with {result}")
             return result
 
         # Next, check the database.
         valid = all([user.check_org_membership(request.user.username, name) for name in names])
-        cache.set(key, valid, 60 * 5)  # 5 minutes
+
+        # Set a cache key for 5 minutes.
+        cache.set(key, valid, 60 * 5)
         logger.error(f"Check-Orgs: Cache set for {key} with {valid}")
         return valid
 
     def process_request(self, request):
-        res = self._login_required(request)
-        if isinstance(res, type(request.user)):
-            if request.user.is_anonymous:
-                return None
+        login_required = self._login_required(request)
 
-            # Validate that the user is a member of the organization.
-            if self.check_orgs(request):
-                return None
+        # If the user is anonymous, but a login is not required, they are good.
+        if request.user.is_anonymous and not login_required:
+            return None # Good, user can continue.
+     
+        # If user is authenticated, check they are in the orgs, they are good.
+        if request.user.is_authenticated and self.check_orgs(request):
+            return None # Good, user can continue.
 
-            return redirect("web:login-problem")
-        return res
+        # Default, fail and redirect to the login-problem page.
+        return redirect("web:login-problem")
+

@@ -110,9 +110,9 @@ logging.getLogger("MARKDOWN").setLevel(logging.ERROR)
 LOGIN_REQUIRED_IGNORE_PATHS = [
     "/oauth/github/login/",
     "/oauth/github/callback/",
+    "^/static/*.*",
 ]
 LOGIN_REQUIRED_IGNORE_VIEW_NAMES = ["web:home", "web:setup", "web:login-problem", "web:logout"]
-
 LOGIN_REQUIRED_REDIRECT_FIELD_NAME = "next"
 LOGIN_URL = "/"
 LOGIN_REDIRECT_URL = "/services/"
