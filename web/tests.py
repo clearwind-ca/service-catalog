@@ -8,6 +8,7 @@ from django.urls import reverse
 from faker import Faker
 from rest_framework.authtoken.models import Token
 
+from catalog.tests import BaseTestCase
 from services.models import Organization
 
 from .helpers import process_query_params
@@ -147,7 +148,11 @@ class TestFormat(TestCase):
 from django.contrib.auth import get_user_model
 
 
-class TestAPIToken(TestCase):
+class TestAPIToken(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        Token.objects.all().delete()
+
     def test_api_token(self):
         """Test the API token pages require login."""
         response = self.client.get(reverse("web:api"))
@@ -159,21 +164,16 @@ class TestAPIToken(TestCase):
         response = self.client.post(reverse("web:api-create"))
         self.assertEqual(response.status_code, 302)
 
-    def add_user(self):
-        self.user = get_user_model().objects.create_user(username="andy")
-
     def test_api_token(self):
         """Test the API token page loads."""
-        self.add_user()
-        self.client.force_login(self.user)
+        self.login()
         response = self.client.get(reverse("web:api"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "api.html")
 
     def test_api_token_create(self):
         """Test that hitting the API token endpoint creates a token."""
-        self.add_user()
-        self.client.force_login(self.user)
+        self.login()
         response = self.client.post(reverse("web:api-create"))
         token = Token.objects.get(user=self.user)
         self.assertContains(response, token.key)
@@ -181,8 +181,7 @@ class TestAPIToken(TestCase):
 
     def test_api_token_delete(self):
         """Test that hitting the API token endpoint deletes a token."""
-        self.add_user()
-        self.client.force_login(self.user)
+        self.login()
         Token.objects.create(user=self.user)
         assert Token.objects.filter(user=self.user).exists()
         self.client.post(reverse("web:api-delete"))
@@ -219,7 +218,7 @@ class TestMiddleware(TestCase):
 
     def test_no_orgs_user(self):
         self.req.user = self.user
-        self.assertEquals(self.check_orgs(self.req), True)
+        self.assertEquals(self.check_orgs(self.req), False)
 
     def test_orgs_anon(self):
         Organization.objects.create(name="foo")

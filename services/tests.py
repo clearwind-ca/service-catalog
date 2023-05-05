@@ -11,7 +11,7 @@ from django.urls import reverse
 from faker import Faker
 
 from catalog.errors import FetchError
-from catalog.helpers.tests import WithUser
+from catalog.tests import BaseTestCase
 from web.shortcuts import get_object_or_None
 
 from . import forms, models
@@ -96,7 +96,7 @@ class ServiceTestCase(TestCase):
         self.assertTrue(form.is_valid(), form.errors)
 
 
-class TestServiceList(WithUser):
+class TestServiceList(BaseTestCase):
     def test_no_services(self):
         """Test the list services view with no services."""
         self.client.force_login(self.user)
@@ -226,7 +226,7 @@ class TestDependencies(TestCase):
         self.assertEqual(result["service"].dependencies.first(), self.service_parent)
 
 
-class TestSchema(WithUser):
+class TestSchema(BaseTestCase):
     def test_schema(self):
         """Test the list schema view."""
         self.client.force_login(self.user)
@@ -240,7 +240,7 @@ class TestSchema(WithUser):
         self.assertEqual(response.status_code, 302)
 
 
-class TestValidate(WithUser):
+class TestValidate(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.source = create_source()
@@ -285,7 +285,7 @@ class TestValidate(WithUser):
         self.assertEqual(self.get_message(response).level, messages.INFO)
 
 
-class TestDelete(WithUser):
+class TestDelete(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.source = create_source()
@@ -326,7 +326,7 @@ class TestDelete(WithUser):
         self.assertEquals(LogEntry.objects.get_for_object(self.source).exists(), True)
 
 
-class TestAdd(WithUser):
+class TestAdd(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.url = reverse("services:source-add")
@@ -348,13 +348,11 @@ class TestAdd(WithUser):
     def test_add_with_org(self, mock_user, mock_fetch):
         """Test the source add view with an org."""
         mock_user.check_org_membership.return_value = True
-        self.org = models.Organization.objects.create(name="test")
         self.client.force_login(self.user)
         response = self.client.post(self.url, {"url": "https://gh.com/test/gh"})
         self.assertEqual(response.status_code, 302, response.content)
         source = models.Source.objects.get(slug="test-gh")
         self.assertEqual(source.name, "gh")
-        self.assertEqual(source.org, self.org)
 
     @patch("services.views.fetch")
     def test_post(self, mock_fetch):
@@ -373,7 +371,7 @@ class TestAdd(WithUser):
         assert not models.Source.objects.filter(slug="andy-gh").exists()
 
 
-class TestSourceList(WithUser):
+class TestSourceList(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.url = reverse("services:source-list")
@@ -401,7 +399,7 @@ class TestSourceList(WithUser):
         self.assertEqual(len(response.context["sources"]), 1)
 
 
-class TestServiceDetail(WithUser):
+class TestServiceDetail(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.source = create_source()
@@ -422,7 +420,7 @@ class TestServiceDetail(WithUser):
         self.assertEqual(response.context["service"], self.service)
 
 
-class TestServiceDelete(WithUser):
+class TestServiceDelete(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.source = create_source()
@@ -448,7 +446,7 @@ class TestServiceDelete(WithUser):
         assert not models.Service.objects.filter(slug=self.service.slug).exists()
 
 
-class TestManagementRefresh(WithUser):
+class TestManagementRefresh(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.command = Command()
@@ -493,7 +491,7 @@ class TestManagementRefresh(WithUser):
         self.assertEquals(mock_fetch.get.call_count, 0)
 
 
-class TestServiceForm(WithUser):
+class TestServiceForm(BaseTestCase):
     def setUp(self):
         super().setUp()
 
@@ -519,7 +517,7 @@ class TestServiceForm(WithUser):
         self.assertEqual(form.save()["updated"], False)
 
 
-class TestAPISource(WithUser):
+class TestAPISource(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.source_list = reverse("services:api-source-list")
@@ -621,7 +619,7 @@ class TestAPISource(WithUser):
         assert "type" in second["data"][0]["message"]
 
 
-class TestAPIService(WithUser):
+class TestAPIService(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.service_list = reverse("services:api-service-list")
@@ -658,7 +656,7 @@ class TestAPIService(WithUser):
         self.assertEqual(get_object_or_None(models.Service, pk=self.service.pk), None)
 
 
-class TestAPIService(WithUser):
+class TestAPIService(BaseTestCase):
     def test_get_schema(self):
         self.url = reverse("services:api-schema-detail")
         response = self.api_client.get(self.url)

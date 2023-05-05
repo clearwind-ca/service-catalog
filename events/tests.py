@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 from faker import Faker
 
-from catalog.helpers.tests import WithUser
+from catalog.tests import BaseTestCase
 from services.tests import create_service, create_source
 
 from . import models
@@ -16,7 +16,7 @@ from .tasks import get_all_active_deployments, get_deployments
 fake = Faker()
 
 
-class WithEvents(WithUser):
+class WithEvents(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.source = create_source()
