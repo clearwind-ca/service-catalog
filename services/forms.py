@@ -7,6 +7,9 @@ from django import forms
 from django.conf import settings
 from django.contrib import messages
 
+from gh.fetch import url_to_nwo
+from web.shortcuts import get_object_or_None
+
 from . import models
 
 
@@ -29,7 +32,7 @@ class OrgForm(forms.ModelForm):
 class SourceForm(forms.ModelForm, BaseForm):
     class Meta:
         model = models.Source
-        exclude = ["created", "modified", "slug"]
+        exclude = ["created", "modified", "slug", "name", "org"]
 
     def clean_url(self):
         url = self.data["url"]
@@ -39,7 +42,23 @@ class SourceForm(forms.ModelForm, BaseForm):
         if not parsed.path:
             raise forms.ValidationError("URL must include a path to the repository.")
 
-        return url
+        org, self.cleaned_data["name"] = url_to_nwo(self.data["url"])
+        organization = get_object_or_None(models.Organization, name=org)
+        self.org = organization
+        return self.data["url"]
+
+    def save(self):
+        res = super().save()
+        dirty = False
+        if not self.instance.name and self.cleaned_data["name"]:
+            dirty = True
+            self.instance.name = self.cleaned_data["name"]
+        if not self.instance.org and self.org:
+            dirty = True
+            self.instance.org = self.org
+        if dirty:
+            self.instance.save()
+        return res
 
 
 def get_schema():

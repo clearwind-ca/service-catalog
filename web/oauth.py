@@ -96,11 +96,6 @@ class GitHubOAuthProvider(OAuthProvider):
         except IndexError:
             raise OAuthError("A verified primary email address is required on GitHub")
 
-        orgs = Organization.objects.all()
-        for org in orgs:
-            if not user.check_org_membership(username, org.name):
-                raise OAuthError(f"User is not a member of the organization: {org.name}")
-
         return OAuthUser(
             id=user_id,
             email=verified_primary_email,

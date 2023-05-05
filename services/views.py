@@ -4,7 +4,6 @@ from itertools import chain
 from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import CharField, Value
 from django.shortcuts import get_object_or_404, redirect, render
@@ -26,7 +25,6 @@ from .serializers import ServiceSerializer, SourceSerializer
 from .tasks import refresh_orgs_from_github
 
 
-@login_required
 @process_query_params
 def service_list(request):
     filters = {}
@@ -55,7 +53,6 @@ def service_list(request):
     return render(request, "service-list.html", context)
 
 
-@login_required
 @require_POST
 def service_delete(request, slug):
     service = get_object_or_404(slug=slug, klass=Service)
@@ -64,7 +61,6 @@ def service_delete(request, slug):
     return redirect("services:service-list")
 
 
-@login_required
 def service_detail(request, slug):
     service = get_object_or_404(slug=slug, klass=Service)
     context = {
@@ -89,7 +85,6 @@ def service_detail(request, slug):
     return render(request, "service-detail.html", context)
 
 
-@login_required
 @process_query_params
 def source_list(request):
     sources = Source.objects.filter().order_by("url")
@@ -107,7 +102,6 @@ def source_list(request):
     return render(request, "source-list.html", context)
 
 
-@login_required
 def source_detail(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
     context = {
@@ -118,7 +112,6 @@ def source_detail(request, slug):
     return render(request, "source-detail.html", context)
 
 
-@login_required
 def source_refresh(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
     try:
@@ -132,7 +125,6 @@ def source_refresh(request, slug):
     return redirect("services:source-detail", slug=source.slug)
 
 
-@login_required
 @require_POST
 def org_refresh(request):
     refresh_orgs_from_github.delay()
@@ -175,7 +167,6 @@ def refresh_results(results, source, request):
     messages.info(request, f"Refreshed source `{source.slug}` successfully.")
 
 
-@login_required
 def source_add(request):
     if request.method == "GET":
         return render(
@@ -200,7 +191,6 @@ def source_add(request):
     return redirect("services:source-list")
 
 
-@login_required
 @require_POST
 def source_delete(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
@@ -214,7 +204,6 @@ def source_delete(request, slug):
     return redirect("services:source-list")
 
 
-@login_required
 def source_update(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
     if request.POST:
@@ -229,7 +218,6 @@ def source_update(request, slug):
     return render(request, "source-update.html", context={"form": form, "source": source})
 
 
-@login_required
 def source_validate(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
     try:
@@ -270,7 +258,6 @@ def api_source_validate(request, pk):
         return Response(response, status=status.HTTP_502_BAD_GATEWAY)
 
 
-@login_required
 def schema_detail(request):
     return render(
         request,

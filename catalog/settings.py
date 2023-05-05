@@ -34,7 +34,11 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": f"{auth_pwd}.CommonPasswordValidator"},
     {"NAME": f"{auth_pwd}.NumericPasswordValidator"},
 ]
-
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    }
+}
 CATALOG_ENV = env
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
@@ -102,6 +106,13 @@ logging.getLogger("faker").setLevel(logging.ERROR)
 logging.getLogger("gh.fetch").setLevel(logging.ERROR)
 logging.getLogger("MARKDOWN").setLevel(logging.ERROR)
 
+LOGIN_REQUIRED_IGNORE_PATHS = [
+    "/oauth/github/login/",
+    "/oauth/github/callback/",
+]
+LOGIN_REQUIRED_IGNORE_VIEW_NAMES = ["web:home", "web:setup", "web:login-problem", "web:logout"]
+
+LOGIN_REQUIRED_REDIRECT_FIELD_NAME = "next"
 LOGIN_URL = "/"
 LOGIN_REDIRECT_URL = "/services/"
 MESSAGE_TAGS = {
@@ -114,6 +125,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "web.middleware.CatalogMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",

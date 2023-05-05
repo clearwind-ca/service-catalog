@@ -1,7 +1,6 @@
 from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -25,7 +24,6 @@ from .serializers import CheckResultSerializer, CheckSerializer
 from .tasks import send_to_github
 
 
-@login_required
 @process_query_params
 def checks(request):
     if not settings.GITHUB_CHECK_REPOSITORY:
@@ -59,7 +57,6 @@ def checks(request):
     return render(request, "checks-list.html", context)
 
 
-@login_required
 def checks_add(request):
     if request.method == "POST":
         form = CheckForm(request.POST)
@@ -75,14 +72,12 @@ def checks_add(request):
     )
 
 
-@login_required
 def checks_detail(request, slug):
     check = Check.objects.get(slug=slug)
     log = LogEntry.objects.get_for_object(check).order_by("-timestamp").first()
     return render(request, "checks-detail.html", {"check": check, "log": log})
 
 
-@login_required
 def checks_update(request, slug):
     check = Check.objects.get(slug=slug)
     if request.method == "POST":
@@ -97,7 +92,6 @@ def checks_update(request, slug):
     return render(request, "checks-update.html", {"check": check, "form": form})
 
 
-@login_required
 @require_POST
 def checks_delete(request, slug):
     get_object_or_404(Check, slug=slug).delete()
@@ -111,7 +105,6 @@ def send(check):
         send_to_github.delay(check.slug, service.slug)
 
 
-@login_required
 @require_POST
 def checks_run(request, slug):
     check = get_object_or_404(Check, slug=slug)
@@ -127,7 +120,6 @@ def api_checks_run(request, pk):
     return Response({"success": True})
 
 
-@login_required
 @process_query_params
 def results(request):
     filters, display_filters = {}, {}

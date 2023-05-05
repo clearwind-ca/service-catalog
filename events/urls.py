@@ -9,7 +9,7 @@ router = routers.DefaultRouter()
 router.register("events", views.EventViewSet, basename="api-events")
 
 urlpatterns = [
-    path("events", views.events_list, name="events-list"),
+    path("events/", views.events_list, name="events-list"),
     path("events/add/", views.events_add, name="events-add"),
     path("events/<str:pk>/update/", views.events_update, name="events-update"),
     path("events/<str:pk>/details/", views.events_detail, name="events-detail"),

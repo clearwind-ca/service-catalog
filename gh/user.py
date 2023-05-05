@@ -1,9 +1,13 @@
+import logging
 import os
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
 from github import Github, GithubIntegration, enable_console_debug_logging
 from oauthlogin.models import OAuthConnection
+
+logger = logging.getLogger(__name__)
 
 if settings.GITHUB_DEBUG:
     enable_console_debug_logging()
@@ -37,7 +41,14 @@ def check_org_membership(username, org):
         gh = login_as_user(username)
         user = gh.get_user(username)
         org_object = gh.get_organization(org)
-        org_object.has_in_members(user)
-        return True
+        print(user, org_object.has_in_members(user))
+        return org_object.has_in_members(user)
+    except ObjectDoesNotExist:
+        logger.error(f"Check-Org-Membership: No user object: {username}")
+        return False
+    except OAuthConnection.DoesNotExist:
+        logger.error(f"Check-Org-Membership: No OAuthConnection for user: {username}")
+        return False
     except:
+        logger.error(f"Check-Org-Membership: Error for user: {username}")
         return False
