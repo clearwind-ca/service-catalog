@@ -5,7 +5,7 @@ from django.contrib import auth, messages
 from django.shortcuts import redirect, render, reverse
 from django.views.decorators.http import require_POST
 from rest_framework.authtoken.models import Token
-
+from django.http import HttpResponse
 from gh import app
 
 from .forms import CreateAppForm
@@ -16,7 +16,7 @@ def login_problem(request):
     return render(request, "403.html")
 
 
-def handler403(request, exception):
+def handler403(request, exception):    
     return render(request, "403.html", status=403, context={"hide_login": True})
 
 

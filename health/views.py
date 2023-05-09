@@ -100,7 +100,7 @@ def checks_delete(request, slug):
 
 
 def send(check):
-    service_queryset = Service.objects.all()
+    service_queryset = Service.objects.filter(active=True)
     for service in service_queryset:
         send_to_github.delay(check.slug, service.slug)
 

@@ -3,8 +3,10 @@ import re
 
 from django.conf import settings
 from django.contrib.auth.middleware import AuthenticationMiddleware
-from django.contrib.auth.views import redirect_to_login
+from rest_framework.exceptions import AuthenticationFailed
 from django.core.cache import cache
+from django.core.exceptions import PermissionDenied
+from django.http import HttpResponse
 from django.http import Http404
 from django.shortcuts import redirect
 from django.urls import resolve
@@ -72,7 +74,12 @@ class CatalogMiddleware(AuthenticationMiddleware):
                 drf_view = APIView()
                 drf_request = drf_view.initialize_request(request)
                 # Raises AuthenticationFailed if not successful
-                drf_request.user.is_authenticated
+                try:
+                    drf_request.user.is_authenticated
+                except AuthenticationFailed:
+                    # If we get here, the user is not authenticated.
+                    request._is_drf = True
+                    return True
                 return False
 
         # If none of the above are met, we need the user to login.
@@ -118,6 +125,7 @@ class CatalogMiddleware(AuthenticationMiddleware):
         return valid
 
     def process_request(self, request):
+        request._is_drf = False
         login_required = self._login_required(request)
 
         # If the user is anonymous, but a login is not required, they are good.
@@ -133,5 +141,11 @@ class CatalogMiddleware(AuthenticationMiddleware):
             if self.check_orgs(request):
                 return None
 
+        # This is a DRF request.
+        if request._is_drf:
+            # Return a non-HTML error response.
+            # Ideally would be in the Accept format for the request.
+            return HttpResponse("Sorry, nope", status=403)
+        
         # Default, fail and redirect to the login-problem page.
         return redirect("web:login-problem")

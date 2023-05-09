@@ -41,7 +41,14 @@ def dispatch(result):
     #
     # Perhaps there's a better way to do this, but this works for now.
     data = base64.b64encode(data.encode("utf-8")).decode("utf-8")
-    payload = {"data": data, "check": result.health_check.slug, "service": result.service.slug}
+    payload = {
+        "data": data,
+        # Things that are really useful to have and can be accessed directly.
+        "check": result.health_check.slug,
+        "service": result.service.slug,
+        "repository": "/".join(url_to_nwo(result.service.source.url)),
+        "server": settings.SERVER_URL,
+    }
 
     res = repo.create_repository_dispatch(event_type="check", client_payload=payload)
     if not res:
