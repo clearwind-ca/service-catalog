@@ -3,13 +3,12 @@ import re
 
 from django.conf import settings
 from django.contrib.auth.middleware import AuthenticationMiddleware
-from rest_framework.exceptions import AuthenticationFailed
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 from django.urls import resolve
+from rest_framework.exceptions import AuthenticationFailed
 
 from gh import user
 from services.models import Organization
@@ -146,6 +145,6 @@ class CatalogMiddleware(AuthenticationMiddleware):
             # Return a non-HTML error response.
             # Ideally would be in the Accept format for the request.
             return HttpResponse("Sorry, nope", status=403)
-        
+
         # Default, fail and redirect to the login-problem page.
         return redirect("web:login-problem")
