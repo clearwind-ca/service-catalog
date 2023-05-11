@@ -1,8 +1,10 @@
 function processDateTime(datetimeTemplate) {
-  const datetimeList = document.querySelectorAll('input[type="datetime-local"]')
+  const datetimeList = document.querySelectorAll(
+    'input[type="datetime-local"]'
+  );
   for (let element of datetimeList) {
     let clone = datetimeTemplate.content.cloneNode(true);
-    let links = clone.querySelectorAll("a")
+    let links = clone.querySelectorAll("a");
     for (let link of links) {
       link.addEventListener("click", (event) => {
         event.preventDefault();
@@ -16,7 +18,8 @@ function processDateTime(datetimeTemplate) {
         }
         // Just move the date not the time, because it might be 12 or 24 hour format,
         // depending upon system settings. Doable but more work. Currently only altering the date anyway.
-        element.value = target.toISOString().slice(0, 10) + element.value.slice(10, 19);
+        element.value =
+          target.toISOString().slice(0, 10) + element.value.slice(10, 19);
       });
     }
     element.parentNode.insertBefore(clone, element.nextSibling);
@@ -29,27 +32,47 @@ function processCreateAppForm(createAppForm) {
     let organization = createAppForm.querySelector("[name=organization]").value;
     let server_url = createAppForm.querySelector("[name=server_url]").value;
     let manifest = JSON.stringify({
-      "name": `Catalog (${organization})`,
-      "url": server_url,
-      "callback_urls": [`${server_url}/oauth/github/callback/`],
-      "redirect_url": `${server_url}/setup/`,
-      "public": false,
-      "default_permissions": {'contents': 'write', 'metadata': 'read', 'organization_administration': 'read'},
-    })
+      name: `Catalog (${organization})`,
+      url: server_url,
+      callback_urls: [`${server_url}/oauth/github/callback/`],
+      redirect_url: `${server_url}/setup/`,
+      hook_attributes: {
+        url: `${server_url}/github/webhooks/`,
+      },
+      public: false,
+      default_permissions: {
+        contents: "write",
+        metadata: "read",
+        deployments: "read",
+        organization_administration: "read",
+      },
+      default_events: ["deployment", "release"],
+    });
     let manifestField = createAppForm.querySelector("[name=manifest]");
     manifestField.value = manifest;
     let original = createAppForm.getAttribute("data-action");
-    createAppForm.setAttribute("action", original.replace("ORGANIZATION", organization));
+    createAppForm.setAttribute(
+      "action",
+      original.replace("ORGANIZATION", organization)
+    );
     createAppForm.submit();
   });
 }
 
 window.addEventListener("load", (event) => {
-  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-  const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+  const tooltipTriggerList = document.querySelectorAll(
+    '[data-bs-toggle="tooltip"]'
+  );
+  const tooltipList = [...tooltipTriggerList].map(
+    (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
+  );
 
-  const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
-  const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+  const popoverTriggerList = document.querySelectorAll(
+    '[data-bs-toggle="popover"]'
+  );
+  const popoverList = [...popoverTriggerList].map(
+    (popoverTriggerEl) => new bootstrap.Popover(popoverTriggerEl)
+  );
 
   const datetimeTemplate = document.getElementById("datetime");
   if (datetimeTemplate) {

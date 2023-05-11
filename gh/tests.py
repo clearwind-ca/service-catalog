@@ -23,7 +23,7 @@ from .fetch import (
     url_to_nwo,
 )
 from .send import dispatch
-from .webhooks import handle_deployment, handle_release, find_service
+from .webhooks import find_service, handle_deployment, handle_release
 
 fake = Faker("en_US")
 
@@ -252,7 +252,7 @@ class TestWebhooks(WithGitHubUser):
             "repository": {
                 "html_url": self.source.url,
             },
-            "action": "published"
+            "action": "published",
         }
 
     def test_handle_release(self):

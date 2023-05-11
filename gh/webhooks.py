@@ -20,25 +20,28 @@ logger = logging.getLogger(__name__)
 @csrf_exempt
 @require_POST
 def webhooks(request):
-    secret = os.getenv("GITHUB_WEBHOOK_SECRET")
-    if not secret:
-        raise ImproperlyConfigured("GITHUB_WEBHOOK_SECRET is not set")
-
-    if "HTTP_X_HUB_SIGNATURE" not in request.META:
-        return HttpResponseBadRequest("Request does not contain X-GITHUB-SIGNATURE header")
     if "HTTP_X_GITHUB_EVENT" not in request.META:
         return HttpResponseBadRequest("Request does not contain X-GITHUB-EVENT header")
 
-    digest_name, signature = request.META["HTTP_X_HUB_SIGNATURE"].split("=")
-    if digest_name != "sha1":
-        return HttpResponseBadRequest(
-            "Unsupported X-HUB-SIGNATURE digest mode found: {}".format(digest_name)
-        )
+    secret = os.getenv("GITHUB_WEBHOOK_SECRET", '')
+    if not secret:
+        logger.info("GITHUB_WEBHOOK_SECRET is not set, so skipping checks for that.")
 
-    mac = hmac.new(secret.encode("utf-8"), msg=request.body, digestmod=hashlib.sha1)
+    else:
+        if "HTTP_X_HUB_SIGNATURE" not in request.META:
+            return HttpResponseBadRequest("Request does not contain X-GITHUB-SIGNATURE header")
 
-    if not hmac.compare_digest(mac.hexdigest(), signature):
-        return HttpResponseBadRequest("Invalid X-HUB-SIGNATURE header found")
+        digest_name, signature = request.META["HTTP_X_HUB_SIGNATURE"].split("=")
+        if digest_name != "sha1":
+            return HttpResponseBadRequest(
+                "Unsupported X-HUB-SIGNATURE digest mode found: {}".format(digest_name)
+            )
+
+        mac = hmac.new(secret.encode("utf-8"), msg=request.body, digestmod=hashlib.sha1)
+
+        if not hmac.compare_digest(mac.hexdigest(), signature):
+            return HttpResponseBadRequest("Invalid X-HUB-SIGNATURE header found")
+        logger.info("X-HUB-SIGNATURE header is valid")
 
     event = request.META["HTTP_X_GITHUB_EVENT"]
     if event not in events:
@@ -86,7 +89,7 @@ def find_service(payload, webhook_type):
                 f"Skipping release webhook service, {service} does not have `releases` in events."
             )
             continue
-        
+
         yield service
 
 
@@ -112,7 +115,6 @@ def handle_release(payload):
             external_id=payload["release"]["id"],
         )
         event.services.add(service)
-
 
 
 events = {
