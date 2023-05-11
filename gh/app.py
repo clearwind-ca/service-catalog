@@ -1,9 +1,13 @@
 from .user import login_as_app
-
+from django.core.exceptions import ImproperlyConfigured
 
 def get_details():
     """Get permissions and events for the app."""
-    gh = login_as_app()
+    try:
+        gh = login_as_app()
+    except ImproperlyConfigured:
+        return {}
+    
     installations = {}
     for installation in gh.get_installations():
         installations[installation.id] = {

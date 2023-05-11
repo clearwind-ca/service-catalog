@@ -32,14 +32,8 @@
 
     <h4>Step 2: GitHub app setup</h4>
     {% if steps.github %}
-        <p><span class="fill-success">{% octicon "verified" %}</span> GitHub app mostly setup 👍 see below 👇</p>
-        <p>
-            <b>Please note:</b> some things have to be <a href="https://docs.github.com/en/apps/creating-github-apps/creating-github-apps/creating-a-github-app-from-a-manifest">done manually</a>.
-            <ul>
-                <li><b>(Required)</b>: To allow users to login you must give the >GitHub app access to <code>Account Permissions</code> 👉 <code>Email addresses</code> 👉 <code>Access: Read-only</code>.</li>
-                <li><b>(Optional but recommended)</b>: Set up secret checking on your Webhook and set the environment variable <code>GITHUB_WEBHOOK_SECRET</code> see <a href="https://docs.github.com/en/webhooks-and-events/webhooks/securing-your-webhooks">the documentation for more</a>.</li>
-            </ul> 
-        </p>
+        <p><span class="fill-success">{% octicon "verified" %}</span> GitHub app setup 👍</p>
+        <p><b>(Optional but recommended)</b>: Set up secret checking on your Webhook and set the environment variable <code>GITHUB_WEBHOOK_SECRET</code> see <a href="https://docs.github.com/en/webhooks-and-events/webhooks/securing-your-webhooks">the documentation for more</a>.</p>
     {% else %}
         <p>This form will guide you through the flow and give you the outputs needed to populate the Environment variables.</p>
         {% if app %}

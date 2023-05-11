@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from github import Github, GithubIntegration, enable_console_debug_logging
 from oauthlogin.models import OAuthConnection
+from django.core.exceptions import ImproperlyConfigured
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,8 @@ if settings.GITHUB_DEBUG:
 
 def login_as_app():
     """Login as the app."""
+    if not os.environ.get("GITHUB_APP_ID") or not os.environ.get("GITHUB_PEM"):
+        raise ImproperlyConfigured("GITHUB_APP_ID and GITHUB_PEM must be set.")
     return GithubIntegration(os.environ.get("GITHUB_APP_ID"), os.environ.get("GITHUB_PEM"))
 
 

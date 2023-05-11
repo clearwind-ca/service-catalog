@@ -44,7 +44,7 @@ function processCreateAppForm(createAppForm) {
         contents: "write",
         metadata: "read",
         deployments: "read",
-        organization_administration: "read",
+        emails: "read",
       },
       default_events: ["deployment", "release"],
     });
