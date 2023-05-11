@@ -114,6 +114,13 @@ class Source(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify_source(self.url)
+        
+        # Both https://github.com/org/repo/ and https://github.com/org/repo are valid,
+        # but GitHub API only uses the latter version, so let's normalize and remove the trailing slash
+        # if the repository has been added manually or through the API.
+        if self.url.endswith('/'):
+            self.url = self.url[:-1]
+            
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):

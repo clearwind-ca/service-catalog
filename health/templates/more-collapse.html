@@ -1,0 +1,15 @@
+{% load octicons %}
+{% load helpers %}
+<a data-bs-toggle="collapse" href="#check-{{ id }}">Details {% octicon "arrow-down" %}</a>
+<div class="collapse mt-3" id="check-{{ id }}">
+    <div class="card">
+    <div class="card-header">
+            {% include "since.html" with since=entry.updated %}
+        </div>
+        <div class="card-body">
+            {{ entry.message|markdown }}
+
+            {% octicon "info" %} <a href="{% url 'health:results-detail' entry.pk %}">View details</a>
+        </div>
+    </div>
+</div>

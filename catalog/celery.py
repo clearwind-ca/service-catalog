@@ -20,7 +20,8 @@ app.conf.beat_schedule = {
         "task": "health.tasks.timeout",
         "schedule": 60 * 60,  # Every hour.
         "args": (6,),  # Timeout health check results older than 6 hours.
-    },    "get-organisations-from-github": {
+    },
+    "get-organisations-from-github": {
         "task": "services.tasks.refresh_orgs_from_github",
         "schedule": 60 * 60,  # Every hour.
     },

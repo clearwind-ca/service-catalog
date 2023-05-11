@@ -35,7 +35,7 @@ def create_service(source):
         type="application",
         source=source,
         meta={"foo": "bar"},
-        events=["deployments"],
+        events=["deployments", "releases"],
     )
 
 
@@ -563,7 +563,7 @@ class TestAPISource(BaseTestCase):
         url = reverse("services:api-source-detail", kwargs={"pk": response.data["id"]})
         response = self.api_client.get(url)
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertEqual(response.json()["url"], fake_url)
+        self.assertEqual(response.json()["url"], fake_url[:-1])
 
     def test_refresh_unauth(self):
         """Test the source validate API requires auth."""

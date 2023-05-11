@@ -23,7 +23,7 @@ from .fetch import (
     url_to_nwo,
 )
 from .send import dispatch
-from .webhooks import handle_deployment, handle_release
+from .webhooks import handle_deployment, handle_release, find_service
 
 fake = Faker("en_US")
 
@@ -186,14 +186,14 @@ class Test(TestCase):
             self.assertRaises(ValueError, url_to_nwo, x)
 
 
-class TestWebhook(WithGitHubUser):
+class TestWebhooks(WithGitHubUser):
     def setUp(self):
         super().setUp()
         self.url = reverse("github:webhooks")
         self.source = create_source()
         self.service = create_service(self.source)
 
-    def test_deployment_no_mocks(self):
+    def test_webhook_no_mocks(self):
         self.assertEqual(self.client.post(self.url).status_code, 400)
 
     def get_deployment_payload(self):
@@ -219,19 +219,17 @@ class TestWebhook(WithGitHubUser):
         self.assertEqual(event.type, "deployment")
         self.assertEqual(event.status, "success")
 
-    def test_handle_deployment_inactive_service(self):
+    def test_find_service(self):
         self.service.active = False
         self.service.save()
 
-        handle_deployment(self.get_deployment_payload())
-        self.assertFalse(Event.objects.exists())
+        assert not len(list(find_service(self.get_deployment_payload(), "deployment")))
 
-    def test_handle_no_event_service(self):
+    def test_no_events(self):
         self.service.events = []
         self.service.save()
 
-        handle_deployment(self.get_deployment_payload())
-        self.assertFalse(Event.objects.exists())
+        assert not len(list(find_service(self.get_deployment_payload(), "deployment")))
 
     @patch("gh.webhooks.requests.get")
     def test_handle_multiple_services(self, mock_get):
@@ -240,3 +238,28 @@ class TestWebhook(WithGitHubUser):
 
         handle_deployment(self.get_deployment_payload())
         self.assertEqual(Event.objects.count(), 2)
+
+    def get_release_payload(self):
+        return {
+            "release": {
+                "body": fake.text(),
+                "name": fake.name(),
+                "html_url": fake.url(),
+                "id": fake.random_int(),
+                "prerelease": False,
+                "draft": False,
+            },
+            "repository": {
+                "html_url": self.source.url,
+            },
+            "action": "published"
+        }
+
+    def test_handle_release(self):
+        handle_release(self.get_release_payload())
+
+        event = Event.objects.get()
+        self.assertEqual(event.type, "release")
+        self.assertEqual(event.status, "published")
+        self.assertEqual(event.customers, True)
+        self.assertEqual(event.active, True)

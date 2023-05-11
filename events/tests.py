@@ -11,7 +11,6 @@ from services.tests import create_service, create_source
 
 from . import models
 from .models import Event
-from .tasks import get_all_active_deployments, get_deployments
 
 fake = Faker()
 
@@ -173,77 +172,3 @@ class TestEventList(WithEvents):
         self.assertEqual(res.context["filters"]["when"], "past")
         self.assertFalse(self.event_in_results(res, future))
         self.assertTrue(self.event_in_results(res, past))
-
-
-class TestDeployments(WithEvents):
-    def setUp(self):
-        super().setUp()
-        self.username = self.user.username
-        self.service = self.services[0]
-
-    @patch("events.tasks.fetch")
-    def test_get_only_active(self, mock_fetch):
-        """Test that we only get deployments for active services"""
-        self.service.active = False
-        self.service.save()
-
-        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
-            get_all_active_deployments()
-        self.assertEqual(mock_fetch.get_deployments.call_count, 2)
-
-    @patch("events.tasks.fetch")
-    def test_get_only_deployment(self, mock_fetch):
-        """Test that we only get services that have deployments"""
-        self.service.active = False
-        self.service.save()
-
-        self.services[1].events = []
-        self.services[1].save()
-
-        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
-            get_all_active_deployments()
-        self.assertEqual(mock_fetch.get_deployments.call_count, 1)
-
-    def setupMocks(self):
-        status = Mock()
-        status.created_at = timezone.now()
-        status.state = fake.name()
-
-        statuses = Mock()
-
-        deployment = Mock()
-        deployment.id = fake.random_int()
-        deployment.get_statuses.return_value = [statuses]
-        deployment.created_at = fake.date_time()
-        deployment.url = fake.url()
-        deployment.get_status.return_value = status
-        return deployment
-
-    @patch("events.tasks.fetch")
-    def test_get_deployments(self, mock_fetch):
-        """Test that we create a deployment"""
-        deployment = self.setupMocks()
-        mock_fetch.get_deployments.return_value = [deployment]
-
-        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
-            get_deployments.delay(self.service.slug)
-
-        self.assertEquals(Event.objects.all().count(), 1)
-        event = Event.objects.get()
-        self.assertEqual([s.slug for s in event.services.all()], [self.service.slug])
-
-    @patch("events.tasks.fetch")
-    def test_ignore_deployments(self, mock_fetch):
-        """Test that we ignore deployments we've seen"""
-        deployment = self.setupMocks()
-        mock_fetch.get_deployments.return_value = [deployment]
-        event = self.create_event()
-        event.external_id = deployment.id
-        event.save()
-
-        self.assertEquals(Event.objects.all().count(), 1)
-
-        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
-            get_deployments.delay(self.service.slug)
-
-        self.assertEquals(Event.objects.all().count(), 1)
