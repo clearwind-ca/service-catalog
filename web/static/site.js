@@ -14,7 +14,9 @@ function processDateTime(datetimeTemplate) {
         if (when == "yesterday") {
           target.setDate(target.getDate() - 1);
         }
-        element.value = target.toISOString().slice(0, 16);
+        // Just move the date not the time, because it might be 12 or 24 hour format,
+        // depending upon system settings. Doable but more work. Currently only altering the date anyway.
+        element.value = target.toISOString().slice(0, 10) + element.value.slice(10, 19);
       });
     }
     element.parentNode.insertBefore(clone, element.nextSibling);
@@ -45,6 +47,9 @@ function processCreateAppForm(createAppForm) {
 window.addEventListener("load", (event) => {
   const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
   const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+  const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+  const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
 
   const datetimeTemplate = document.getElementById("datetime");
   if (datetimeTemplate) {

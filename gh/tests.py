@@ -3,12 +3,15 @@ import json
 import random
 from unittest.mock import patch
 
+from django.shortcuts import reverse
 from django.test import TestCase
 from faker import Faker
 from github import GithubException, UnknownObjectException
 
 from catalog import errors
+from services.tests import create_service, create_source
 from health.tests import create_health_check, create_health_check_result
+from events.models import Event
 from services.models import Source
 
 from .fetch import (
@@ -20,6 +23,7 @@ from .fetch import (
     url_to_nwo,
 )
 from .send import dispatch
+from .webhooks import handle_deployment, handle_release
 
 fake = Faker("en_US")
 
@@ -180,3 +184,59 @@ class Test(TestCase):
         """
         for x in ["foo/bar/baz", "/foo", "foo", "http://github.com"]:
             self.assertRaises(ValueError, url_to_nwo, x)
+
+
+class TestWebhook(WithGitHubUser):
+    def setUp(self):
+        super().setUp()
+        self.url = reverse("github:webhooks")
+        self.source = create_source()
+        self.service = create_service(self.source)
+
+    def test_deployment_no_mocks(self):
+        self.assertEqual(self.client.post(self.url).status_code, 400)
+
+    def get_deployment_payload(self):
+        return {
+            "deployment": {
+                "description": "",
+                "environment": "production",
+                "url": fake.url(),
+                "id": fake.random_int(),
+                "statuses_url": fake.url()
+            },
+            "repository": {
+                "html_url": self.source.url,
+            },
+        }
+
+    @patch("gh.webhooks.requests.get")
+    def test_handle_deployment(self, mock_get):
+        mock_get.return_value.json.return_value = [{ "state": "success" }]
+        handle_deployment(self.get_deployment_payload())
+        
+        event = Event.objects.get()
+        self.assertEqual(event.type, "deployment")
+        self.assertEqual(event.status, "success")
+
+    def test_handle_deployment_inactive_service(self):
+        self.service.active = False
+        self.service.save()
+
+        handle_deployment(self.get_deployment_payload())
+        self.assertFalse(Event.objects.exists())    
+    
+    def test_handle_no_event_service(self):
+        self.service.events = []
+        self.service.save()
+
+        handle_deployment(self.get_deployment_payload())
+        self.assertFalse(Event.objects.exists())    
+    
+    @patch("gh.webhooks.requests.get")
+    def test_handle_multiple_services(self, mock_get):
+        mock_get.return_value.json.return_value = [{ "state": "success" }]
+        create_service(self.source)
+
+        handle_deployment(self.get_deployment_payload())
+        self.assertEqual(Event.objects.count(), 2)

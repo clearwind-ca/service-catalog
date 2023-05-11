@@ -51,7 +51,7 @@ class Event(models.Model):
         max_length=255,
         blank=True,
         null=True,
-        verbose_name="External URL",
+        verbose_name="URL",
         help_text="Any external URL for this event.",
     )
 
@@ -59,7 +59,7 @@ class Event(models.Model):
         max_length=255,
         blank=True,
         null=True,
-        verbose_name="External status",
+        verbose_name="Status",
         help_text="Any external status for this event.",
     )
 

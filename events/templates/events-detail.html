@@ -12,8 +12,8 @@
     <h4>
         {% include "active.html" with active=event.active %}
         {% include "customers.html" with impacts=event.customers %}
-        {{ event.description|markdown|safe }}
     </h4>
+    <p>{{ event.description|markdown|safe }}</p>
 {% endblock %}
 
 {% block main %}

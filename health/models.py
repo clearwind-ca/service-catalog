@@ -56,6 +56,10 @@ RESULT_CHOICES = (
     ("fail", "Fail"),  # The check failed, something is wrong.
     ("error", "Error"),  # The service got the check, but there was an error running the check.
     ("unknown", "Unknown"),  # Default status, we've sent it but haven't heard back yet.
+    (
+        "skipped",
+        "Skipped",
+    ),  # The health check was skipped, likely because its not relevant to the service.
 )
 
 

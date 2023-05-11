@@ -108,8 +108,9 @@ logging.getLogger("gh.fetch").setLevel(logging.ERROR)
 logging.getLogger("MARKDOWN").setLevel(logging.ERROR)
 
 LOGIN_REQUIRED_IGNORE_PATHS = [
-    "/oauth/github/login/",
-    "/oauth/github/callback/",
+    "^/oauth/github/login/",
+    "^/oauth/github/callback/",
+    "^/github/webhooks/",
     "^/static/*.*",
 ]
 LOGIN_REQUIRED_IGNORE_VIEW_NAMES = ["web:home", "web:setup", "web:login-problem", "web:logout"]
