@@ -23,7 +23,7 @@ def webhooks(request):
     if "HTTP_X_GITHUB_EVENT" not in request.META:
         return HttpResponseBadRequest("Request does not contain X-GITHUB-EVENT header")
 
-    secret = os.getenv("GITHUB_WEBHOOK_SECRET", '')
+    secret = os.getenv("GITHUB_WEBHOOK_SECRET", "")
     if not secret:
         logger.info("GITHUB_WEBHOOK_SECRET is not set, so skipping checks for that.")
 

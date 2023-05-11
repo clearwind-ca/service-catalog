@@ -54,13 +54,15 @@ def setup(request):
                 "GITHUB_CLIENT_ID": get("GITHUB_CLIENT_ID"),
                 "GITHUB_CLIENT_SECRET": get("GITHUB_CLIENT_SECRET"),
                 "GITHUB_PEM": get("GITHUB_PEM"),
+                "GITHUB_WEBHOOK_SECRET": get("GITHUB_WEBHOOK_SECRET"),
             },
             "app": {},
         },
-        "permissions": app.get_perms(),
+        "app_details": app.get_details(),
         "steps": {"django": False, "github": False},
         "form": form,
     }
+    print(app.get_details())
     if request.GET and request.GET.get("code"):
         headers = {
             "Accept": "application/vnd.github+json",

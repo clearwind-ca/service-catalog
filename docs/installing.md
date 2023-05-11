@@ -76,6 +76,7 @@ Visiting `/setup/` will provide you with a form to create the GitHub App and the
 |GITHUB_CLIENT_ID|As above.|Yes|Empty|
 |GITHUB_CLIENT_SECRET|As above.|Yes|Empty|
 |GITHUB_PEM|As above.|Yes|Empty|
+|GITHUB_WEBHOOK_SECRET|If set, [signature checking](https://docs.github.com/en/webhooks-and-events/webhooks/securing-your-webhooks) will occur on webhooks|No|No signature checking occurs|
 
 **Note:** To allow users to login you must give the GitHub app access to `Account Permissions` 👉 `Email addresses` 👉 `Access: Read-only`. Currently this does not seem possible to set from the manifest process and must be done on https://github.com.
 

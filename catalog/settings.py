@@ -5,7 +5,6 @@ from pathlib import Path
 import dj_database_url
 from django.contrib.messages import constants as messages
 from django.forms.widgets import DateInput, DateTimeInput, TimeInput
-
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
