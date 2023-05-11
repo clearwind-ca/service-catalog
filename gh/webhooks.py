@@ -53,7 +53,7 @@ def webhooks(request):
 
 
 def handle_deployment(payload):
-    for service in find_service(payload, "deployment"):
+    for service in find_service(payload, "deployment", "deployments"):
         status = requests.get(payload["deployment"]["statuses_url"]).json()[0]["state"]
         description = payload["deployment"]["description"]
         if not description:
@@ -72,7 +72,7 @@ def handle_deployment(payload):
         event.services.add(service)
 
 
-def find_service(payload, webhook_type):
+def find_service(payload, webhook_type, event_type):
     repository = payload["repository"]["html_url"]
     source = get_object_or_None(Source, url=repository)
     if not source:
@@ -81,12 +81,12 @@ def find_service(payload, webhook_type):
 
     for service in source.services.all():
         if not service.active:
-            logger.info(f"Skipping release webhook inactive service {service}")
+            logger.info(f"Skipping {webhook_type} webhook inactive service {service}")
             continue
 
-        if not service.events or "releases" not in service.events:
+        if not service.events or event_type not in service.events:
             logger.info(
-                f"Skipping release webhook service, {service} does not have `releases` in events."
+                f"Skipping release {webhook_type} service, {service} does not have `{event_type}` in events."
             )
             continue
 
@@ -98,7 +98,7 @@ def handle_release(payload):
         logger.info(f"Skipping release webhook, action {payload['action']} not supported")
         return
 
-    for service in find_service(payload, "release"):
+    for service in find_service(payload, "release", "releases"):
         default_msg = f'{service.name}: {payload["release"]["name"]} {payload["action"]}'
         description = payload["release"]["body"]
         if not description:
