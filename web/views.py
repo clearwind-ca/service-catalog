@@ -62,7 +62,6 @@ def setup(request):
         "steps": {"django": False, "github": False},
         "form": form,
     }
-    print(app.get_details())
     if request.GET and request.GET.get("code"):
         headers = {
             "Accept": "application/vnd.github+json",
