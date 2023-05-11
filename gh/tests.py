@@ -9,10 +9,10 @@ from faker import Faker
 from github import GithubException, UnknownObjectException
 
 from catalog import errors
-from services.tests import create_service, create_source
-from health.tests import create_health_check, create_health_check_result
 from events.models import Event
+from health.tests import create_health_check, create_health_check_result
 from services.models import Source
+from services.tests import create_service, create_source
 
 from .fetch import (
     file_paths,
@@ -203,7 +203,7 @@ class TestWebhook(WithGitHubUser):
                 "environment": "production",
                 "url": fake.url(),
                 "id": fake.random_int(),
-                "statuses_url": fake.url()
+                "statuses_url": fake.url(),
             },
             "repository": {
                 "html_url": self.source.url,
@@ -212,9 +212,9 @@ class TestWebhook(WithGitHubUser):
 
     @patch("gh.webhooks.requests.get")
     def test_handle_deployment(self, mock_get):
-        mock_get.return_value.json.return_value = [{ "state": "success" }]
+        mock_get.return_value.json.return_value = [{"state": "success"}]
         handle_deployment(self.get_deployment_payload())
-        
+
         event = Event.objects.get()
         self.assertEqual(event.type, "deployment")
         self.assertEqual(event.status, "success")
@@ -224,18 +224,18 @@ class TestWebhook(WithGitHubUser):
         self.service.save()
 
         handle_deployment(self.get_deployment_payload())
-        self.assertFalse(Event.objects.exists())    
-    
+        self.assertFalse(Event.objects.exists())
+
     def test_handle_no_event_service(self):
         self.service.events = []
         self.service.save()
 
         handle_deployment(self.get_deployment_payload())
-        self.assertFalse(Event.objects.exists())    
-    
+        self.assertFalse(Event.objects.exists())
+
     @patch("gh.webhooks.requests.get")
     def test_handle_multiple_services(self, mock_get):
-        mock_get.return_value.json.return_value = [{ "state": "success" }]
+        mock_get.return_value.json.return_value = [{"state": "success"}]
         create_service(self.source)
 
         handle_deployment(self.get_deployment_payload())
