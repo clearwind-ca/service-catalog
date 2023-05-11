@@ -32,8 +32,8 @@
 
     <h4>Step 2: GitHub app setup</h4>
     {% if steps.github %}
-        <p><span class="fill-success">{% octicon "verified" %}</span> GitHub app setup 👍. You should be good to go.</p>
-        <p><b>Note:</b> To allow users to login you must give the GitHub app access to <code>Account Permissions</code> 👉 <code>Email addresses</code> 👉 <code>Access: Read-only</code>. Currently this does not seem possible to set from the manifest.</p>
+        <p><span class="fill-success">{% octicon "verified" %}</span> GitHub app setup 👍</p>
+        <p><b>(Optional but recommended)</b>: Set up secret checking on your Webhook and set the environment variable <code>GITHUB_WEBHOOK_SECRET</code> see <a href="https://docs.github.com/en/webhooks-and-events/webhooks/securing-your-webhooks">the documentation for more</a>.</p>
     {% else %}
         <p>This form will guide you through the flow and give you the outputs needed to populate the Environment variables.</p>
         {% if app %}
@@ -81,24 +81,36 @@
     </table>
     {% endif %}
 
-    {% if permissions and request.user.is_authenticated %}
-    <h4>Review GitHub app permissions</h4>
-    <p>Permissions we've got for the GitHub app per installation.</p>
-    <table class="table table-hover">
-        <tr>
-            <th>Installation</th>
-            <th>Permission</th>
-            <th>Value</th>
-        </tr>
-        {% for installation, permissions in permissions.items %}
-            {% for k, v in permissions.items %}
+    {% if request.user.is_authenticated %}
+        <h4>Review GitHub app details</h4>
+        {% for installation, values in app_details.items %}
+            <p>Installation: <code>{{ installation }}</code></p>
+            <p>URL: <a href="{{ values.html_url }}">{{ values.html_url }}</a></p>
+            <p>Permissions we've got for the GitHub app installation.</p>
+            <table class="table table-hover">
                 <tr>
-                    <td><code>{{ installation }}</code></td>
-                    <td><code>{{ k }}</code></td>
-                    <td><code>{{ v }}</code></td>
+                    <th>Permission</th>
+                    <th>Value</th>
                 </tr>
-            {% endfor %}
+                {% for k, v in values.permissions.items %}
+                    <tr>
+                        <td><code>{{ k }}</code></td>
+                        <td><code>{{ v }}</code></td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <p>Events we'll recieve as Webhooks for the GitHub app installation.</p>
+            <table class="table table-hover">
+                <tr>
+                    <th>Event</th>
+                </tr>
+                {% for k in values.events %}
+                    <tr>
+                        <td><code>{{ k }}</code></td>
+                    </tr>
+                {% endfor %}
+            </table>
+
         {% endfor %}
-    </table>
     {% endif %}
 {% endblock %}

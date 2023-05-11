@@ -2,7 +2,6 @@ import os
 
 import requests
 from django.contrib import auth, messages
-from django.http import HttpResponse
 from django.shortcuts import redirect, render, reverse
 from django.views.decorators.http import require_POST
 from rest_framework.authtoken.models import Token
@@ -54,10 +53,11 @@ def setup(request):
                 "GITHUB_CLIENT_ID": get("GITHUB_CLIENT_ID"),
                 "GITHUB_CLIENT_SECRET": get("GITHUB_CLIENT_SECRET"),
                 "GITHUB_PEM": get("GITHUB_PEM"),
+                "GITHUB_WEBHOOK_SECRET": get("GITHUB_WEBHOOK_SECRET"),
             },
             "app": {},
         },
-        "permissions": app.get_perms(),
+        "app_details": app.get_details(),
         "steps": {"django": False, "github": False},
         "form": form,
     }

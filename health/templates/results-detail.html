@@ -1,0 +1,47 @@
+{% extends "base-two-column.html" %}
+{% load helpers %}
+{% load humanize %}
+{% load octicons %}
+{% load crispy_forms_tags %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'health:checks-list' %}">{% octicon "dashboard" %} Health checks</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Result</li>
+{% endblock %}
+
+{% block top %}
+    <h2>{{ result.health_check.name }} &bull; {{ result.service.name }}</h2>
+    <h4>
+        {% include "pass.html" with pass=result.result %}
+    </h4>
+{% endblock %}
+    
+
+{% block main %}
+    <p>{% if result.message %}{{ result.message|markdown }}{% else %}No message in the response{% endif %}</p>
+{% endblock %}
+
+{% block sidebar %}
+    <div class="pb-3">
+        <h6 class="text-muted border-bottom">Info</h6>
+        <p>Primary key: <code>{{ result.pk }}</code></p>
+        <p>Created: {% include "since.html" with since=result.created %}</p>
+        <p>Updated: {% include "since.html" with since=result.updated %}</p>
+    </div>
+
+    <div class="pb-3">
+        <h6 class="text-muted border-bottom">Check</h6>
+        <p><a href="{% url 'health:checks-detail' result.health_check.slug %}">View check</a></p>
+        <p><a href="{% url 'services:service-detail' result.service.slug %}">View service</a></p>
+    </div>
+
+    <div class="pb-3">
+        <h6 class="text-muted border-bottom">Logs</h6>
+        {% if log %}
+            <p>{{ log.get_action_display|capfirst }} {% include "since.html" with since=log.timestamp %}</p>
+            <p><a href="{% url 'logs:log-list' %}?slug={{ check.slug }}&type=check">View more</a></p>
+        {% else %}
+            <p>{% octicon "deny" %} No logs found for this result.</p>
+        {% endif %}
+    </div>
+{% endblock %}

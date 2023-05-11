@@ -4,7 +4,7 @@ from pathlib import Path
 
 import dj_database_url
 from django.contrib.messages import constants as messages
-from django.forms.widgets import DateInput, DateTimeInput, SelectMultiple, TimeInput
+from django.forms.widgets import DateInput, DateTimeInput, TimeInput
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -108,8 +108,9 @@ logging.getLogger("gh.fetch").setLevel(logging.ERROR)
 logging.getLogger("MARKDOWN").setLevel(logging.ERROR)
 
 LOGIN_REQUIRED_IGNORE_PATHS = [
-    "/oauth/github/login/",
-    "/oauth/github/callback/",
+    "^/oauth/github/login/",
+    "^/oauth/github/callback/",
+    "^/github/webhooks/",
     "^/static/*.*",
 ]
 LOGIN_REQUIRED_IGNORE_VIEW_NAMES = ["web:home", "web:setup", "web:login-problem", "web:logout"]

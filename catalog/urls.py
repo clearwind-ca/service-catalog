@@ -8,6 +8,7 @@ urlpatterns = [
     path("", include("health.urls")),
     path("", include("events.urls")),
     path("", include("systemlogs.urls")),
+    path("github/", include("gh.urls")),
     path("oauth/", include("oauthlogin.urls")),
     path("admin/", admin.site.urls),
     path(

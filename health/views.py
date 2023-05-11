@@ -150,6 +150,12 @@ def results(request):
     return render(request, "results-list.html", context)
 
 
+def results_detail(request, pk):
+    result = get_object_or_404(CheckResult, pk=pk)
+    log = LogEntry.objects.get_for_object(result).order_by("-timestamp").first()
+    return render(request, "results-detail.html", {"result": result, "log": log})
+
+
 class CheckViewSet(viewsets.ModelViewSet):
     queryset = Check.objects.all().order_by("-created")
     serializer_class = CheckSerializer
