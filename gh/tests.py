@@ -19,9 +19,9 @@ from .fetch import (
     get,
     get_file,
     get_file_from_list,
-    login_as_user,
     url_to_nwo,
 )
+from .user import login_as_user
 from .send import dispatch
 from .webhooks import find_service, handle_deployment, handle_release
 
