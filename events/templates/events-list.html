@@ -15,7 +15,7 @@
     
     {% include "filters-text.html" with reset="events:events-list" %}
 
-    {% if events %}
+    {% if page %}
         <table class="table table-hover my-3">
             <thead>
                 <tr>
@@ -28,7 +28,7 @@
                 </tr>
             </thead>
             <tbody>    
-                {% for event in events %}
+                {% for event in page %}
                     <tr>
                         <td>
                             <a href="{% url 'events:events-detail' event.pk %}">{% if event.name %}{{ event.name }}{% else %}(empty){% endif %}</a>

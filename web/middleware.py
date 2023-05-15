@@ -4,7 +4,6 @@ import re
 from django.conf import settings
 from django.contrib.auth.middleware import AuthenticationMiddleware
 from django.core.cache import cache
-from django.core.exceptions import PermissionDenied
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 from django.urls import resolve

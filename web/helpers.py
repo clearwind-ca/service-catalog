@@ -1,79 +1,35 @@
-from auditlog.models import LogEntry
 from django.conf import settings
-
-
-def attempt_int(value):
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        pass
-
-
-def attempt_yesno(value):
-    if value is None:
-        return None
-    try:
-        value = str(value).lower()
-    except (TypeError, ValueError):
-        pass
-    return {
-        "yes": True,
-        "no": False,
-        "all": None,
-    }.get(value)
-
-
-def attempt_yesno_all(value):
-    if value is None:
-        return default_query_params["active"]
-    try:
-        value = str(value).lower()
-    except (TypeError, ValueError):
-        pass
-    return {
-        "yes": True,
-        "no": False,
-        "all": None,
-    }.get(value)
-
-
-def attempt_choices(value):
-    choices = dict([(v, k) for k, v in LogEntry.Action.choices])
-    return choices.get(value, None)
-
+from django.core.paginator import Paginator
 
 default_query_params = {"per_page": 10, "page": 1, "active": True}
+YES_NO_CHOICES = (("yes", "True"), ("no", "False"), ("all", None))
 
 
-def process_query_params(func):
-    """
-    A decorator for processing query params, that we'll use in any list view.
-    """
+def paginate(request, filterset, extra=None):
+    queryset = getattr(filterset, "qs", filterset)
+    filters = getattr(filterset, "filters", {})
+    paginator = Paginator(queryset, per_page=request.GET.get("per_page", 10))
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+    return {
+        "paginator": paginator,
+        "page_number": page_number,
+        "page": page_obj,
+        "page_range": page_obj.paginator.get_elided_page_range(page_number),
+        "active": ["yes", "no"],
+        "filters": filtered_filters(request.GET, filters, extra=extra),
+    }
 
-    def wrapper(request, *args, **kwargs):
-        parsed = default_query_params.copy()
-        parsed["page"] = attempt_int(request.GET.get("page", 1)) or 1
-        parsed["active"] = attempt_yesno_all(request.GET.get("active"))
-        parsed["customers"] = attempt_yesno(request.GET.get("customers"))
-        parsed["level"] = attempt_int(request.GET.get("level"))
-        parsed["priority"] = attempt_int(request.GET.get("priority"))
-        parsed["action"] = attempt_choices(request.GET.get("action"))
-        for key in request.GET.keys():
-            if key in parsed.keys():
-                continue
-            parsed[key] = request.GET[key]
 
-        if request.GET.get("per_page"):
-            try:
-                # Max 100 should be enough.
-                parsed["per_page"] = min(int(request.GET["per_page"]), 100)
-            except ValueError:
-                pass
-
-        request.GET = parsed
-        return func(request, *args, **kwargs)
-
-    return wrapper
+def filtered_filters(get, filterset, extra=None):
+    result = {}
+    for _dict in (filterset, get):
+        for k in _dict.keys():
+            v = get.get(k, None)
+            if v:
+                result[k] = v
+    result.update(extra or {})
+    return result
 
 
 def site_context(request):

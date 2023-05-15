@@ -85,14 +85,29 @@ def checks_badge(checks):
     return result
 
 
+@register.filter(name="dict_key")
+def dict_key(d, k):
+    return d.get(k)
+
+
+@register.filter(name="choice_value")
+def choice_value(v):
+    if isinstance(v, (list, tuple)):
+        return v[1]
+    return v
+
+
+@register.simple_tag(name="get_as_css")
+def get_as_css(request, key, value):
+    if request.GET.get(key) == value:
+        return "active"
+    return ""
+
+
 @register.simple_tag(name="qs")
 def qs(request, override_key, override_value):
     """
     A tag that generates a query string based on the current request.
-
-    It assumes that the template that uses this, is from a view that has
-    the `process_query_params` decorator applied to it. Because that
-    decorator will format all these query params the right way.
     """
 
     def convert(v):

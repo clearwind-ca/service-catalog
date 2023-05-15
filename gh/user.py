@@ -3,10 +3,9 @@ import os
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from github import Github, GithubIntegration, enable_console_debug_logging
 from oauthlogin.models import OAuthConnection
-from django.core.exceptions import ImproperlyConfigured
 
 logger = logging.getLogger(__name__)
 

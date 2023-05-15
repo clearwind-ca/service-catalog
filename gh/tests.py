@@ -19,9 +19,9 @@ from .fetch import (
     get,
     get_file,
     get_file_from_list,
-    login_as_user,
     url_to_nwo,
 )
+from .user import login_as_user
 from .send import dispatch
 from .webhooks import find_service, handle_deployment, handle_release
 
@@ -223,13 +223,17 @@ class TestWebhooks(WithGitHubUser):
         self.service.active = False
         self.service.save()
 
-        assert not len(list(find_service(self.get_deployment_payload(), "deployment")))
+        assert not len(
+            list(find_service(self.get_deployment_payload(), "deployment", "deployments"))
+        )
 
     def test_no_events(self):
         self.service.events = []
         self.service.save()
 
-        assert not len(list(find_service(self.get_deployment_payload(), "deployment")))
+        assert not len(
+            list(find_service(self.get_deployment_payload(), "deployment", "deployments"))
+        )
 
     @patch("gh.webhooks.requests.get")
     def test_handle_multiple_services(self, mock_get):

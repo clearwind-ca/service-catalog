@@ -11,7 +11,7 @@
         {% include "filters-dropdown.html" with list=status_choices key="status" in_request=request.GET.key %}
     </div>
 
-    {% include "filters-text.html" with reset="health:results-list" hide_all_message=True %}
+    {% include "filters-text.html" with reset="health:results-list" %}
 
     {% if results %}
         <table class="table table-hover my-3">

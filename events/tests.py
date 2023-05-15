@@ -1,5 +1,4 @@
 from datetime import timedelta
-from unittest.mock import Mock, patch
 from urllib.parse import urlencode
 
 from django.urls import reverse
@@ -52,7 +51,7 @@ class WithEvents(BaseTestCase):
         return event
 
     def event_in_results(self, res, event):
-        return event.pk in [e.pk for e in res.context["events"].object_list]
+        return event.pk in [e.pk for e in res.context["page"].object_list]
 
     def get_list(self, params=None):
         url = reverse("events:events-list")
@@ -147,13 +146,6 @@ class TestEventList(WithEvents):
         self.assertEqual(res.context["ordering"], "-start")
         self.assertEqual(res.context["filters"]["when"], "recent")
         self.assertTrue(self.event_in_results(res, event))
-
-    def test_list_filters_out_active(self):
-        event = self.create_event_at_time(seconds=-600, active=False)
-        res = self.get_list()
-        self.assertEqual(res.context["ordering"], "-start")
-        self.assertEqual(res.context["filters"]["when"], "recent")
-        self.assertFalse(self.event_in_results(res, event))
 
     def test_list_filters_future(self):
         past = self.create_event_at_time(seconds=-600, active=True)

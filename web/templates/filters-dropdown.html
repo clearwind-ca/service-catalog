@@ -5,8 +5,8 @@
     </button>
     <ul class="dropdown-menu">
         {% for element in list %}
-            <li>
-                <a class="dropdown-item {% if element == in_request %}active{% endif %}" href="{% qs request key element %}">{{ prefix }}{{ element|capfirst }}</a>
+        <li>
+                <a class="dropdown-item {% if filters|dict_key:key == element|choice_value %}active{% endif %}" href="{% qs request key element|choice_value %}">{{ prefix }}{{ element|choice_value|capfirst }}</a>
             </li>
         {% endfor %}
         <li>

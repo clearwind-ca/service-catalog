@@ -1,13 +1,9 @@
 import datetime
 
 import requests
-from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 from oauthlogin.exceptions import OAuthError
 from oauthlogin.providers import OAuthProvider, OAuthToken, OAuthUser
-
-from gh import user
-from services.models import Organization
 
 
 class GitHubOAuthProvider(OAuthProvider):

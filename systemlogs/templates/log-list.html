@@ -15,7 +15,7 @@
     
     {% include "filters-text.html" with reset="logs:log-list" %}
 
-    {% if logs %}
+    {% if page %}
         <table class="table table-hover my-3">
             <thead>
                 <tr>
@@ -27,7 +27,7 @@
                 </tr>
             </thead>
             <tbody>    
-                {% for log in logs %}
+                {% for log in page %}
                     <tr>
                         <td>{{ log.get_action_display|capfirst }}</td>
                         <td>{{ log.content_type.name|capfirst }}</td>

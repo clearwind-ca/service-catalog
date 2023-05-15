@@ -1,3 +1,6 @@
+from distutils.util import strtobool
+
+import django_filters
 from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib import messages
@@ -10,7 +13,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from services.models import Service
-from web.helpers import process_query_params
+from web.helpers import YES_NO_CHOICES, paginate
 
 from .forms import CheckForm
 from .models import (
@@ -24,7 +27,14 @@ from .serializers import CheckResultSerializer, CheckSerializer
 from .tasks import send_to_github
 
 
-@process_query_params
+class CheckFilter(django_filters.FilterSet):
+    active = django_filters.TypedChoiceFilter(choices=YES_NO_CHOICES, coerce=strtobool)
+
+    class Meta:
+        model = Check
+        fields = ["frequency"]
+
+
 def checks(request):
     if not settings.GITHUB_CHECK_REPOSITORY:
         messages.error(
@@ -32,28 +42,14 @@ def checks(request):
             'The "GITHUB_CHECK_REPOSITORY" environment variable is not set. Health Checks will not run.',
         )
 
-    filters = {}
-    get = request.GET
-    for param, lookup in (
-        ("active", "active"),
-        ("frequency", "frequency"),
-    ):
-        if get.get(param) is not None:
-            filters[lookup] = get[param]
-
-    checks = Check.objects.filter(**filters).order_by("-created")
-
-    paginator = Paginator(checks, per_page=get["per_page"])
-    page_number = get["page"]
-    page_obj = paginator.get_page(page_number)
-
-    context = {
-        "checks": page_obj,
-        "filters": filters,
-        "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
-        "active": ["yes", "no"],
-        "frequency": dict(FREQUENCY_CHOICES).keys(),
-    }
+    queryset = Check.objects.all().order_by("-created")
+    checks = CheckFilter(request.GET, queryset=queryset)
+    context = paginate(request, checks)
+    context.update(
+        {
+            "frequency": dict(FREQUENCY_CHOICES).keys(),
+        }
+    )
     return render(request, "checks-list.html", context)
 
 
@@ -120,7 +116,6 @@ def api_checks_run(request, pk):
     return Response({"success": True})
 
 
-@process_query_params
 def results(request):
     filters, display_filters = {}, {}
     get = request.GET
