@@ -1,10 +1,11 @@
 import json
+from distutils.util import strtobool
 from itertools import chain
 
+import django_filters
 from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib import messages
-from django.core.paginator import Paginator
 from django.db.models import CharField, Value
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -17,7 +18,7 @@ from rest_framework.response import Response
 from catalog.errors import FetchError
 from events.models import Event
 from gh import fetch
-from web.helpers import process_query_params
+from web.helpers import YES_NO_CHOICES, paginate
 
 from .forms import ServiceForm, SourceForm, get_schema
 from .models import Organization, Service, Source
@@ -25,31 +26,23 @@ from .serializers import ServiceSerializer, SourceSerializer
 from .tasks import refresh_orgs_from_github
 
 
-@process_query_params
+class ServiceFilter(django_filters.FilterSet):
+    active = django_filters.TypedChoiceFilter(choices=YES_NO_CHOICES, coerce=strtobool)
+
+    class Meta:
+        model = Service
+        fields = ["priority", "source__slug"]
+
+
 def service_list(request):
-    filters = {}
-    get = request.GET
-    for param, lookup in (
-        ("active", "active"),
-        ("priority", "priority"),
-        ("source", "source__slug"),
-    ):
-        if get.get(param) is not None:
-            filters[lookup] = get[param]
-
-    services = Service.objects.filter(**filters).order_by("priority", "name")
-
-    paginator = Paginator(services, per_page=get["per_page"])
-    page_number = get["page"]
-    page_obj = paginator.get_page(page_number)
-
-    context = {
-        "services": page_obj,
-        "priorities": sorted([k[0] for k in Service.objects.values_list("priority").distinct()]),
-        "filters": filters,
-        "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
-        "active": ["yes", "no"],
-    }
+    queryset = Service.objects.all().order_by("priority", "name")
+    services = ServiceFilter(request.GET, queryset=queryset)
+    context = paginate(request, services)
+    context.update(
+        {
+            "priorities": [str(k) for k in range(1, 11)],
+        }
+    )
     return render(request, "service-list.html", context)
 
 
@@ -85,20 +78,14 @@ def service_detail(request, slug):
     return render(request, "service-detail.html", context)
 
 
-@process_query_params
 def source_list(request):
-    sources = Source.objects.filter().order_by("url")
-    get = request.GET
-
-    paginator = Paginator(sources, per_page=get["per_page"])
-    page_number = get["page"]
-    page_obj = paginator.get_page(page_number)
-
-    context = {
-        "sources": page_obj,
-        "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
-        "orgs": Organization.objects.all(),
-    }
+    queryset = Source.objects.filter().order_by("url")
+    context = paginate(request, queryset)
+    context.update(
+        {
+            "orgs": Organization.objects.all(),
+        }
+    )
     return render(request, "source-list.html", context)
 
 

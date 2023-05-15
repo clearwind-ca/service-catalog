@@ -1,16 +1,16 @@
 from datetime import timedelta
+from distutils.util import strtobool
 
+import django_filters
 from auditlog.models import LogEntry
 from django.contrib import messages
-from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from rest_framework import permissions, viewsets
 
-from services.models import Service
-from web.helpers import process_query_params
+from web.helpers import YES_NO_CHOICES, paginate
 
 from .forms import EventForm
 from .models import Event
@@ -65,63 +65,47 @@ def events_update(request, pk):
     return render(request, "events-update.html", context)
 
 
-@process_query_params
+class EventsFilter(django_filters.FilterSet):
+    active = django_filters.TypedChoiceFilter(choices=YES_NO_CHOICES, coerce=strtobool)
+    customers = django_filters.TypedChoiceFilter(choices=YES_NO_CHOICES, coerce=strtobool)
+
+    class Meta:
+        model = Event
+        fields = ["active", "type", "customers", "services"]
+
+
 def events_list(request):
-    filters, display_filters = {}, {}
     get = request.GET
-    for param, lookup in (
-        ("active", "active"),
-        ("type", "type"),
-        ("customers", "customers"),
-    ):
-        if get.get(param) is not None:
-            filters[lookup] = get[param]
-            display_filters[param] = get[param]
+    filters = {}
 
     if get.get("when") == "past":
         filters["start__lt"] = timezone.now()
-        display_filters["when"] = "past"
 
     elif get.get("when") == "future":
         filters["start__gte"] = timezone.now()
-        display_filters["when"] = "future"
 
     elif get.get("when", None) in [None, "recent"]:
         # Default to 2 days either side from now
         filters["start__gte"] = timezone.now() - timedelta(days=2)
         filters["start__lte"] = timezone.now() + timedelta(days=2)
-        display_filters["when"] = "recent"
-
-    else:
-        display_filters["when"] = "all"
-
-    if get.get("service"):
-        service = get_object_or_404(Service, slug=get["service"])
-        filters["services__in"] = [service]
-        display_filters["service"] = get["service"]
 
     ordering = "-start"
     if get.get("when") in ["future"]:
         ordering = "start"
 
-    results = Event.objects.filter(**filters).order_by(ordering)
-
-    paginator = Paginator(results, per_page=get["per_page"])
-    page_number = get["page"]
-    page_obj = paginator.get_page(page_number)
-
-    context = {
-        "events": page_obj,
-        "filters": display_filters,
-        "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
-        "types": sorted(
-            Event.objects.filter(type__gt="").values_list("type", flat=True).distinct()
-        ),
-        "when": ["future", "recent", "past"],
-        "active": ["yes", "no"],
-        "customers": ["yes", "no"],
-        "ordering": ordering,
-    }
+    queryset = Event.objects.filter(**filters).order_by(ordering)
+    events = EventsFilter(request.GET, queryset=queryset)
+    context = paginate(request, events, extra={'when': get.get('when', 'recent')})
+    context.update(
+        {
+            "types": sorted(
+                Event.objects.filter(type__gt="").values_list("type", flat=True).distinct()
+            ),
+            "when": ["future", "recent", "past"],
+            "customers": ["yes", "no"],
+            "ordering": ordering,
+        }
+    )
     return render(request, "events-list.html", context)
 
 

@@ -13,7 +13,7 @@
 
     {% include "filters-text.html" with reset="health:checks-list" %}
 
-    {% if checks %}
+    {% if page %}
         <table class="table table-hover my-3">
             <thead>
                 <tr>
@@ -25,7 +25,7 @@
                 </tr>
             </thead>
             <tbody>    
-                {% for check in checks %}
+                {% for check in page %}
                     <tr>
                         <td><a href="{% url 'health:checks-detail' check.slug %}">{{ check.name }}</a></td>
                         <td>{% include "active.html" with active=check.active %}</td>

@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.humanize",
     "django_extensions",
+    "django_filters",
     "auditlog",
     "crispy_forms",
     "crispy_bootstrap5",

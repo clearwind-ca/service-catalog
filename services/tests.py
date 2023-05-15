@@ -1,9 +1,6 @@
-import os
 from unittest.mock import patch
-
 from auditlog.models import LogEntry
 from django.contrib import messages
-from django.contrib.auth.models import User
 from django.db.models.deletion import ProtectedError
 from django.forms.models import model_to_dict
 from django.test import TestCase
@@ -387,7 +384,7 @@ class TestSourceList(BaseTestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "source-list.html")
-        self.assertEqual(len(response.context["sources"]), 0)
+        self.assertEqual(len(response.context["page"]), 0)
 
     def test_logged_in_with_a_source(self):
         """Test the source list view when logged in, and a source."""
@@ -396,7 +393,7 @@ class TestSourceList(BaseTestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "source-list.html")
-        self.assertEqual(len(response.context["sources"]), 1)
+        self.assertEqual(len(response.context["page"]), 1)
 
 
 class TestServiceDetail(BaseTestCase):

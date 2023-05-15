@@ -12,7 +12,6 @@ from rest_framework.authtoken.models import Token
 from catalog.tests import BaseTestCase
 from services.models import Organization
 
-from .helpers import process_query_params
 from .middleware import CatalogMiddleware
 from .templatetags.helpers import (
     apply_format,
@@ -41,35 +40,6 @@ example_app_response = {
     "client_secret": fake.text(),
 }
 
-
-class TestProcessQueryParams(TestCase):
-    def setUp(self):
-        self.factory = RequestFactory()
-
-    def _test_decorator(self, params, expected):
-        @process_query_params
-        def test(request, query_params=None):
-            return query_params
-
-        request = self.factory.get(f"/?{params}")
-        test(request)
-        if expected is None:
-            self.assertIsNone(request.GET)
-        else:
-            for k, v in expected.items():
-                self.assertEqual(request.GET[k], v)
-
-    def test_process_query_params(self):
-        """Test the process query params decorator works."""
-        self._test_decorator("", {"per_page": 10, "page": 1})
-        self._test_decorator("per_page=89&page=2", {"per_page": 89, "page": 2})
-        self._test_decorator("per_page=102&page=3", {"per_page": 100, "page": 3})
-        self._test_decorator("per_page=foo&page=bar", {"per_page": 10, "page": 1})
-        self._test_decorator("active=yes", {"active": True})
-        self._test_decorator("active=no", {"active": False})
-        self._test_decorator("active=whatever", {"active": None})
-
-
 class TestHomePage(TestCase):
     def test_home_page(self):
         """Test the home page loads."""
@@ -95,36 +65,6 @@ class TestYesNo(TestCase):
         self.assertEqual(yesno_if_boolean(False), "no")
         self.assertEqual(yesno_if_boolean(None), None)
         self.assertEqual(yesno_if_boolean("foo"), "foo")
-
-
-class TestQs(TestCase):
-    def setUp(self):
-        self.factory = RequestFactory()
-
-    def _test_qs(self, params, *overrides):
-        request = self.factory.get(f"/?{params}")
-
-        @process_query_params
-        def test(request, query_params=None):
-            return query_params
-
-        test(request)
-        return qs(request, *overrides)
-
-    def test_qs(self):
-        self.assertEqual(self._test_qs("page=10", None, None), "?page=10&active=yes")
-        # Override params works.
-        self.assertEqual(self._test_qs("page=10", "page", 3), "?page=3&active=yes")
-        # Preserve other params.
-        self.assertEqual(self._test_qs("page=10&active=yes", "page", 3), "?page=3&active=yes")
-        self.assertEqual(self._test_qs("priority=1", None, None), "?active=yes&priority=1")
-        self.assertEqual(self._test_qs("level=10", None, None), "?active=yes&level=10")
-        # No is False and then converted back to no.
-        self.assertEqual(self._test_qs("active=no", None, None), "?active=no")
-        self.assertEqual(self._test_qs("active=all", None, None), "?")
-        # Something that converts to None is ignored
-        self.assertEqual(self._test_qs("page=10&active=whatever", None, None), "?page=10")
-
 
 class TestFormat(TestCase):
     def test_strip_format(self):
