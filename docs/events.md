@@ -13,7 +13,7 @@ And so on. These are critical or important events in your infrastructure that ar
 If in the `catalog.json` your service defines some events values, those will **automatically** be entered into the Events list. Example:
 
 ```json
-'events': {'deployments', 'releases'}
+"events": {"deployments", "releases"}
 ```
 
 In this example both deployment and releases will be sent from GitHub to the Service Catalog, as webhooks and automatically added to the events timeline. 
