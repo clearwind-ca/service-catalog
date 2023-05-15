@@ -121,14 +121,17 @@ class CheckResultFilter(django_filters.FilterSet):
         model = CheckResult
         fields = ["result", "status", "service__slug", "health_check__slug"]
 
+
 def results(request):
     queryset = CheckResult.objects.all().order_by("-created")
     results = CheckResultFilter(request.GET, queryset=queryset)
     context = paginate(request, results)
-    context.update({
-        "result_choices": dict(RESULT_CHOICES).keys(),
-        "status_choices": dict(STATUS_CHOICES).keys(),
-    })
+    context.update(
+        {
+            "result_choices": dict(RESULT_CHOICES).keys(),
+            "status_choices": dict(STATUS_CHOICES).keys(),
+        }
+    )
     return render(request, "results-list.html", context)
 
 

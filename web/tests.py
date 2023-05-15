@@ -18,6 +18,7 @@ from .templatetags.helpers import (
     priority_as_colour,
     strip_format,
     yesno_if_boolean,
+    checks_badge,
 )
 
 fake = Faker("en_US")
@@ -215,3 +216,24 @@ class TestMiddleware(TestCase):
         self.req = self.factory.get("/services/")
         self.req.user = AnonymousUser()
         assert self.process_request(self.req)
+
+
+class FakeResult:
+    def __init__(self, result):
+        self.result = result
+
+class TestChecksBadge(TestCase):
+    def test_all_checks_pass(self):
+        checks = [{"last": FakeResult("pass")}]
+        self.assertEqual(checks_badge(checks), {"colour": "success", "text": "All health checks pass"})
+
+        checks.append({"last": FakeResult("pass")})
+        self.assertEqual(checks_badge(checks), {"colour": "success", "text": "All health checks pass"})
+
+    def test_all_no_checks_pass(self):
+        checks = []
+        self.assertEqual(checks_badge(checks), {"colour": "info", "text": "No health checks run"})
+
+    def test_some_checks_fail(self):
+        checks = [{"last": FakeResult("fail")}]
+        self.assertEqual(checks_badge(checks), {"colour": "warning", "text": "Some checks failing"})
