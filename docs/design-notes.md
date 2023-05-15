@@ -7,9 +7,16 @@ Some design notes and project goal.
 
 ## GitHub App access
 
-The long term goal is to keep the permissions needed by the GitHub App to the minimum needed to satifsy the needs of the project. Currently they include:
+See `/setup/` on your Service Catalog to see what is currently included.
 
-* `Write contents to repo`: because the health checks run GitHub Actions.
+The long term goal is to keep the permissions needed by the GitHub App to the minimum needed to satifsy the needs of the project and cope if you'd like to limit permissions, there are solutions. Currently they include:
+
+* `Write contents to repo`: because the health checks run GitHub Actions. If you remove this permission, for example just setting `Read access` then you will have to find another way to trigger the Actions in the health check repository. This could be done through cron jobs or Actions using the `cron` syntax.
+
+Events:
+
+* `Deployments`: so that the webhooks can be sent from GitHub. If the Service Catalog is at a URL not accessible from the server, then you can manually create these using the [create-event Action](https://github.com/clearwind-ca/create-event), the API, or by polling GitHub.
+* `Releases`: same as above for releases.
 
 ## Running health checks
 

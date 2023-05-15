@@ -42,6 +42,7 @@ Optional fields:
 * `dependencies`: an array of strings, where each string is a slug of the service that is a dependency. See below for the slug 👇.
 * `meta`: an object that allows you to enter any arbitrary detail. See below for more detail 👇.
 * `files`: an array of strings, where each string is a path relative to the root of the repository that contains more catalog entries. See below for more detail 👇.
+* `events`: a list of webhooks to listen to on GitHub. Currently only possible values are `deployments` and `releases`. See [events for more](events.md) 
 
 ### Slugs
 
