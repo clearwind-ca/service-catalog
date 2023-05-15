@@ -15,9 +15,9 @@ In order to send a response back to the Service Catalog, you must authenticate w
 
 For the Action to report the data back to the Service Catalog, the Action Runner (either [hosted](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners) or [self-hosted](https://docs.github.com/en/actions/hosting-your-own-runners/about-self-hosted-runners)) must have network access to the Service Catalog.
 
-## Example GitHub Action
+## Example GitHub Action using the API
 
-```
+```yaml
 name: Service Catalog Basic Check
 run-name: Catalog check ${{ github.event.client_payload.check }} on ${{ github.event.client_payload.service }}
 on:
@@ -45,8 +45,81 @@ Three key variables are provided in the payload:
 * `data`: contains all the objects from the Service Catalog to allow you to do whatever work you'd like and post the information back to the Service Catalog.
 * `check`: the `slug` of the check so you can identify and route the health check appropriately.
 * `service`: the `slug` of the service so you can identify and rout the health check appropriately.
- 
+* `repository`: the `repository` the service comes from, this is suitable for passing to actions, such as [checkout](https://github.com/actions/checkout)
+* `server`: the URL of the Service Catalog.
+* 
 At the end of this workflow we are running a script contained in the repository of the name `calculate-result.py` which is going to process the payload.
+
+You can use the [send-result Action](https://github.com/clearwind-ca/send-result) for this.
+
+## Example for multiple checks using actions
+
+## Example GitHub Action using other Actions
+
+```yaml
+name: Service Catalog Basic Check
+run-name: Catalog check ${{ github.event.client_payload.check }} on ${{ github.event.client_payload.service }}
+on:
+  repository_dispatch:
+    types: ["check"]
+
+jobs:
+  log4j:
+    env:
+      SERVICE_CATALOG_TOKEN: ${{ secrets.SERVICE_CATALOG_TOKEN }}
+    if: github.event.client_payload.check == 'log4j-vulnerability'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        repository: ${{ github.event.client_payload.repository }}
+    - run: |
+        wget https://github.com/google/log4jscanner/releases/download/v0.5.0/log4jscanner-v0.5.0-linux-amd64.tar.gz
+        tar -zxf log4jscanner-v0.5.0-linux-amd64.tar.gz
+        cd log4jscanner
+        ./log4jscanner $GITHUB_WORKSPACE >> /tmp/log4j.results
+        if test -s "/tmp/log4j.results"; then
+          contents=$(cat /tmp/log4j.results)
+          echo "::error::Vulnerable files found"
+          printf '{"result": "fail", "message": "Vulnerable file(s) found: `%s`"}' $contents >> /tmp/service-catalog-result.json
+        else
+          echo "::notice::All good, no vulnerable files found"
+          printf '{"result": "pass"}' >> /tmp/service-catalog-result.json
+        fi
+        echo `cat /tmp/service-catalog-result.json`
+    - uses: clearwind-ca/send-result@inputs
+        
+
+  codeowners:
+    env:
+      SERVICE_CATALOG_TOKEN: ${{ secrets.SERVICE_CATALOG_TOKEN }}
+    if: github.event.client_payload.check == 'codeowners-check'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        repository: ${{ github.event.client_payload.repository }}
+    - uses: mszostok/codeowners-validator@v0.7.4
+      with:
+        checks: "files,duppatterns,syntax"
+    - if: success()
+      uses: clearwind-ca/send-result@inputs
+      with:
+        result: "pass"
+    - if: failure()
+      uses: clearwind-ca/send-result@inputs
+      with:
+        result: "fail"
+```
+
+This is a more complicated example that does two different health checks in one workflow and uses different methods to report the results.
+
+**Notes:**
+* This uses `send-result` Action to send data instead of accessing the API manually.
+* This uses `if github.event.client_payload.check` to have one workflow file running different health checks.
+* `failure` and `success` allow to report `pass` or `fail` of the build if previous steps fail.
+* `printf '{...` is a way to populate a file with a result and message to use with the `send-result` Action.
+
 
 ## Payload: data
 
@@ -62,6 +135,8 @@ decoded = base64.b64decode(payload).decode('utf-8')
 data = json.loads(decoded)
 print("Received payload of:", data)
 ```
+
+You can use the [get-payload Action](https://github.com/clearwind-ca/get-payload) for this.
 
 ### Updating status
 
@@ -86,6 +161,8 @@ data = {"result": "pass"} # Set the health check to pass
 res = requests.patch(url, data, headers=headers)
 print("Response", res.status_code)
 ```
+
+You can use the [send-result Action](https://github.com/clearwind-ca/send-result) for this.
 
 ## Notes
 
