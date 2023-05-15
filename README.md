@@ -4,15 +4,13 @@ Service Catalog is an open source tool for tracking teams, applications and tool
 
 ### Current status
 
-This is under rapid development and isn't anywhere near a stable release yet, so please feel free to use, but understand that anything and everything might change as we figure out how best this can serve people.
-
-### Demo instance
-
-There is a demo instance here: https://service-catalog.fly.dev/ which is currently intermittenly updated.
+May 15th 2023: This is approaching a first stable release, core parts of it have stayed the same for a while now and there will be a clear migration path going forwards from here on.
 
 ### Documentation
 
 All the information you need to know is in [the documentation](docs).
+
+
 
 ---
 
