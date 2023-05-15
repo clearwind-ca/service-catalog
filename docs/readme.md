@@ -12,6 +12,10 @@ The Service Catalog is available under the [MIT license](../license.md).
 * [Installing](installing.md)
 * [Getting started](getting-started.md)
 * [Configuration](configuring.md)
+* [Health checks](health-checks.md)
+* [Events](events.md)
+* [API](api.md)
+* [Actions](actions.md)
 * [Examples](examples/readme.md)
 
 ---
