@@ -116,32 +116,19 @@ def api_checks_run(request, pk):
     return Response({"success": True})
 
 
+class CheckResultFilter(django_filters.FilterSet):
+    class Meta:
+        model = CheckResult
+        fields = ["result", "status", "service__slug", "health_check__slug"]
+
 def results(request):
-    filters, display_filters = {}, {}
-    get = request.GET
-    for param, lookup in (
-        ("result", "result"),
-        ("status", "status"),
-        ("service", "service__slug"),
-        ("check", "health_check__slug"),
-    ):
-        if get.get(param) is not None:
-            filters[lookup] = get[param]
-            display_filters[param] = get[param]
-
-    results = CheckResult.objects.filter(**filters).order_by("-created")
-
-    paginator = Paginator(results, per_page=get["per_page"])
-    page_number = get["page"]
-    page_obj = paginator.get_page(page_number)
-
-    context = {
-        "results": page_obj,
-        "filters": display_filters,
-        "page_range": page_obj.paginator.get_elided_page_range(get["page"]),
+    queryset = CheckResult.objects.all().order_by("-created")
+    results = CheckResultFilter(request.GET, queryset=queryset)
+    context = paginate(request, results)
+    context.update({
         "result_choices": dict(RESULT_CHOICES).keys(),
         "status_choices": dict(STATUS_CHOICES).keys(),
-    }
+    })
     return render(request, "results-list.html", context)
 
 

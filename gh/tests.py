@@ -14,15 +14,9 @@ from health.tests import create_health_check, create_health_check_result
 from services.models import Source
 from services.tests import create_service, create_source
 
-from .fetch import (
-    file_paths,
-    get,
-    get_file,
-    get_file_from_list,
-    url_to_nwo,
-)
-from .user import login_as_user
+from .fetch import file_paths, get, get_file, get_file_from_list, url_to_nwo
 from .send import dispatch
+from .user import login_as_user
 from .webhooks import find_service, handle_deployment, handle_release
 
 fake = Faker("en_US")

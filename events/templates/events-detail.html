@@ -52,7 +52,7 @@
     <dt>Source</dt>
     <dd>{{ event.source }}</dd>
     <dt>URL</dt>
-    <dd>{{ event.url|urlize }}</dd>
+    <dd><a href="{{ event.url }}">{{ event.url|truncatechars:50 }} {% octicon "link-external" %}</a></dd>
 </dl>
 {% endblock %}
 
