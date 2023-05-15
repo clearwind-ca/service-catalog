@@ -68,16 +68,16 @@ def checks_badge(checks):
             all_passing = False
             continue
         not_run = False
-        if check["last"].result != "P":
+        if check["last"].result != "pass":
             all_passing = False
             break
 
-    if all_passing:
-        result["text"] = "All health checks pass"
-        result["colour"] = "success"
-    elif not_run:
+    if not_run:
         result["colour"] = "info"
         result["text"] = "No health checks run"
+    elif all_passing:
+        result["text"] = "All health checks pass"
+        result["colour"] = "success"
     else:
         result["colour"] = "warning"
         result["text"] = "Some checks failing"
