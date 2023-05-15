@@ -10,8 +10,6 @@ May 15th 2023: This is approaching a first stable release, core parts of it have
 
 All the information you need to know is in [the documentation](docs).
 
-
-
 ---
 
 Service Catalog is under the [MIT License](LICENSE.md) and originally built by [Clearwind Consulting](https://clearwind.ca).
