@@ -1,8 +1,5 @@
-
 from django.conf import settings
-
 from django.core.paginator import Paginator
-
 
 default_query_params = {"per_page": 10, "page": 1, "active": True}
 YES_NO_CHOICES = (("yes", "True"), ("no", "False"), ("all", None))
@@ -23,7 +20,8 @@ def paginate(request, filterset, extra=None):
         "filters": filtered_filters(request.GET, filters, extra=extra),
     }
 
-def filtered_filters(get, filterset, extra=None): 
+
+def filtered_filters(get, filterset, extra=None):
     result = {}
     for _dict in (filterset, get):
         for k in _dict.keys():

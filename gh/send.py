@@ -3,9 +3,8 @@ import json
 
 from django.conf import settings
 from django.urls import reverse
-from github import UnknownObjectException
 
-from catalog.errors import NoRepository, SendError
+from catalog.errors import SendError
 from health.serializers import CheckResultSerializer, CheckSerializer
 from services.serializers import ServiceSerializer, SourceSerializer
 

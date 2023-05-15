@@ -6,7 +6,7 @@ from github import GithubException, UnknownObjectException
 
 from catalog.errors import NoEntryFound, NoRepository, SchemaError
 
-from .user import login_as_app, login_as_installation, login_as_user
+from .user import login_as_app, login_as_installation
 
 logger = logging.getLogger(__name__)
 

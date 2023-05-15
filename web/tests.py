@@ -3,7 +3,6 @@ from unittest.mock import Mock, patch
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.core.cache import cache
-from django.shortcuts import redirect
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from faker import Faker
@@ -17,7 +16,6 @@ from .templatetags.helpers import (
     apply_format,
     markdown_filter,
     priority_as_colour,
-    qs,
     strip_format,
     yesno_if_boolean,
 )
@@ -39,6 +37,7 @@ example_app_response = {
     "pem": fake.text(),
     "client_secret": fake.text(),
 }
+
 
 class TestHomePage(TestCase):
     def test_home_page(self):
@@ -65,6 +64,7 @@ class TestYesNo(TestCase):
         self.assertEqual(yesno_if_boolean(False), "no")
         self.assertEqual(yesno_if_boolean(None), None)
         self.assertEqual(yesno_if_boolean("foo"), "foo")
+
 
 class TestFormat(TestCase):
     def test_strip_format(self):

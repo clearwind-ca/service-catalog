@@ -95,7 +95,7 @@ def events_list(request):
 
     queryset = Event.objects.filter(**filters).order_by(ordering)
     events = EventsFilter(request.GET, queryset=queryset)
-    context = paginate(request, events, extra={'when': get.get('when', 'recent')})
+    context = paginate(request, events, extra={"when": get.get("when", "recent")})
     context.update(
         {
             "types": sorted(

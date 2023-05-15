@@ -1,8 +1,6 @@
-import os
 from datetime import timedelta
 from unittest.mock import patch
 
-from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils import timezone
 from faker import Faker

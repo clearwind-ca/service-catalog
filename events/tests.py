@@ -1,5 +1,4 @@
 from datetime import timedelta
-from unittest.mock import Mock, patch
 from urllib.parse import urlencode
 
 from django.urls import reverse

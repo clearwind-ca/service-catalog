@@ -1,4 +1,5 @@
 from unittest.mock import patch
+
 from auditlog.models import LogEntry
 from django.contrib import messages
 from django.db.models.deletion import ProtectedError

@@ -223,13 +223,17 @@ class TestWebhooks(WithGitHubUser):
         self.service.active = False
         self.service.save()
 
-        assert not len(list(find_service(self.get_deployment_payload(), "deployment", "deployments")))
+        assert not len(
+            list(find_service(self.get_deployment_payload(), "deployment", "deployments"))
+        )
 
     def test_no_events(self):
         self.service.events = []
         self.service.save()
 
-        assert not len(list(find_service(self.get_deployment_payload(), "deployment", "deployments")))
+        assert not len(
+            list(find_service(self.get_deployment_payload(), "deployment", "deployments"))
+        )
 
     @patch("gh.webhooks.requests.get")
     def test_handle_multiple_services(self, mock_get):
