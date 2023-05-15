@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import CheckResult, Check
+from .models import Check, CheckResult
 
 
 class CheckAdmin(admin.ModelAdmin):
