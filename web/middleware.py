@@ -116,7 +116,7 @@ class CatalogMiddleware(AuthenticationMiddleware):
         # Set a cache key for 5 minutes.
         cache.set(key, valid, 60 * 5)
         logger.error(f"Check-Orgs: Cache set for {key} with {valid}")
-        
+
         return valid
 
     def process_request(self, request):
@@ -140,16 +140,16 @@ class CatalogMiddleware(AuthenticationMiddleware):
         if request.user.is_authenticated and login_required:
             # If this didn't pass, then we need to check a default base permission.
             if settings.ALLOW_PUBLIC_READ_ACCESS:
-                # This is the base we need if this is set. 
+                # This is the base we need if this is set.
                 if request.user.has_perm("services.view_service"):
                     return None
-        
+
             # Otherwise, check org membership.
             else:
                 # This is the base we need if this is not set.
                 if self.check_orgs(request):
                     return None
-            
+
         # This is a DRF request.
         if request._is_drf:
             # Return a non-HTML error response.

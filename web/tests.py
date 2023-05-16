@@ -267,6 +267,7 @@ class TestMiddleware(TestCase):
         self.req.user = self.user
         self.assertEqual(self.process_request(self.req), None)
 
+
 class FakeResult:
     def __init__(self, result):
         self.result = result
