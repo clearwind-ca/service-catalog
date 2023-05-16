@@ -4,13 +4,13 @@ import django_filters
 from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib import messages
-from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.contrib.auth.decorators import permission_required
 
 from services.models import Service
 from web.helpers import YES_NO_CHOICES, paginate
@@ -52,7 +52,7 @@ def checks(request):
     )
     return render(request, "checks-list.html", context)
 
-
+@permission_required("health.add_check")
 def checks_add(request):
     if request.method == "POST":
         form = CheckForm(request.POST)
@@ -74,6 +74,7 @@ def checks_detail(request, slug):
     return render(request, "checks-detail.html", {"check": check, "log": log})
 
 
+@permission_required("health.change_check")
 def checks_update(request, slug):
     check = Check.objects.get(slug=slug)
     if request.method == "POST":
@@ -89,11 +90,11 @@ def checks_update(request, slug):
 
 
 @require_POST
+@permission_required("health.delete_check")
 def checks_delete(request, slug):
     get_object_or_404(Check, slug=slug).delete()
     messages.info(request, f"Health check `{slug}` and matching results deleted")
     return redirect(reverse("health:checks-list"))
-
 
 def send(check):
     service_queryset = Service.objects.filter(active=True)
@@ -101,7 +102,10 @@ def send(check):
         send_to_github.delay(check.slug, service.slug)
 
 
+# Sending a check is essentially asking something to change it
+# so let's use the same permissions here.
 @require_POST
+@permission_required("health.change_check")
 def checks_run(request, slug):
     check = get_object_or_404(Check, slug=slug)
     send(check)
@@ -110,6 +114,7 @@ def checks_run(request, slug):
 
 
 @api_view(["POST"])
+@permission_required("health.change_check")
 def api_checks_run(request, pk):
     check = get_object_or_404(Check, pk=pk)
     send(request.user.username, check)

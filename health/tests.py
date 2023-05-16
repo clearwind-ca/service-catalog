@@ -38,6 +38,59 @@ class WithHealthCheck(BaseTestCase):
         self.health_check = created["health_check"]
 
 
+class TestCheck(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self.source = create_source()
+        self.service = create_service(self.source)
+
+    def test_add_check(self):
+        url = reverse("health:checks-add")
+        self.client.force_login(self.user)
+        self.add_to_members()
+        res = self.client.post(url, {"name": fake.name(), "description": fake.text(), "frequency": "daily", "active": True})
+        self.assertEqual(res.status_code, 302, res.content)
+        self.assertEqual(Check.objects.count(), 1)
+
+    def test_add_check_no_perms(self):
+        url = reverse("health:checks-add")
+        self.client.force_login(self.user)
+        res = self.client.post(url, {"name": fake.name(), "description": fake.text(), "frequency": "daily", "active": True})
+        self.login_required(res)
+
+    def test_update_check(self):
+        created = create_health_check()["health_check"]
+        url = reverse("health:checks-update", args=[created.slug])
+        self.client.force_login(self.user)
+        self.add_to_members()
+        res = self.client.post(url, {"name": "new name", "description": fake.text(), "frequency": "daily", "active": True})
+        self.assertEqual(res.status_code, 302, res.content)
+        self.assertEqual(Check.objects.get().name, "new name")
+
+    def test_update_check_no_perms(self):
+        created = create_health_check()["health_check"]
+        url = reverse("health:checks-update", args=[created.slug])
+        self.client.force_login(self.user)
+        res = self.client.post(url, {"name": "new name", "description": fake.text(), "frequency": "daily", "active": True})
+        self.login_required(res)
+
+    def test_delete_check(self):
+        created = create_health_check()["health_check"]
+        url = reverse("health:checks-delete", args=[created.slug])
+        self.client.force_login(self.user)
+        self.add_to_members()
+        res = self.client.post(url)
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(Check.objects.count(), 0)
+
+    def test_delete_check_no_perms(self):
+        created = create_health_check()["health_check"]
+        url = reverse("health:checks-delete", args=[created.slug])
+        self.client.force_login(self.user)
+        res = self.client.post(url)
+        self.login_required(res)
+
+
 class TestAPICheck(BaseTestCase):
     def setUp(self):
         super().setUp()
@@ -264,20 +317,20 @@ class TestAdHoc(WithHealthCheck):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 405)
 
-    @patch("health.tasks.send")
-    def test_post(self, mock_send):
+    def test_post_no_perms(self, mock_send):
         """Test the view works if a POST"""
-        mock_send.dispatch.return_value = True
+        mock_send.dispatch.side_effect = NoRepository("Nope")
         self.client.force_login(self.user)
-        response = self.client.post(self.url)
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(CheckResult.objects.filter(status="sent").count(), 1)
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            response = self.client.post(self.url)
+        self.login_required(response)
 
     @patch("health.tasks.send")
     def test_post(self, mock_send):
         """Test the view works if a POST"""
         mock_send.dispatch.side_effect = NoRepository("Nope")
         self.client.force_login(self.user)
+        self.add_to_members()
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
             response = self.client.post(self.url)
         self.assertEqual(response.status_code, 302)
