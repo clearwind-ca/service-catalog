@@ -253,6 +253,7 @@ class TestValidate(BaseTestCase):
     def test_validate_bad_json(self, mock_fetch):
         """Test the validate sources view with some non-schema JSON."""
         self.client.force_login(self.user)
+        self.add_to_members()
         mock_fetch.get.return_value = [{"contents": {"hi": "there"}}]
         response = self.client.get(self.url)
         self.assertEqual(self.get_message(response).level, messages.ERROR)
@@ -261,14 +262,21 @@ class TestValidate(BaseTestCase):
     def test_validate_invalid_json(self, mock_fetch):
         """Test the validate sources view with some totally invalid JSON."""
         self.client.force_login(self.user)
+        self.add_to_members()
         mock_fetch.get.return_value = [{"contents": 1}]
         response = self.client.get(self.url)
         self.assertEqual(self.get_message(response).level, messages.ERROR)
+
+    def test_validate_no_perms(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        self.login_required(response)
 
     @patch("services.views.fetch")
     def test_validate_good_json(self, mock_fetch):
         """Test the validate sources view."""
         self.client.force_login(self.user)
+        self.add_to_members()
         mock_fetch.get.return_value = [
             {
                 "contents": {
@@ -300,16 +308,23 @@ class TestDelete(BaseTestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 405)
 
+    def test_delete_no_perms(self):
+        self.client.force_login(self.user)
+        response = self.client.post(self.url)
+        self.login_required(response)
+
     def test_delete_works(self):
         """Test the delete source view."""
         self.client.force_login(self.user)
-        response = self.client.post(self.url)
+        self.add_to_members()
+        response = self.client.post(self.url)    
         self.assertEqual(self.get_message(response).level, messages.INFO)
         assert not models.Source.objects.filter(slug=self.source.slug).exists()
 
     def test_delete_stops(self):
         """Test the delete source view stops if there are services."""
         self.client.force_login(self.user)
+        self.add_to_members()
         create_service(self.source)
         response = self.client.post(self.url)
         self.assertEqual(self.get_message(response).level, messages.ERROR)
@@ -318,6 +333,7 @@ class TestDelete(BaseTestCase):
     def test_delete_still_has_log(self):
         """Test that we've still got the system log entries."""
         self.client.force_login(self.user)
+        self.add_to_members()
         response = self.client.post(self.url)
         self.assertEqual(self.get_message(response).level, messages.INFO)
         # Assert that we still have the system log entries for that object.
@@ -337,9 +353,16 @@ class TestAdd(BaseTestCase):
     def test_get(self):
         """Test the source add view."""
         self.client.force_login(self.user)
+        self.add_to_members()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "source-add.html")
+    
+    def test_get_no_perms(self):
+        """Test the source add view."""
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        self.login_required(response)
 
     @patch("services.views.fetch")
     @patch("web.middleware.user")
@@ -347,6 +370,7 @@ class TestAdd(BaseTestCase):
         """Test the source add view with an org."""
         mock_user.check_org_membership.return_value = True
         self.client.force_login(self.user)
+        self.add_to_members()
         response = self.client.post(self.url, {"url": "https://gh.com/test/gh"})
         self.assertEqual(response.status_code, 302, response.content)
         source = models.Source.objects.get(slug="test-gh")
@@ -356,6 +380,7 @@ class TestAdd(BaseTestCase):
     def test_post(self, mock_fetch):
         """Test the source add view with a POST."""
         self.client.force_login(self.user)
+        self.add_to_members()
         mock_fetch.get.return_value = sample_response()
         response = self.client.post(self.url, {"url": "https://gh.com/andy/gh"})
         self.assertEqual(self.get_message(response).level, messages.INFO)
@@ -364,6 +389,7 @@ class TestAdd(BaseTestCase):
     def test_post_errors(self):
         """Test the source add view with a POST that errors"""
         self.client.force_login(self.user)
+        self.add_to_members()
         response = self.client.post(self.url, {"url": "sort-of-failure"})
         self.assertEqual(self.get_message(response).level, messages.ERROR)
         assert not models.Source.objects.filter(slug="andy-gh").exists()
@@ -436,9 +462,15 @@ class TestServiceDelete(BaseTestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 405)
 
+    def test_delete_no_perms(self):
+        self.client.force_login(self.user)
+        response = self.client.post(self.url)
+        self.login_required(response)
+
     def test_delete_works(self):
         """Test the delete service view."""
         self.client.force_login(self.user)
+        self.add_to_members()
         response = self.client.post(self.url)
         self.assertEqual(self.get_message(response).level, messages.INFO)
         assert not models.Service.objects.filter(slug=self.service.slug).exists()
@@ -575,17 +607,26 @@ class TestAPISource(BaseTestCase):
         """Test the source list API as POST"""
         self.source = create_source()
         self.api_login()
+        self.add_to_members()
         url = reverse("services:api-source-refresh", kwargs={"pk": self.source.pk})
         mock_fetch.get.return_value = sample_response()
         response = self.api_client.post(url)
         assert mock_fetch.get.called
         self.assertEqual(response.status_code, 200)
 
+    def test_source_add_and_refresh_no_perms(self):
+        self.source = create_source()
+        self.api_login()
+        url = reverse("services:api-source-refresh", kwargs={"pk": self.source.pk})
+        response = self.api_client.post(url)
+        self.login_required(response)
+
     @patch("services.views.fetch")
     def test_validate_gateway_error(self, mock_fetch):
         """Test the source validate API when it fails on fetch."""
         self.source = create_source()
         self.api_login()
+        self.add_to_members()
         url = reverse("services:api-source-validate", kwargs={"pk": self.source.pk})
         mock_fetch.get.side_effect = FetchError("Nope")
         response = self.api_client.post(url)
@@ -604,6 +645,7 @@ class TestAPISource(BaseTestCase):
         """Test the source validate API when it fails on a record."""
         self.source = create_source()
         self.api_login()
+        self.add_to_members()
         url = reverse("services:api-source-validate", kwargs={"pk": self.source.pk})
         # Will return multiple errors and one success.
         mock_fetch.get.return_value = mixed_responses()
@@ -616,6 +658,12 @@ class TestAPISource(BaseTestCase):
         second = response.json()["failures"][1]
         assert "type" in second["data"][0]["message"]
 
+    def test_validate_error_no_perms(self):
+        self.source = create_source()
+        self.api_login()
+        url = reverse("services:api-source-validate", kwargs={"pk": self.source.pk})
+        response = self.api_client.post(url)
+        self.login_required(response)
 
 class TestAPIService(BaseTestCase):
     def setUp(self):

@@ -25,6 +25,7 @@ from .models import Organization, Service, Source
 from .serializers import ServiceSerializer, SourceSerializer
 from .tasks import refresh_orgs_from_github
 
+from django.contrib.auth.decorators import permission_required
 
 class ServiceFilter(django_filters.FilterSet):
     active = django_filters.TypedChoiceFilter(choices=YES_NO_CHOICES, coerce=strtobool)
@@ -47,6 +48,7 @@ def service_list(request):
 
 
 @require_POST
+@permission_required("services.delete_service")
 def service_delete(request, slug):
     service = get_object_or_404(slug=slug, klass=Service)
     messages.info(request, f"Service `{service.slug}` successfully deleted")
@@ -99,6 +101,7 @@ def source_detail(request, slug):
     return render(request, "source-detail.html", context)
 
 
+@permission_required("services.change_source")
 def source_refresh(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
     try:
@@ -113,6 +116,7 @@ def source_refresh(request, slug):
 
 
 @require_POST
+@permission_required("services.change_source")
 def org_refresh(request):
     refresh_orgs_from_github.delay()
     messages.info(request, "Refresh of data from GitHub successfully queued.")
@@ -120,6 +124,7 @@ def org_refresh(request):
 
 
 @api_view(["POST"])
+@permission_required("services.change_source")
 def api_source_refresh(request, pk):
     source = get_object_or_404(pk=pk, klass=Source)
     try:
@@ -153,7 +158,7 @@ def refresh_results(results, source, request):
 
     messages.info(request, f"Refreshed source `{source.slug}` successfully.")
 
-
+@permission_required("services.add_source")
 def source_add(request):
     if request.method == "GET":
         return render(
@@ -179,6 +184,7 @@ def source_add(request):
 
 
 @require_POST
+@permission_required("services.delete_source")
 def source_delete(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
     if source.services.exists():
@@ -190,7 +196,7 @@ def source_delete(request, slug):
     source.delete()
     return redirect("services:source-list")
 
-
+@permission_required("services.change_source")
 def source_update(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
     if request.POST:
@@ -204,7 +210,7 @@ def source_update(request, slug):
 
     return render(request, "source-update.html", context={"form": form, "source": source})
 
-
+@permission_required("services.change_source")
 def source_validate(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
     try:
@@ -225,6 +231,7 @@ def source_validate(request, slug):
 
 
 @api_view(["POST"])
+@permission_required("services.change_source")
 def api_source_validate(request, pk):
     source = get_object_or_404(pk=pk, klass=Source)
     try:

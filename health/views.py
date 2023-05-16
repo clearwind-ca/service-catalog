@@ -4,13 +4,13 @@ import django_filters
 from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.decorators import permission_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from django.contrib.auth.decorators import permission_required
 
 from services.models import Service
 from web.helpers import YES_NO_CHOICES, paginate
@@ -51,6 +51,7 @@ def checks(request):
         }
     )
     return render(request, "checks-list.html", context)
+
 
 @permission_required("health.add_check")
 def checks_add(request):
@@ -95,6 +96,7 @@ def checks_delete(request, slug):
     get_object_or_404(Check, slug=slug).delete()
     messages.info(request, f"Health check `{slug}` and matching results deleted")
     return redirect(reverse("health:checks-list"))
+
 
 def send(check):
     service_queryset = Service.objects.filter(active=True)
