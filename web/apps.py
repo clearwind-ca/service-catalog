@@ -7,10 +7,9 @@ class WebConfig(AppConfig):
 
     def ready(self):
         from auditlog.registry import auditlog
+        from rest_framework.authtoken.models import Token
 
         import web.signals  # noqa: F401
-
-        from rest_framework.authtoken.models import Token
 
         auditlog.register(Token)
 

@@ -51,12 +51,15 @@
             <p>{% octicon "deny" %} No logs found for this service.</p>
         {% endif %}
     </div>
-    <div class="pb-3">
-        <h6 class="text-muted border-bottom">Admin</h6>
-        <p><a href="#" data-bs-toggle="modal" data-bs-target="#run-modal">Run this check now</a></p>
-        <p><a href="{% url 'health:checks-update' check.slug %}">Edit this check</a></p>
-        <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete this check</a></p>
-    </div>
+
+    {# if perms.health.change_checks #}
+        <div class="pb-3">
+            <h6 class="text-muted border-bottom">Admin</h6>
+            <p><a href="#" data-bs-toggle="modal" data-bs-target="#run-modal">Run this check now</a></p>
+            <p><a href="{% url 'health:checks-update' check.slug %}">Edit this check</a></p>
+            <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete this check</a></p>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block modals %}
