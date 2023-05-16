@@ -14,11 +14,11 @@ from services.models import Organization
 from .middleware import CatalogMiddleware
 from .templatetags.helpers import (
     apply_format,
+    checks_badge,
     markdown_filter,
     priority_as_colour,
     strip_format,
     yesno_if_boolean,
-    checks_badge,
 )
 
 fake = Faker("en_US")
@@ -222,13 +222,18 @@ class FakeResult:
     def __init__(self, result):
         self.result = result
 
+
 class TestChecksBadge(TestCase):
     def test_all_checks_pass(self):
         checks = [{"last": FakeResult("pass")}]
-        self.assertEqual(checks_badge(checks), {"colour": "success", "text": "All health checks pass"})
+        self.assertEqual(
+            checks_badge(checks), {"colour": "success", "text": "All health checks pass"}
+        )
 
         checks.append({"last": FakeResult("pass")})
-        self.assertEqual(checks_badge(checks), {"colour": "success", "text": "All health checks pass"})
+        self.assertEqual(
+            checks_badge(checks), {"colour": "success", "text": "All health checks pass"}
+        )
 
     def test_all_no_checks_pass(self):
         checks = []
