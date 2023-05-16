@@ -4,6 +4,7 @@ from distutils.util import strtobool
 import django_filters
 from auditlog.models import LogEntry
 from django.contrib import messages
+from django.contrib.auth.decorators import permission_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -17,6 +18,7 @@ from .models import Event
 from .serializers import EventSerializer
 
 
+@permission_required("events.add_event")
 def events_add(request):
     if request.POST:
         form = EventForm(request.POST)
@@ -40,6 +42,7 @@ def events_detail(request, pk):
 
 
 @require_POST
+@permission_required("events.delete_event")
 def events_delete(request, pk):
     event = get_object_or_404(Event, pk=pk)
     event.delete()
@@ -47,6 +50,7 @@ def events_delete(request, pk):
     return redirect(reverse("events:events-list"))
 
 
+@permission_required("events.change_event")
 def events_update(request, pk):
     event = get_object_or_404(Event, pk=pk)
     if request.POST:
@@ -112,4 +116,4 @@ def events_list(request):
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all().order_by("-created")
     serializer_class = EventSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.DjangoModelPermissions]

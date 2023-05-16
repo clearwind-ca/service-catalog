@@ -46,13 +46,15 @@
         {% endif %}
     </div>
 
-    <div>
-        <h6 class="text-muted border-bottom">Admin</h6>
-        <p><a href="{% url 'services:source-refresh' source.slug %}">Refresh this repository</a></p>
-        <p><a href="{% url 'services:source-update' source.slug %}">Edit this source</a></p>
-        <p><a href="{% url 'services:source-validate' source.slug %}">Validate the JSON</a></p>
-        <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete from the catalog</a>
-    </div>
+    {% if perms.service.change_source %}
+        <div>
+            <h6 class="text-muted border-bottom">Admin</h6>
+            <p><a href="{% url 'services:source-refresh' source.slug %}">Refresh this repository</a></p>
+            <p><a href="{% url 'services:source-update' source.slug %}">Edit this source</a></p>
+            <p><a href="{% url 'services:source-validate' source.slug %}">Validate the JSON</a></p>
+            <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete from the catalog</a>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block modals %}

@@ -6,6 +6,7 @@ import django_filters
 from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.decorators import permission_required
 from django.db.models import CharField, Value
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -47,6 +48,7 @@ def service_list(request):
 
 
 @require_POST
+@permission_required("services.delete_service")
 def service_delete(request, slug):
     service = get_object_or_404(slug=slug, klass=Service)
     messages.info(request, f"Service `{service.slug}` successfully deleted")
@@ -99,6 +101,7 @@ def source_detail(request, slug):
     return render(request, "source-detail.html", context)
 
 
+@permission_required("services.change_source")
 def source_refresh(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
     try:
@@ -113,6 +116,7 @@ def source_refresh(request, slug):
 
 
 @require_POST
+@permission_required("services.change_source")
 def org_refresh(request):
     refresh_orgs_from_github.delay()
     messages.info(request, "Refresh of data from GitHub successfully queued.")
@@ -120,6 +124,7 @@ def org_refresh(request):
 
 
 @api_view(["POST"])
+@permission_required("services.change_source")
 def api_source_refresh(request, pk):
     source = get_object_or_404(pk=pk, klass=Source)
     try:
@@ -154,6 +159,7 @@ def refresh_results(results, source, request):
     messages.info(request, f"Refreshed source `{source.slug}` successfully.")
 
 
+@permission_required("services.add_source")
 def source_add(request):
     if request.method == "GET":
         return render(
@@ -179,6 +185,7 @@ def source_add(request):
 
 
 @require_POST
+@permission_required("services.delete_source")
 def source_delete(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
     if source.services.exists():
@@ -191,6 +198,7 @@ def source_delete(request, slug):
     return redirect("services:source-list")
 
 
+@permission_required("services.change_source")
 def source_update(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
     if request.POST:
@@ -205,6 +213,7 @@ def source_update(request, slug):
     return render(request, "source-update.html", context={"form": form, "source": source})
 
 
+@permission_required("services.change_source")
 def source_validate(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
     try:
@@ -225,6 +234,7 @@ def source_validate(request, slug):
 
 
 @api_view(["POST"])
+@permission_required("services.change_source")
 def api_source_validate(request, pk):
     source = get_object_or_404(pk=pk, klass=Source)
     try:
@@ -264,7 +274,7 @@ def api_schema_detail(request):
 class SourceViewSet(viewsets.ModelViewSet):
     queryset = Source.objects.all().order_by("-created")
     serializer_class = SourceSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.DjangoModelPermissions]
 
 
 class ServiceViewSet(
@@ -275,4 +285,4 @@ class ServiceViewSet(
 ):
     queryset = Service.objects.all().order_by("-created")
     serializer_class = ServiceSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.DjangoModelPermissions]

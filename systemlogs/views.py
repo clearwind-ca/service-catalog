@@ -17,6 +17,8 @@ model_map = {
     "event": "events",
     "check": "health",
     "check result": "health",
+    "token": "authtoken",
+    "user": "auth",
 }
 
 
@@ -35,10 +37,12 @@ def log_list(request):
     # Not sure how to do these in django-filters.
     if request.GET.get("type"):
         target = get["type"]
-        _model_name = model_map.get(target)
-        assert _model_name
-        _model = apps.get_model(model_name=target.replace(" ", ""), app_label=_model_name)
-        filters["content_type__pk"] = ContentType.objects.get_for_model(_model).pk
+
+        if target != "all":
+            _model_name = model_map.get(target)
+            assert _model_name
+            _model = apps.get_model(model_name=target.replace(" ", ""), app_label=_model_name)
+            filters["content_type__pk"] = ContentType.objects.get_for_model(_model).pk
 
     if get.get("slug"):
         _object = _model.objects.get(slug=get["slug"])
@@ -68,4 +72,4 @@ def log_details(request, pk):
 class SystemLogViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = LogEntry.objects.all().order_by("-timestamp")
     serializer_class = LogEntrySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.DjangoModelPermissions]

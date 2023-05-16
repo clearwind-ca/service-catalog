@@ -54,6 +54,8 @@
         {% include "pagination.html" with objects=Checks %}
     {% endif %}
 
-    <a href="{% url 'health:checks-add' %}">{% octicon 'plus' %} Add health check</a>
+    {% if perms.health.add_check %}
+        <a href="{% url 'health:checks-add' %}">{% octicon 'plus' %} Add health check</a>
+    {% endif %}
 </div>
 {% endblock %}

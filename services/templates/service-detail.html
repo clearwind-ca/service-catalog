@@ -65,6 +65,7 @@
         <h6 class="text-muted border-bottom">Info</h6>
         <p>Validated using <a href="{% url 'services:schema-detail' %}">this schema</a></p>
         <p>Slug: <code>{{ service.slug }}</code></p>
+        <p><a href="{% url 'services:source-detail' source.slug %}">View the source</a></p>
     </div>
 
     <div class="pb-3">
@@ -85,12 +86,13 @@
             <p>{% octicon "deny" %} No logs found for this service.</p>
         {% endif %}
     </div>
-
-    <div>
-        <h6 class="text-muted border-bottom">Admin</h6>
-        <p><a href="{% url 'services:source-detail' source.slug %}">View the source</a></p>
-        <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete from the catalog</a>
-    </div>
+    
+    {% if perms.services.change_source %}
+        <div>
+            <h6 class="text-muted border-bottom">Admin</h6>
+            <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete from the catalog</a>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block modals %}

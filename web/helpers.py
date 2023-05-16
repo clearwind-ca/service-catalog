@@ -36,10 +36,14 @@ def site_context(request):
     """
     A site wide context processor for adding site wide things.
     """
+    groups = request.user.groups.values_list("name", flat=True)
     return {
         # Set to true, and then override in views to False to hide breadcrumbs.
         "breadcrumbs": True,
         "settings": {
             "timezone": settings.TIME_ZONE,
+            "public": settings.ALLOW_PUBLIC_READ_ACCESS,
         },
+        "member": "members" in groups,
+        "public": "public" in groups,
     }

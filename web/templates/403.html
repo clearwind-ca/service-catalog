@@ -2,10 +2,12 @@
 {% load static %}
 {% block main %} 
 <div class="row pt-5">
-    <h2>Nope</h2>
-    <p>Yeah, nope. Sorry, you aren't allowed.</p>
     {% if request.user.is_authenticated %}
-        <p>To be able to access this site, you <b>must be a public member of the GitHub organisations</b> set up in the Catalog.</p>
+        <h2>Not enough permissions</h2>
+        <p>You are logged in, cool. But sadly you don't have enough permission to do that. To be able to access this site, you <b>must be a public member of the GitHub organisations</b> set up in the Catalog.</p>
+    {% else %}
+        <h2>Login required</h2>
+        <p>Yeah, nope. Sorry.</p>
     {% endif %}
     <p>Don't worry the AI cat hasn't got what it wanted either. I mean that picture is just a big nope anyway. The bird is flying without using its wings and the cat has two tails. So much nope.</p>
 </div>

@@ -24,6 +24,10 @@ if not os.path.exists(env):
 
 load_dotenv(dotenv_path=env)
 
+# Danger: This can expose private information outside of you organization.
+# Read the documentation before changing this. If in doubt, don't.
+ALLOW_PUBLIC_READ_ACCESS = os.environ.get("ALLOW_PUBLIC_READ_ACCESS", False)
+
 # Doing this so that it shows up in the debug page for clarity.
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(" ")
 auth_pwd = "django.contrib.auth.password_validation"
@@ -116,7 +120,7 @@ LOGIN_REQUIRED_IGNORE_PATHS = [
 ]
 LOGIN_REQUIRED_IGNORE_VIEW_NAMES = ["web:home", "web:setup", "web:login-problem", "web:logout"]
 LOGIN_REQUIRED_REDIRECT_FIELD_NAME = "next"
-LOGIN_URL = "/"
+LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/services/"
 MESSAGE_TAGS = {
     messages.ERROR: "danger",
