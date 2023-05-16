@@ -1,14 +1,11 @@
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Group, Permission
+from django.contrib.contenttypes.models import ContentType
 
 models = {
     "members": ["check", "checkresult", "event", "organization", "service", "source", "token"],
     "public": ["check", "checkresult", "event", "organization", "service", "source"],
 }
-prefixes = {
-    "members": ("add", "change", "delete", "view"),
-    "public": ("view")
-}
+prefixes = {"members": ("add", "change", "delete", "view"), "public": ("view")}
 
 
 def get_filtered_content_types(models):
@@ -16,6 +13,7 @@ def get_filtered_content_types(models):
         if obj.model not in models:
             continue
         yield obj
+
 
 def setup_group(name=None):
     assert name in ["members", "public"]

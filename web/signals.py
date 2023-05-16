@@ -10,6 +10,7 @@ from services.models import Organization
 
 logger = logging.getLogger(__name__)
 
+
 def user_logged_in_handler(sender, request, user, **kwargs):
     names = Organization.objects.values_list("name", flat=True)
     if not names:
@@ -25,7 +26,7 @@ def user_logged_in_handler(sender, request, user, **kwargs):
         if not members_user_set.filter(username=username).exists():
             members_user_set.add(user)
             logger.info(f"Added user {username} to group members")
-    
+
     if not is_member:
         if members_user_set.filter(username=username).exists():
             members_user_set.remove(user)

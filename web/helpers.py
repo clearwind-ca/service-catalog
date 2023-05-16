@@ -43,6 +43,6 @@ def site_context(request):
         "settings": {
             "timezone": settings.TIME_ZONE,
         },
-        "member": 'members' in groups,
+        "member": "members" in groups,
         "public": "public" in groups,
     }

@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.core.cache import cache
 from django.test import TestCase
 from faker import Faker
@@ -9,7 +10,7 @@ from rest_framework.test import APIClient
 
 from services.models import Organization
 from web.groups import setup_group
-from django.contrib.auth.models import Group
+
 fake = Faker("en_US")
 
 
@@ -25,8 +26,8 @@ class BaseTestCase(TestCase):
         self.api_client = APIClient()
         settings.ENFORCE_ORG_MEMBERSHIP = False
 
-        setup_group('members')
-        setup_group('public')
+        setup_group("members")
+        setup_group("public")
         self.members = Group.objects.get(name="members")
         self.public = Group.objects.get(name="public")
         return super().setUp()
@@ -70,3 +71,7 @@ class BaseTestCase(TestCase):
     def remove_from_public(self):
         """Remove the user from the public group."""
         self.public.user_set.remove(self.user)
+
+    def login_required(self, res):
+        self.assertEqual(res.status_code, 302)
+        assert res.url.startswith(settings.LOGIN_URL), res.url

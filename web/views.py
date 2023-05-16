@@ -2,8 +2,8 @@ import os
 
 import requests
 from django.contrib import auth, messages
-from django.shortcuts import redirect, render, reverse
 from django.contrib.auth.decorators import permission_required
+from django.shortcuts import redirect, render, reverse
 from django.views.decorators.http import require_POST
 from rest_framework.authtoken.models import Token
 
@@ -89,6 +89,7 @@ def setup(request):
     )
 
     return render(request, "setup.html", context)
+
 
 @permission_required("authtoken.add_token")
 def api(request):

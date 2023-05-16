@@ -75,24 +75,49 @@ class TestEventList(WithEvents):
         """Test that we can post an event."""
         url = reverse("events:events-add")
         self.client.force_login(user=self.user)
+        self.add_to_members()
         res = self.client.post(url, data=self.get_event_data())
         self.assertEqual(res.status_code, 302)
         self.assertEqual(Event.objects.count(), 1)
+
+    def test_create_event_no_perms(self):
+        url = reverse("events:events-add")
+        self.client.force_login(user=self.user)
+        res = self.client.post(url, data=self.get_event_data())
+        self.login_required(res)
 
     def test_update_event(self):
         """Test that we can update an event."""
         event = self.create_event()
         url = reverse("events:events-update", kwargs={"pk": event.pk})
         self.client.force_login(user=self.user)
-        res = self.client.post(url, data=self.get_event_data())
+        self.add_to_members()
+        data = self.get_event_data()
+        data["description"] = "new description"
+        res = self.client.post(url, data=data)
         self.assertEqual(res.status_code, 302)
-        self.assertEqual(Event.objects.count(), 1)
+        self.assertEqual(Event.objects.get().description, "new description")
+
+    def test_update_event_no_perms(self):
+        event = self.create_event()
+        url = reverse("events:events-update", kwargs={"pk": event.pk})
+        self.client.force_login(user=self.user)
+        res = self.client.post(url, data={})
+        self.login_required(res)
+
+    def test_delete_event_no_perms(self):
+        event = self.create_event()
+        url = reverse("events:events-delete", kwargs={"pk": event.pk})
+        self.client.force_login(user=self.user)
+        res = self.client.post(url)
+        self.login_required(res)
 
     def test_delete_event(self):
         """Test that we can delete an event"""
         event = self.create_event()
         url = reverse("events:events-delete", kwargs={"pk": event.pk})
         self.client.force_login(user=self.user)
+        self.add_to_members()
         res = self.client.post(url)
         self.assertEqual(res.status_code, 302)
         self.assertEqual(Event.objects.count(), 0)

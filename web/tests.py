@@ -1,22 +1,21 @@
 from unittest.mock import Mock, patch
 
+from auditlog.models import LogEntry
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser, Group, Permission
 from django.contrib.contenttypes.models import ContentType
-
 from django.core.cache import cache
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from faker import Faker
 from rest_framework.authtoken.models import Token
 
-from auditlog.models import LogEntry
 from catalog.tests import BaseTestCase
 from services.models import Organization
 
-from .signals import user_logged_in_handler
 from .groups import setup_group
 from .middleware import CatalogMiddleware
+from .signals import user_logged_in_handler
 from .templatetags.helpers import (
     apply_format,
     checks_badge,
@@ -156,7 +155,7 @@ class TestAPIToken(BaseTestCase):
     def test_log_masked(self):
         self.login()
         Token.objects.create(user=self.user)
-        self.assertEquals(LogEntry.objects.first().object_repr[3:], '.' * 10)
+        self.assertEquals(LogEntry.objects.first().object_repr[3:], "." * 10)
 
 
 class TestMiddleware(TestCase):
@@ -275,10 +274,11 @@ class TestChecksBadge(TestCase):
         checks = [{"last": FakeResult("fail")}]
         self.assertEqual(checks_badge(checks), {"colour": "warning", "text": "Some checks failing"})
 
+
 class TestGroupAssignment(TestCase):
     def setUp(self):
-        setup_group('members')
-        setup_group('public')
+        setup_group("members")
+        setup_group("public")
         self.members = Group.objects.get(name="members")
         self.public = Group.objects.get(name="public")
         self.factory = RequestFactory()
@@ -288,7 +288,7 @@ class TestGroupAssignment(TestCase):
     def test_member_public_permissions(self):
         """Test that the public group has what looks like the right permissions"""
         for permission in self.public.permissions.all():
-            assert permission.codename.startswith('view'), permission.codename
+            assert permission.codename.startswith("view"), permission.codename
 
     @patch("web.signals.check_org_membership")
     def test_member_assigned(self, mock_check_org_membership):
@@ -315,7 +315,7 @@ class TestGroupAssignment(TestCase):
         self.req = self.factory.get("/services/")
         self.req.user = self.user
         mock_check_org_membership.return_value = False
-        
+
         with self.settings(ALLOW_PUBLIC_READ_ACCESS=True):
             user_logged_in_handler(sender=None, request=self.req, user=self.user)
         assert not self.members.user_set.filter(username=self.user.username).exists()
@@ -326,7 +326,7 @@ class TestGroupAssignment(TestCase):
         self.req = self.factory.get("/services/")
         self.req.user = self.user
         mock_check_org_membership.return_value = False
-        
+
         with self.settings(ALLOW_PUBLIC_READ_ACCESS=True):
             user_logged_in_handler(sender=None, request=self.req, user=self.user)
         assert self.public.user_set.filter(username=self.user.username).exists()

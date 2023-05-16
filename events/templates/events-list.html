@@ -61,6 +61,8 @@
         {% include "pagination.html" with objects=events %}
     {% endif %}
 
-    <a href="{% url 'events:events-add' %}">{% octicon 'plus' %} Add event</a>
+    {% if perms.events.add_event %}
+        <a href="{% url 'events:events-add' %}">{% octicon 'plus' %} Add event</a>
+    {% endif %}
 </div>
 {% endblock %}
