@@ -151,10 +151,10 @@ def results_detail(request, pk):
 class CheckViewSet(viewsets.ModelViewSet):
     queryset = Check.objects.all().order_by("-created")
     serializer_class = CheckSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.DjangoModelPermissions]
 
 
 class CheckResultViewSet(viewsets.ModelViewSet):
     queryset = CheckResult.objects.all().order_by("-created")
     serializer_class = CheckResultSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.DjangoModelPermissions]

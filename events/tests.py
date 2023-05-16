@@ -144,6 +144,7 @@ class TestEventList(WithEvents):
         """Test that we can create via the API"""
         url = reverse("events:api-events-list")
         self.api_login()
+        self.add_to_members()
         res = self.api_client.post(url, data=self.get_event_data())
         self.assertEqual(res.status_code, 201)
         self.assertEqual(Event.objects.count(), 1)
@@ -153,6 +154,7 @@ class TestEventList(WithEvents):
         event = self.create_event()
         url = reverse("events:api-events-detail", kwargs={"pk": event.pk})
         self.api_login()
+        self.add_to_members()
         res = self.api_client.patch(url, data={"name": "new name"})
         self.assertEqual(res.status_code, 200)
         self.assertEqual(Event.objects.get(pk=event.pk).name, "new name")
@@ -162,6 +164,7 @@ class TestEventList(WithEvents):
         event = self.create_event()
         url = reverse("events:api-events-detail", kwargs={"pk": event.pk})
         self.api_login()
+        self.add_to_members()
         res = self.api_client.delete(url)
         self.assertEqual(res.status_code, 204)
 

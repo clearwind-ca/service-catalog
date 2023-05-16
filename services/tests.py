@@ -550,6 +550,7 @@ class TestServiceForm(BaseTestCase):
 class TestAPISource(BaseTestCase):
     def setUp(self):
         super().setUp()
+        self.add_to_members()
         self.source_list = reverse("services:api-source-list")
 
     def test_source_list(self):
@@ -561,7 +562,6 @@ class TestAPISource(BaseTestCase):
     def test_source_unauth(self):
         """Test the source list API as an unauthed user."""
         response = self.api_client.get(self.source_list)
-        print(response.headers)
         self.assertEqual(response.status_code, 401, response.content)
 
     def test_source_delete(self):
@@ -607,7 +607,6 @@ class TestAPISource(BaseTestCase):
         """Test the source list API as POST"""
         self.source = create_source()
         self.api_login()
-        self.add_to_members()
         url = reverse("services:api-source-refresh", kwargs={"pk": self.source.pk})
         mock_fetch.get.return_value = sample_response()
         response = self.api_client.post(url)
@@ -617,6 +616,7 @@ class TestAPISource(BaseTestCase):
     def test_source_add_and_refresh_no_perms(self):
         self.source = create_source()
         self.api_login()
+        self.remove_from_members()
         url = reverse("services:api-source-refresh", kwargs={"pk": self.source.pk})
         response = self.api_client.post(url)
         self.login_required(response)
@@ -645,7 +645,6 @@ class TestAPISource(BaseTestCase):
         """Test the source validate API when it fails on a record."""
         self.source = create_source()
         self.api_login()
-        self.add_to_members()
         url = reverse("services:api-source-validate", kwargs={"pk": self.source.pk})
         # Will return multiple errors and one success.
         mock_fetch.get.return_value = mixed_responses()
@@ -659,6 +658,7 @@ class TestAPISource(BaseTestCase):
         assert "type" in second["data"][0]["message"]
 
     def test_validate_error_no_perms(self):
+        self.remove_from_members()
         self.source = create_source()
         self.api_login()
         url = reverse("services:api-source-validate", kwargs={"pk": self.source.pk})
@@ -669,6 +669,7 @@ class TestAPISource(BaseTestCase):
 class TestAPIService(BaseTestCase):
     def setUp(self):
         super().setUp()
+        self.add_to_members()
         self.service_list = reverse("services:api-service-list")
 
     def test_service_list(self):
@@ -702,8 +703,6 @@ class TestAPIService(BaseTestCase):
         self.assertEqual(response.status_code, 204, response.content)
         self.assertEqual(get_object_or_None(models.Service, pk=self.service.pk), None)
 
-
-class TestAPIService(BaseTestCase):
     def test_get_schema(self):
         self.url = reverse("services:api-schema-detail")
         response = self.api_client.get(self.url)

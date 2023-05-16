@@ -116,4 +116,4 @@ def events_list(request):
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all().order_by("-created")
     serializer_class = EventSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.DjangoModelPermissions]

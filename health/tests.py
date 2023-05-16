@@ -108,6 +108,7 @@ class TestAPICheck(BaseTestCase):
         super().setUp()
         self.source = create_source()
         self.service = create_service(self.source)
+        self.add_to_members()
 
     def test_add_check(self):
         """Tests adding in a check via the API"""
@@ -152,6 +153,10 @@ class TestAPICheck(BaseTestCase):
 
 
 class TestAPIResult(WithHealthCheck):
+    def setUp(self):
+        super().setUp()
+        self.add_to_members()
+
     def test_add_result(self):
         url = reverse("health:api-result-list")
         data = {
@@ -261,7 +266,7 @@ class TestSendFrequency(WithHealthCheck):
     def test_send_if_daily(self):
         """Test that it will send if daily"""
         self.health_check.frequency = "daily"
-        result = CheckResult.objects.create(health_check=self.health_check, service=self.service)
+        CheckResult.objects.create(health_check=self.health_check, service=self.service)
         assert not send.should_run(self.health_check, self.service)
         CheckResult.objects.update(created=timezone.now() - timedelta(days=1))
         assert send.should_run(self.health_check, self.service)
@@ -269,7 +274,7 @@ class TestSendFrequency(WithHealthCheck):
     def test_send_if_hourly(self):
         """Test that it will send if hourly"""
         self.health_check.frequency = "hourly"
-        result = CheckResult.objects.create(health_check=self.health_check, service=self.service)
+        CheckResult.objects.create(health_check=self.health_check, service=self.service)
         assert not send.should_run(self.health_check, self.service)
         CheckResult.objects.update(created=timezone.now() - timedelta(seconds=30 * 60))
         assert not send.should_run(self.health_check, self.service)
@@ -280,7 +285,7 @@ class TestSendFrequency(WithHealthCheck):
     def test_send_if_weekly(self):
         """Test that it will send if weekly"""
         self.health_check.frequency = "weekly"
-        result = CheckResult.objects.create(health_check=self.health_check, service=self.service)
+        CheckResult.objects.create(health_check=self.health_check, service=self.service)
         assert not send.should_run(self.health_check, self.service)
         CheckResult.objects.update(created=timezone.now() - timedelta(days=7))
         assert send.should_run(self.health_check, self.service)

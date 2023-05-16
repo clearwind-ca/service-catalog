@@ -274,7 +274,7 @@ def api_schema_detail(request):
 class SourceViewSet(viewsets.ModelViewSet):
     queryset = Source.objects.all().order_by("-created")
     serializer_class = SourceSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.DjangoModelPermissions]
 
 
 class ServiceViewSet(
@@ -285,4 +285,4 @@ class ServiceViewSet(
 ):
     queryset = Service.objects.all().order_by("-created")
     serializer_class = ServiceSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.DjangoModelPermissions]

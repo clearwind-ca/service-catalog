@@ -72,4 +72,4 @@ def log_details(request, pk):
 class SystemLogViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = LogEntry.objects.all().order_by("-timestamp")
     serializer_class = LogEntrySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.DjangoModelPermissions]
