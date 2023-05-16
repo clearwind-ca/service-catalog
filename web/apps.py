@@ -7,11 +7,8 @@ class WebConfig(AppConfig):
 
     def ready(self):
         from auditlog.registry import auditlog
-        from django.contrib.auth.models import User
 
         import web.signals  # noqa: F401
-
-        auditlog.register(User)
 
         from rest_framework.authtoken.models import Token
 
