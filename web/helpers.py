@@ -42,6 +42,7 @@ def site_context(request):
         "breadcrumbs": True,
         "settings": {
             "timezone": settings.TIME_ZONE,
+            "public": settings.ALLOW_PUBLIC_READ_ACCESS,
         },
         "member": "members" in groups,
         "public": "public" in groups,

@@ -34,11 +34,7 @@ class CatalogMiddleware(AuthenticationMiddleware):
 
         user = request.user
 
-        # If a user is authenticated, no login_required.
-        if user.is_authenticated:
-            return False
-
-        # If the URL is in an IGNORE_PATH, no login_required.
+        # If the URL is in an IGNORE_PATH, no extra login_required.
         path = request.path
         if any(url.match(path) for url in IGNORE_PATHS):
             return False
@@ -120,11 +116,17 @@ class CatalogMiddleware(AuthenticationMiddleware):
         # Set a cache key for 5 minutes.
         cache.set(key, valid, 60 * 5)
         logger.error(f"Check-Orgs: Cache set for {key} with {valid}")
+        
         return valid
 
     def process_request(self, request):
+        # Note to self: returning None mean its all good and can continue.
         request._is_drf = False
         login_required = self._login_required(request)
+
+        # Super users have super powers.
+        if request.user.is_superuser:
+            return None
 
         # If the user is anonymous, but a login is not required, they are good.
         if request.user.is_anonymous and not login_required:
@@ -136,9 +138,18 @@ class CatalogMiddleware(AuthenticationMiddleware):
 
         # If the user is authenticated, and a login is required, then we go check the orgs.
         if request.user.is_authenticated and login_required:
-            if self.check_orgs(request):
-                return None
-
+            # If this didn't pass, then we need to check a default base permission.
+            if settings.ALLOW_PUBLIC_READ_ACCESS:
+                # This is the base we need if this is set. 
+                if request.user.has_perm("services.view_service"):
+                    return None
+        
+            # Otherwise, check org membership.
+            else:
+                # This is the base we need if this is not set.
+                if self.check_orgs(request):
+                    return None
+            
         # This is a DRF request.
         if request._is_drf:
             # Return a non-HTML error response.

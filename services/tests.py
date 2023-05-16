@@ -317,7 +317,7 @@ class TestDelete(BaseTestCase):
         """Test the delete source view."""
         self.client.force_login(self.user)
         self.add_to_members()
-        response = self.client.post(self.url)    
+        response = self.client.post(self.url)
         self.assertEqual(self.get_message(response).level, messages.INFO)
         assert not models.Source.objects.filter(slug=self.source.slug).exists()
 
@@ -357,7 +357,7 @@ class TestAdd(BaseTestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "source-add.html")
-    
+
     def test_get_no_perms(self):
         """Test the source add view."""
         self.client.force_login(self.user)
@@ -664,6 +664,7 @@ class TestAPISource(BaseTestCase):
         url = reverse("services:api-source-validate", kwargs={"pk": self.source.pk})
         response = self.api_client.post(url)
         self.login_required(response)
+
 
 class TestAPIService(BaseTestCase):
     def setUp(self):

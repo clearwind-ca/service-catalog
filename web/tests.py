@@ -165,6 +165,10 @@ class TestMiddleware(TestCase):
         self.user = get_user_model().objects.create_user(username="andy")
         self.check_orgs = CatalogMiddleware(Mock()).check_orgs
         self.process_request = CatalogMiddleware(Mock()).process_request
+        setup_group("members")
+        setup_group("public")
+        self.members = Group.objects.get(name="members")
+        self.public = Group.objects.get(name="public")
         super().setUp()
 
     def tearDown(self):
@@ -236,18 +240,32 @@ class TestMiddleware(TestCase):
     def test_login_not_required_user(self):
         self.req = self.factory.get("/static/site.js")
         self.req.user = self.user
-        self.assertEqual(self.process_request(self.req), None)
+        with self.settings(ALLOW_PUBLIC_READ_ACCESS=False):
+            self.assertEqual(self.process_request(self.req), None)
 
     def test_login_required_user(self):
         self.req = self.factory.get("/services/")
         self.req.user = self.user
-        self.assertEqual(self.process_request(self.req), None)
+        with self.settings(ALLOW_PUBLIC_READ_ACCESS=False, ENFORCE_ORG_MEMBERSHIP=False):
+            self.assertEqual(self.process_request(self.req), None)
 
     def test_login_required_anon(self):
         self.req = self.factory.get("/services/")
         self.req.user = AnonymousUser()
         assert self.process_request(self.req)
 
+    def test_login_required_read_access(self):
+        self.req = self.factory.get("/services/")
+        self.req.user = self.user
+        self.public.user_set.add(self.user)
+        with self.settings(ALLOW_PUBLIC_READ_ACCESS=True, ENFORCE_ORG_MEMBERSHIP=False):
+            self.assertEqual(self.process_request(self.req), None)
+
+    def test_is_superuser(self):
+        self.req = self.factory.get("/services/")
+        self.user.is_superuser = True
+        self.req.user = self.user
+        self.assertEqual(self.process_request(self.req), None)
 
 class FakeResult:
     def __init__(self, result):
@@ -350,3 +368,8 @@ class TestGroupAssignment(TestCase):
             user_logged_in_handler(sender=None, request=self.req, user=self.user)
             assert not self.members.user_set.filter(username=self.user.username).exists()
             assert not self.public.user_set.filter(username=self.user.username).exists()
+
+    @patch("web.signals.check_org_membership")
+    def test_member_changes_mind(self, mock_check_org_membership):
+        self.req = self.factory.get("/services/")
+        self.req.user = self.user

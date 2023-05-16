@@ -6,6 +6,7 @@ import django_filters
 from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.decorators import permission_required
 from django.db.models import CharField, Value
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -25,7 +26,6 @@ from .models import Organization, Service, Source
 from .serializers import ServiceSerializer, SourceSerializer
 from .tasks import refresh_orgs_from_github
 
-from django.contrib.auth.decorators import permission_required
 
 class ServiceFilter(django_filters.FilterSet):
     active = django_filters.TypedChoiceFilter(choices=YES_NO_CHOICES, coerce=strtobool)
@@ -158,6 +158,7 @@ def refresh_results(results, source, request):
 
     messages.info(request, f"Refreshed source `{source.slug}` successfully.")
 
+
 @permission_required("services.add_source")
 def source_add(request):
     if request.method == "GET":
@@ -196,6 +197,7 @@ def source_delete(request, slug):
     source.delete()
     return redirect("services:source-list")
 
+
 @permission_required("services.change_source")
 def source_update(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
@@ -209,6 +211,7 @@ def source_update(request, slug):
         form = SourceForm(instance=source)
 
     return render(request, "source-update.html", context={"form": form, "source": source})
+
 
 @permission_required("services.change_source")
 def source_validate(request, slug):

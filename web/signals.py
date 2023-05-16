@@ -7,7 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from gh.user import check_org_membership
 from services.models import Organization
-
+from django.contrib.auth import logout
 logger = logging.getLogger(__name__)
 
 

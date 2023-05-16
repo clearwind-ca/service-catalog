@@ -81,8 +81,11 @@
         </div>
     </body>
     <footer>
-        <div class="container-lg py-5 text-light fw-lighter" style="font-size: small;">
-            An open source project by <a href="https://clearwind.ca">Clearwind</a> and <a href="https://github.com/clearwind-ca/service-catalog">contributors</a> on {% octicon "mark-github" %}
+        <div class="container-lg py-5 text-light fw-lighter">
+            {% if settings.public %}
+                <p><span class="badge bg-danger">Read only public access is enabled</span></p>
+            {% endif %}
+            <p>An open source project by <a href="https://clearwind.ca">Clearwind</a> and <a href="https://github.com/clearwind-ca/service-catalog">contributors</a> on {% octicon "mark-github" %}</p>
           </div>
     </footer>
 </html>

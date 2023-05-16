@@ -39,6 +39,7 @@ The following environment variables provide access to site functionality:
 
 |Variable|Effect|Required|Default if not set|
 |-|-|-|-|
+|ALLOW_PUBLIC_READ_ACCESS|Allows members outside the organisation to have read only access. See [design-notes](design-notes)|No|False|
 |ALLOWED_HOSTS|Override the Django `ALLOWED_HOSTS` setting.|Yes, for browser access if not in `DEBUG` mode.|Empty|
 |CATALOG_ENV|The path to a file of enviroment variables to load. Environment variables loaded from this file will override variables loaded elsewhere.|No|(see notes below)|
 |CELERY_BROKER_URL|The celery broker backend to connect to|No|`redis://localhost:6379/0`|
