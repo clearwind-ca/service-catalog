@@ -8,7 +8,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from services.models import Organization
-
+from web.groups import setup_group
+from django.contrib.auth.models import Group
 fake = Faker("en_US")
 
 
@@ -23,6 +24,11 @@ class BaseTestCase(TestCase):
         self.org = Organization.objects.create(name=fake.company())
         self.api_client = APIClient()
         settings.ENFORCE_ORG_MEMBERSHIP = False
+
+        setup_group('members')
+        setup_group('public')
+        self.members = Group.objects.get(name="members")
+        self.public = Group.objects.get(name="public")
         return super().setUp()
 
     def tearDown(self) -> None:
@@ -48,3 +54,19 @@ class BaseTestCase(TestCase):
     def remove_api_token(self):
         """Remove the API token from the user."""
         self.token.delete()
+
+    def add_to_members(self):
+        """Add the user to the members group."""
+        self.members.user_set.add(self.user)
+
+    def add_to_public(self):
+        """Add the user to the public group."""
+        self.public.user_set.add(self.user)
+
+    def remove_from_members(self):
+        """Remove the user from the members group."""
+        self.members.user_set.remove(self.user)
+
+    def remove_from_public(self):
+        """Remove the user from the public group."""
+        self.public.user_set.remove(self.user)

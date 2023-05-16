@@ -81,7 +81,7 @@
     </table>
     {% endif %}
 
-    {% if request.user.is_authenticated %}
+    {% if request.user.is_authenticated and member %}
         <h4>Review GitHub app details</h4>
         {% for installation, values in app_details.items %}
             <p>Installation: <code>{{ installation }}</code></p>

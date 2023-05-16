@@ -3,6 +3,7 @@ import os
 import requests
 from django.contrib import auth, messages
 from django.shortcuts import redirect, render, reverse
+from django.contrib.auth.decorators import permission_required
 from django.views.decorators.http import require_POST
 from rest_framework.authtoken.models import Token
 
@@ -89,7 +90,7 @@ def setup(request):
 
     return render(request, "setup.html", context)
 
-
+@permission_required("authtoken.add_token")
 def api(request):
     token = get_object_or_None(Token, user=request.user)
     if request.method == "GET":
@@ -97,6 +98,7 @@ def api(request):
 
 
 @require_POST
+@permission_required("authtoken.add_token")
 def api_create(request):
     if Token.objects.filter(user=request.user).exists():
         messages.add_message(request, messages.ERROR, "Token already exists")
@@ -112,6 +114,7 @@ def api_create(request):
 
 
 @require_POST
+@permission_required("authtoken.add_token")
 def api_delete(request):
     Token.objects.filter(user=request.user).delete()
     messages.add_message(request, messages.SUCCESS, "Deleted API token.")

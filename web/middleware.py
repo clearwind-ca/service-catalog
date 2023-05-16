@@ -130,7 +130,7 @@ class CatalogMiddleware(AuthenticationMiddleware):
         if request.user.is_anonymous and not login_required:
             return None  # Good, user can continue.
 
-        # If user is authenticated, but we still don't need a login, they are good.
+        # If the user is authenticated, but we still don't need a login, they are good.
         if request.user.is_authenticated and not login_required:
             return None  # Good, user can continue.
 

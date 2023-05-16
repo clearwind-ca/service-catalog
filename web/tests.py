@@ -1,16 +1,21 @@
 from unittest.mock import Mock, patch
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.models import AnonymousUser, Group, Permission
+from django.contrib.contenttypes.models import ContentType
+
 from django.core.cache import cache
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from faker import Faker
 from rest_framework.authtoken.models import Token
 
+from auditlog.models import LogEntry
 from catalog.tests import BaseTestCase
 from services.models import Organization
 
+from .signals import user_logged_in_handler
+from .groups import setup_group
 from .middleware import CatalogMiddleware
 from .templatetags.helpers import (
     apply_format,
@@ -91,6 +96,7 @@ class TestAPIToken(BaseTestCase):
     def setUp(self):
         super().setUp()
         Token.objects.all().delete()
+        LogEntry.objects.all().delete()
 
     def test_api_token(self):
         """Test the API token pages require login."""
@@ -106,25 +112,51 @@ class TestAPIToken(BaseTestCase):
     def test_api_token(self):
         """Test the API token page loads."""
         self.login()
+        self.add_to_members()
         response = self.client.get(reverse("web:api"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "api.html")
 
+    def test_api_token_no_perms(self):
+        """Test the API token page loads."""
+        self.login()
+        response = self.client.get(reverse("web:api"))
+        self.assertEqual(response.status_code, 302)
+
     def test_api_token_create(self):
         """Test that hitting the API token endpoint creates a token."""
         self.login()
+        self.add_to_members()
         response = self.client.post(reverse("web:api-create"))
         token = Token.objects.get(user=self.user)
         self.assertContains(response, token.key)
         self.assertEquals(Token.objects.filter(user=self.user).exists(), True)
 
+    def test_api_token_create_no_perms(self):
+        """Test the API token page loads."""
+        self.login()
+        response = self.client.post(reverse("web:api-create"))
+        self.assertEqual(response.status_code, 302)
+
+    def test_api_token_delete_no_perms(self):
+        """Test the API token page loads."""
+        self.login()
+        response = self.client.post(reverse("web:api-delete"))
+        self.assertEqual(response.status_code, 302)
+
     def test_api_token_delete(self):
         """Test that hitting the API token endpoint deletes a token."""
         self.login()
+        self.add_to_members()
         Token.objects.create(user=self.user)
         assert Token.objects.filter(user=self.user).exists()
         self.client.post(reverse("web:api-delete"))
         self.assertEquals(Token.objects.filter(user=self.user).exists(), False)
+
+    def test_log_masked(self):
+        self.login()
+        Token.objects.create(user=self.user)
+        self.assertEquals(LogEntry.objects.first().object_repr[3:], '.' * 10)
 
 
 class TestMiddleware(TestCase):
@@ -242,3 +274,79 @@ class TestChecksBadge(TestCase):
     def test_some_checks_fail(self):
         checks = [{"last": FakeResult("fail")}]
         self.assertEqual(checks_badge(checks), {"colour": "warning", "text": "Some checks failing"})
+
+class TestGroupAssignment(TestCase):
+    def setUp(self):
+        setup_group('members')
+        setup_group('public')
+        self.members = Group.objects.get(name="members")
+        self.public = Group.objects.get(name="public")
+        self.factory = RequestFactory()
+        self.user = get_user_model().objects.create_user(username="andy")
+        Organization.objects.create(name="foo")
+
+    def test_member_public_permissions(self):
+        """Test that the public group has what looks like the right permissions"""
+        for permission in self.public.permissions.all():
+            assert permission.codename.startswith('view'), permission.codename
+
+    @patch("web.signals.check_org_membership")
+    def test_member_assigned(self, mock_check_org_membership):
+        self.req = self.factory.get("/services/")
+        self.req.user = self.user
+        mock_check_org_membership.return_value = True
+
+        with self.settings(ALLOW_PUBLIC_READ_ACCESS=False):
+            user_logged_in_handler(sender=None, request=self.req, user=self.user)
+            assert self.members.user_set.filter(username=self.user.username).exists()
+
+    @patch("web.signals.check_org_membership")
+    def test_not_public_assigned(self, mock_check_org_membership):
+        self.req = self.factory.get("/services/")
+        self.req.user = self.user
+        mock_check_org_membership.return_value = False
+        with self.settings(ALLOW_PUBLIC_READ_ACCESS=False):
+            user_logged_in_handler(sender=None, request=self.req, user=self.user)
+            assert not self.members.user_set.filter(username=self.user.username).exists()
+            assert not self.public.user_set.filter(username=self.user.username).exists()
+
+    @patch("web.signals.check_org_membership")
+    def test_public_assigned(self, mock_check_org_membership):
+        self.req = self.factory.get("/services/")
+        self.req.user = self.user
+        mock_check_org_membership.return_value = False
+        
+        with self.settings(ALLOW_PUBLIC_READ_ACCESS=True):
+            user_logged_in_handler(sender=None, request=self.req, user=self.user)
+        assert not self.members.user_set.filter(username=self.user.username).exists()
+        assert self.public.user_set.filter(username=self.user.username).exists()
+
+    @patch("web.signals.check_org_membership")
+    def test_public_changes_mind(self, mock_check_org_membership):
+        self.req = self.factory.get("/services/")
+        self.req.user = self.user
+        mock_check_org_membership.return_value = False
+        
+        with self.settings(ALLOW_PUBLIC_READ_ACCESS=True):
+            user_logged_in_handler(sender=None, request=self.req, user=self.user)
+        assert self.public.user_set.filter(username=self.user.username).exists()
+
+        with self.settings(ALLOW_PUBLIC_READ_ACCESS=False):
+            user_logged_in_handler(sender=None, request=self.req, user=self.user)
+        # Assert they are removed from public.
+        assert not self.public.user_set.filter(username=self.user.username).exists()
+
+    @patch("web.signals.check_org_membership")
+    def test_member_changes_mind(self, mock_check_org_membership):
+        self.req = self.factory.get("/services/")
+        self.req.user = self.user
+
+        with self.settings(ALLOW_PUBLIC_READ_ACCESS=False):
+            mock_check_org_membership.return_value = True
+            user_logged_in_handler(sender=None, request=self.req, user=self.user)
+            assert self.members.user_set.filter(username=self.user.username).exists()
+
+            mock_check_org_membership.return_value = False
+            user_logged_in_handler(sender=None, request=self.req, user=self.user)
+            assert not self.members.user_set.filter(username=self.user.username).exists()
+            assert not self.public.user_set.filter(username=self.user.username).exists()

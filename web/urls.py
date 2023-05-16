@@ -12,7 +12,7 @@ urlpatterns = [
     path("api/delete/", views.api_delete, name="api-delete"),
     path("setup/", views.setup, name="setup"),
     path("logout/", views.logout, name="logout"),
-    path("login-problem/", views.login_problem, name="login-problem"),
+    path("login/", views.login_problem, name="login-problem"),
 ]
 
 handler403 = "web.views.handler403"
