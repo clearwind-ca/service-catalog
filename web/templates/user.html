@@ -12,7 +12,7 @@
     {% if member or public %}
     <li><hr></li>
     <li>
-        <span class="dropdown-item">{% octicon "group" %} {% if member %}Member{% endif %}{% if public %}Public{% endif %}</span>
+        <span class="dropdown-item">{% octicon "group" %} {% if member %}Editor{% endif %}{% if public %}Read only{% endif %} permission</span>
     </li>
     {% endif %}
 </ul>
