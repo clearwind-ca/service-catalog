@@ -54,7 +54,6 @@ def send_to_github(check_slug, service_slug):
         service=service,
     )
     try:
-        # Should this use the cron user?
         send.dispatch(result)
     except (SendError, NoRepository) as error:
         # Fatal error, they are all going to fail.

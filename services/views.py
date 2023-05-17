@@ -217,7 +217,7 @@ def source_update(request, slug):
 def source_validate(request, slug):
     source = get_object_or_404(slug=slug, klass=Source)
     try:
-        results = fetch.get(request.user, source)
+        results = fetch.get(source)
     except (FetchError) as error:
         messages.error(request, error.message)
         return redirect("services:source-detail", slug=source.slug)

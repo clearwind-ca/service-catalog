@@ -146,6 +146,8 @@ class Organization(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    raw_data = models.JSONField(blank=True, null=True)
+
     def __str__(self):
         return self.name
 

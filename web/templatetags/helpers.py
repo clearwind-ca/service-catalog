@@ -16,7 +16,7 @@ import json
 @register.filter(name="priority_as_colour")
 def priority_as_colour(value):
     levels = {
-        1: "warning",
+        1: "primary",
         2: "primary",
         3: "primary",
         4: "secondary",
@@ -73,7 +73,7 @@ def checks_badge(checks):
             break
 
     if not_run:
-        result["colour"] = "info"
+        result["colour"] = "secondary"
         result["text"] = "No health checks run"
     elif all_passing:
         result["text"] = "All health checks pass"

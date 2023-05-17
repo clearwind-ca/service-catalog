@@ -6,7 +6,7 @@ from . import views
 app_name = "web"  # pylint: disable=invalid-name
 
 urlpatterns = [
-    path("", TemplateView.as_view(template_name="home.html"), name="home"),
+    path("", views.home, name="home"),
     path("api/", views.api, name="api"),
     path("api/create/", views.api_create, name="api-create"),
     path("api/delete/", views.api_delete, name="api-delete"),

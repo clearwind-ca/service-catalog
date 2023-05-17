@@ -1,12 +1,36 @@
-{% extends "base-one-column.html" %}
-{% block content %}
+{% extends "base-two-column.html" %}
 {% load octicons %}
+{% load helpers %}
+
+{% block main %}
 <h2>👋 Hi there</h2>
-<p>This is a tool to track services across your organization.
-    {% if not user.is_authenticated %}
-        Before you can use the service catalog you <i>must login</i>.
-    {% endif %}
-</p>
-<p>For more information on the service catalog check out <a href="https://github.com/clearwind-ca/service-catalog">the repository on {% octicon "mark-github" %} GitHub</a> or <a href="https://github.com/clearwind-ca/service-catalog/blob/main/docs/getting-started.md">the documentation to get started</a>.</p>
-<p class="form-text">The service catalog is written by <a href="https://clearwind.ca">Clearwind</a> and its contributors.</p>
+{% if not user.is_authenticated %}
+    <p>Before you can use the service catalog you <i>must login</i>.</p>
+{% else %}
+    <p>This is a tool to track services across your organization.</p>
+{% endif %}
+    <p>For more information on the service catalog check out <a href="https://github.com/clearwind-ca/service-catalog">the repository on {% octicon "mark-github" %} GitHub</a> or <a href="https://github.com/clearwind-ca/service-catalog/blob/main/docs/getting-started.md">the documentation to get started</a>.</p>
 {% endblock %}
+
+{% block sidebar %}
+    {% if user.is_authenticated %}
+        {% if orgs %}
+            {% for org in orgs %}
+                <div class="pb-3">
+                    <h5 class="text-muted border-bottom">{{ org.raw_data.name }}</h5>
+                    <p>
+                        <img src="{{ org.raw_data.avatar_url }}" class="rounded float-end" width="100" alt="{{ org.raw_data.name }}">
+                        {{ org.raw_data.description|markdown }}
+                    </p>
+                    <p>This organization has {{ org.sources.count }} repositories with the <a href="{% url 'services:service-list' %}">service catalog installed</a>.</p>
+                    <p><a href="{{ org.raw_data.html_url }}">View on GitHub {% octicon "link-external" %}</a></p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="pb-3">
+                <h5 class="text-muted border-bottom">Setup</h5>
+                <p>Looks like there are no orgs setup yet, check out the <a href="{% url 'web:setup' %}">setup page</a> for how to do that.</p>
+            </div>
+        {% endif %}
+    {% endif %}
+{% endblock %} 

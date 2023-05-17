@@ -21,7 +21,9 @@ See `/setup/` on your Service Catalog to see what is currently included.
 
 The long term goal is to keep the permissions needed by the GitHub App to the minimum needed to satifsy the needs of the project and cope if you'd like to limit permissions, there are solutions. Currently they include:
 
-* `Write contents to repo`: because the health checks run GitHub Actions. If you remove this permission, for example just setting `Read access` then you will have to find another way to trigger the Actions in the health check repository. This could be done through cron jobs or Actions using the `cron` syntax.
+* `contents` 👉 `write`: because the health checks run GitHub Actions. If you remove this permission, for example just setting `read` you will have to find another way to trigger the Actions in the health check repository. This could be done through cron jobs or Actions using the `cron` syntax.
+
+* `organization_administration` 👉 `read`: so that the Catalog can find all the places that the app is installed. If you remove this, you can add in each repo individually.
 
 Events:
 
