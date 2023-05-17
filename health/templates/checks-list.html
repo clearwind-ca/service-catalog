@@ -54,8 +54,16 @@
         {% include "pagination.html" with objects=Checks %}
     {% endif %}
 
+
     {% if perms.health.add_check %}
-        <a href="{% url 'health:checks-add' %}">{% octicon 'plus' %} Add health check</a>
+        <p><a href="{% url 'health:checks-add' %}">{% octicon 'plus' %} Add health check</a></p>
+    {% endif %}
+
+    <hr>
+    {% if repo %}
+        <p class="form-text">The repository called by the health check is: <code>{{ repo }}</code>.</p>
+    {% else %}
+        <p class="form-text"><b>No value is present for <code>GITHUB_CHECKS_REPOSITORY</code> so health checks will not work.</b></p>
     {% endif %}
 </div>
 {% endblock %}
