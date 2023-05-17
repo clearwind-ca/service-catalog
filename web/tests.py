@@ -287,7 +287,9 @@ class TestChecksBadge(TestCase):
 
     def test_all_no_checks_pass(self):
         checks = []
-        self.assertEqual(checks_badge(checks), {"colour": "secondary", "text": "No health checks run"})
+        self.assertEqual(
+            checks_badge(checks), {"colour": "secondary", "text": "No health checks run"}
+        )
 
     def test_some_checks_fail(self):
         checks = [{"last": FakeResult("fail")}]

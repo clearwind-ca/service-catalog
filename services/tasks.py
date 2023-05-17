@@ -1,3 +1,5 @@
+import logging
+
 from catalog.celery import app
 from catalog.errors import FetchError
 from gh import fetch
@@ -5,8 +7,8 @@ from services import forms
 from services.models import Organization, Source
 from web.shortcuts import get_object_or_None
 
-import logging
 logger = logging.getLogger(__name__)
+
 
 @app.task
 def refresh_source_from_github(source_slug):
@@ -42,7 +44,7 @@ def refresh_org_from_github(org_slug):
     except FetchError as error:
         return False
 
-    # Results is giving the same repository multiple times, not sure why yet. 
+    # Results is giving the same repository multiple times, not sure why yet.
     # So we'll dedupe.
     dedupe = set()
     for repo in results:
@@ -67,7 +69,7 @@ def refresh_org_from_github(org_slug):
 
 
 @app.task
-def refresh_sources_from_orgs(): 
+def refresh_sources_from_orgs():
     logger.info(f"Task: refreshing sources from orgs")
     for org in Organization.objects.filter(active=True, auto_add_sources=True):
         refresh_org_from_github.delay(org.name)
