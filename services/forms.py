@@ -114,9 +114,7 @@ class ServiceForm(forms.Form, BaseForm):
                         value = True
                     setattr(service, key, value)
                     updated = True
-            if service.raw_data != data:
-                service.raw_data = data
-                updated = True
+            service.raw_data = data
             if updated:
                 service.save()
                 logs.append([f"Updated service: `{service}`.", messages.INFO])

@@ -27,13 +27,22 @@ def create_source():
 
 def create_service(source):
     """Create a service."""
+    name = fake.user_name()
+    description = fake.text()
     return models.Service.objects.create(
-        name=fake.user_name(),
-        description=fake.text(),
+        name=name,
+        description=description,
         type="application",
         source=source,
         meta={"foo": "bar"},
         events=["deployments", "releases"],
+        raw_data={
+            "name": name,
+            "description": description,
+            "type": "application",
+            "meta": {"foo": "bar"},
+            "events": ["deployments", "releases"],
+        },
     )
 
 
