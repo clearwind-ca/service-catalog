@@ -48,6 +48,7 @@ def checks(request):
     context.update(
         {
             "frequency": dict(FREQUENCY_CHOICES).keys(),
+            "repo": settings.GITHUB_CHECK_REPOSITORY,
         }
     )
     return render(request, "checks-list.html", context)

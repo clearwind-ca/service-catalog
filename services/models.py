@@ -46,6 +46,9 @@ class Service(models.Model):
 
     events = models.JSONField(blank=True, null=True)
 
+    # Just store the raw file too.
+    raw_data = models.JSONField(blank=True, null=True)
+
     def logs(self):
         return LogEntry.objects.get_for_object(self)
 

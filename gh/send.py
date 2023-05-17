@@ -28,6 +28,7 @@ def dispatch(result):
             "result": CheckResultSerializer(result).data,
             "service": ServiceSerializer(result.service).data,
             "source": SourceSerializer(result.service.source).data,
+            "catalog.json": result.service.raw_data,
         }
     )
     # GitHub is assuming that the data is a string when you access the payload
