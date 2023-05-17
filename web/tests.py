@@ -2,8 +2,7 @@ from unittest.mock import Mock, patch
 
 from auditlog.models import LogEntry
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser, Group, Permission
-from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import AnonymousUser, Group
 from django.core.cache import cache
 from django.test import RequestFactory, TestCase
 from django.urls import reverse

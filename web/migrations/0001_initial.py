@@ -1,5 +1,3 @@
-import logging
-
 from django.db import migrations
 
 from web.groups import setup_group
