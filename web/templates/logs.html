@@ -1,0 +1,10 @@
+{% load octicons %}
+<div class="pb-3">
+    <h5 class="text-muted border-bottom">Logs</h5>
+    {% if log %}
+        <p>Last entry: {{ log.get_action_display|capfirst }} &bull; {% include "since.html" with since=log.timestamp %}</p>
+        <p><a href="{% url 'logs:log-list' %}?pk={{ pk }}&type={{ type }}">View more logs</a></p>
+    {% else %}
+        <p>{% octicon "deny" %} {{ no_message }}.</p>
+    {% endif %}
+</div>
