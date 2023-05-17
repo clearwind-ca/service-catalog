@@ -10,6 +10,13 @@ May 15th 2023: This is approaching a first stable release, core parts of it have
 
 All the information you need to know is in [the documentation](docs).
 
+## Try it out
+
+There's a demo site and organisation available for you to try out.
+
+* Demo site: https://catalog.clearwind.ca 👈 you will only have read-only access.
+* Demo organisation: https://github.com/burnt-tomatoes 👈 a public GitHub org with some public and private repositories.
+
 ---
 
 Service Catalog is under the [MIT License](LICENSE.md) and originally built by [Clearwind Consulting](https://clearwind.ca).
