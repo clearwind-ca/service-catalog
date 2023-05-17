@@ -78,10 +78,10 @@
     {% if sources %}
         {% include "pagination.html" with objects=sources %}
     {% endif %}
-    {% if perms.source.add_source %}
+    {% if perms.services.add_source %}
     <p><a href="{% url 'services:source-add' %}">{% octicon 'plus' %} Add in a new source</a></p>
     {% endif %}
-    {% if perms.source.change_source %}
+    {% if perms.services.change_source %}
     <hr>
     <p>Organisations and sources are automatically pulled from GitHub at intervals. You can trigger these events manually if you'd like 👇</p>
     <form action="{% url 'services:org-refresh' %}" method="post">

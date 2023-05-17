@@ -26,7 +26,7 @@
 {% endblock %}
 
 {% block modals %}
-    <div class="modal " tabindex="-1" id="delete-modal">
+    <div class="modal fade" tabindex="-1" id="delete-modal">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -51,20 +51,14 @@
 
 {% block sidebar %}
     <div class="pb-3">
-        <h6 class="text-muted border-bottom">Info</h6>
+        <h5 class="text-muted border-bottom">Info</h5>
         <p>Primary key: <code>{{ event.pk }}</code></p>
     </div>
+
+    {% include "logs.html" with no_message="No logs found for this event."  pk=event.pk type="event"  %}
+    
     <div class="pb-3">
-        <h6 class="text-muted border-bottom">Logs</h6>
-        {% if log %}
-            <p>{{ log.get_action_display|capfirst }} {% include "since.html" with since=log.timestamp %}</p>
-            <p><a href="{% url 'logs:log-list' %}?pk={{ event.pk }}&type=event">View more</a></p>
-        {% else %}
-            <p>{% octicon "deny" %} No logs found for this event.</p>
-        {% endif %}
-    </div>
-    <div class="pb-3">
-        <h6 class="text-muted border-bottom">Admin</h6>
+        <h5 class="text-muted border-bottom">Admin</h5>
         <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete this event</a></p>
     </div>
 {% endblock %}

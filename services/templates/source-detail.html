@@ -31,24 +31,16 @@
 
 {% block sidebar %}
     <div class="pb-3">
-        <h6 class="text-muted border-bottom">Info</h6>
+        <h5 class="text-muted border-bottom">Info</h5>
         <p>Slug: <code>{{ source.slug }}</code></p>
-        <p>Repository: <code data-bs-toggle="tooltip" data-bs-title="{{ source.url }}">{{ source.url|truncatechars:20 }}</code> <a href="{{ source.url }}">{% octicon "link-external" %}</a></p>
+        <p>Repository: <a href="{{ source.url }}">{{ source.url|truncatechars:20 }} {% octicon "link-external" %}</a></p>
     </div>
 
-    <div class="pb-3">
-        <h6 class="text-muted border-bottom">Logs</h6>
-        {% if log %}
-            <p>{{ log.get_action_display|capfirst }} {% include "since.html" with since=log.timestamp %}</p>
-            <p><a href="{% url 'logs:log-list' %}?slug={{ source.slug }}&type=source">View more</a></p>
-        {% else %}
-            {% include "blankslate.html" with message="No logs found for this source" %}.</p>
-        {% endif %}
-    </div>
+    {% include "logs.html" with no_message="No logs found for this source." pk=source.pk type="source" %}
 
-    {% if perms.service.change_source %}
+    {% if perms.services.change_source %}
         <div>
-            <h6 class="text-muted border-bottom">Admin</h6>
+            <h5 class="text-muted border-bottom">Admin</h5>
             <p><a href="{% url 'services:source-refresh' source.slug %}">Refresh this repository</a></p>
             <p><a href="{% url 'services:source-update' source.slug %}">Edit this source</a></p>
             <p><a href="{% url 'services:source-validate' source.slug %}">Validate the JSON</a></p>
@@ -58,7 +50,7 @@
 {% endblock %}
 
 {% block modals %}
-    <div class="modal " tabindex="-1" id="delete-modal">
+    <div class="modal fade" tabindex="-1" id="delete-modal">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">

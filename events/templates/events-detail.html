@@ -58,26 +58,18 @@
 
 {% block sidebar %}
 <div class="pb-3">
-    <h6 class="text-muted border-bottom">Info</h6>
+    <h5 class="text-muted border-bottom">Info</h5>
     <p>Primary key: <code>{{ event.pk }}</code></p>
     {% if event.external_id %}
     <p>External id: <code>{{ event.external_id }}</code></p>
     {% endif %}
 </div>
 
-<div class="pb-3">
-    <h6 class="text-muted border-bottom">Logs</h6>
-    {% if log %}
-        <p>{{ log.get_action_display|capfirst }} {% include "since.html" with since=log.timestamp %}</p>
-        <p><a href="{% url 'logs:log-list' %}?pk={{ event.pk }}&type=event">View more</a></p>
-    {% else %}
-        <p>{% octicon "deny" %} No logs found for this event.</p>
-    {% endif %}
-</div>
+{% include "logs.html" with no_message="No logs found for this event." pk=event.pk type="event" %}
 
 {% if perms.events.change_event %}
     <div>
-        <h6 class="text-muted border-bottom">Admin</h6>
+        <h5 class="text-muted border-bottom">Admin</h5>
         <p><a href="{% url 'events:events-update' event.pk %}">Update this event</a></p>
     </div>
 {% endif %}

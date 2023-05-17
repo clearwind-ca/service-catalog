@@ -8,9 +8,19 @@ from django.views.decorators.http import require_POST
 from rest_framework.authtoken.models import Token
 
 from gh import app
+from services.models import Organization
 
 from .forms import CreateAppForm
 from .shortcuts import get_object_or_None
+
+
+def home(request):
+    context = {}
+    if request.user.is_authenticated:
+        # We could show all but that's gonna be pretty big.
+        context["orgs"] = [Organization.objects.last()]
+
+    return render(request, "home.html", context)
 
 
 def login_problem(request):

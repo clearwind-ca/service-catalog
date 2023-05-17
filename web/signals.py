@@ -1,10 +1,8 @@
 import logging
 
 from django.conf import settings
-from django.contrib.auth import logout
 from django.contrib.auth.models import Group
 from django.contrib.auth.signals import user_logged_in
-from django.contrib.contenttypes.models import ContentType
 
 from gh.user import check_org_membership
 from services.models import Organization

@@ -2,8 +2,7 @@ from unittest.mock import Mock, patch
 
 from auditlog.models import LogEntry
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser, Group, Permission
-from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import AnonymousUser, Group
 from django.core.cache import cache
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
@@ -54,7 +53,7 @@ class TestHomePage(TestCase):
 
 class TestColour(TestCase):
     def test_colour_filter(self):
-        self.assertEqual(priority_as_colour(1), "warning")
+        self.assertEqual(priority_as_colour(1), "primary")
         self.assertEqual(priority_as_colour("foo"), "dark")
 
 
@@ -287,7 +286,9 @@ class TestChecksBadge(TestCase):
 
     def test_all_no_checks_pass(self):
         checks = []
-        self.assertEqual(checks_badge(checks), {"colour": "info", "text": "No health checks run"})
+        self.assertEqual(
+            checks_badge(checks), {"colour": "secondary", "text": "No health checks run"}
+        )
 
     def test_some_checks_fail(self):
         checks = [{"last": FakeResult("fail")}]

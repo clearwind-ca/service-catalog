@@ -1,3 +1,3 @@
 {% load helpers %}
 {% checks_badge checks as the_badge %}
-<span class="badge text-bg-{{ the_badge.colour }}">{{ the_badge.text }}</span>
+<span class="badge text-bg-{{ the_badge.colour }}" data-bs-title="The status of the health checks for this service" data-bs-toggle="tooltip">{{ the_badge.text }}</span>

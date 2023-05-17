@@ -29,7 +29,7 @@
 
 {% block sidebar %}
     <div class="pb-3">
-        <h6 class="text-muted border-bottom">Info</h6>
+        <h5 class="text-muted border-bottom">Info</h5>
         <p>Slug: <code>{{ source.slug }}</code></p>
         <p>Repository: <code data-bs-toggle="tooltip" data-bs-title="{{ source.url }}">{{ source.url|truncatechars:20 }}</code> <a href="{{ source.url }}">{% octicon "link" %}</a></p>
     </div>

@@ -23,7 +23,6 @@ if not os.path.exists(env):
     raise FileNotFoundError(f"Unable to find {env} file.")
 
 load_dotenv(dotenv_path=env)
-
 # Danger: This can expose private information outside of you organization.
 # Read the documentation before changing this. If in doubt, don't.
 ALLOW_PUBLIC_READ_ACCESS = os.environ.get("ALLOW_PUBLIC_READ_ACCESS", False)

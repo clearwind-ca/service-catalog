@@ -33,28 +33,20 @@
 
 {% block sidebar %}
     <div class="pb-3">
-        <h6 class="text-muted border-bottom">Info</h6>
+        <h5 class="text-muted border-bottom">Info</h5>
         <p>Slug: <code>{{ check.slug }}</code></p>
     </div>
 
     <div class="pb-3">
-        <h6 class="text-muted border-bottom">Results</h6>
+        <h5 class="text-muted border-bottom">Results</h5>
         <p><a href="{% url 'health:results-list' %}{% qs request 'health_check__slug' check.slug %}">View results</a></p>
     </div>
 
-    <div class="pb-3">
-        <h6 class="text-muted border-bottom">Logs</h6>
-        {% if log %}
-            <p>{{ log.get_action_display|capfirst }} {% include "since.html" with since=log.timestamp %}</p>
-            <p><a href="{% url 'logs:log-list' %}?slug={{ check.slug }}&type=check">View more</a></p>
-        {% else %}
-            <p>{% octicon "deny" %} No logs found for this service.</p>
-        {% endif %}
-    </div>
+    {% include "logs.html" with no_message="No logs found for this result."  pk=check.pk type="check"  %}
 
-    {# if perms.health.change_check #}
+    {% if perms.health.change_check %}
         <div class="pb-3">
-            <h6 class="text-muted border-bottom">Admin</h6>
+            <h5 class="text-muted border-bottom">Admin</h5>
             <p><a href="#" data-bs-toggle="modal" data-bs-target="#run-modal">Run this check now</a></p>
             <p><a href="{% url 'health:checks-update' check.slug %}">Edit this check</a></p>
             <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete this check</a></p>
@@ -63,7 +55,7 @@
 {% endblock %}
 
 {% block modals %}
-    <div class="modal " tabindex="-1" id="delete-modal">
+    <div class="modal fade" tabindex="-1" id="delete-modal">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -84,7 +76,7 @@
         </div>
     </div>
 
-    <div class="modal " tabindex="-1" id="run-modal">
+    <div class="modal fade" tabindex="-1" id="run-modal">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
