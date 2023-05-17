@@ -36,7 +36,13 @@ def create_service(source):
         source=source,
         meta={"foo": "bar"},
         events=["deployments", "releases"],
-        raw_data={"name": name, "description": description, "type": "application", "meta": {"foo": "bar"}, "events": ["deployments", "releases"]},
+        raw_data={
+            "name": name,
+            "description": description,
+            "type": "application",
+            "meta": {"foo": "bar"},
+            "events": ["deployments", "releases"],
+        },
     )
 
 
