@@ -76,7 +76,7 @@ class EventsFilter(django_filters.FilterSet):
     class Meta:
         model = Event
         fields = ["type"]
-        
+
 
 def events_list(request):
     get = request.GET
