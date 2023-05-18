@@ -75,7 +75,7 @@ class EventsFilter(django_filters.FilterSet):
 
     class Meta:
         model = Event
-        fields = ["active", "type", "customers", "services"]
+        fields = ["type"]
 
 
 def events_list(request):
@@ -97,8 +97,13 @@ def events_list(request):
     if get.get("when") in ["future"]:
         ordering = "start"
 
+    # Doesn't seem to work in django-filters, I'm clearly holding it wrong.
+    if get.get("services"):
+        filters["services__slug"] = get.get("services")
+
     queryset = Event.objects.filter(**filters).order_by(ordering)
     events = EventsFilter(request.GET, queryset=queryset)
+
     context = paginate(request, events, extra={"when": get.get("when", "recent")})
     context.update(
         {

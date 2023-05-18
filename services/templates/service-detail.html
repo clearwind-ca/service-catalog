@@ -44,7 +44,7 @@
         <div class="card-header fw-bold">Health checks</div>
         <div class="card-body">
             {% include "health-check.html" with check=check %}
-            <p class="form-text pt-3">{% octicon "info" %} Limited to the <i>latest</i> health checks. <a href="{% url 'health:results-list' %}{% qs request 'service__slug' service.slug %}">View all health checks</a>.</p>
+            <p class="form-text pt-3">{% octicon "info" %} Limited to the <i>latest</i> checks. <a href="{% url 'health:results-list' %}{% qs request 'service__slug' service.slug %}">Results over time</a>.</p>
         </div>
     </div>
 
