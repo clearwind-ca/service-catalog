@@ -22,7 +22,7 @@ There's a demo site and organisation available for you to try out.
 Some blog posts about the catalog:
 
 * https://mckay.pub/2023-05-15-service-catalog/ 👈 where a catalog can help.
-
+* https://mckay.pub/2023-05-18-using-actions/ 👈 health checks and using Actions.
 ---
 
 Service Catalog is under the [MIT License](LICENSE.md) and originally built by [Clearwind Consulting](https://clearwind.ca).
