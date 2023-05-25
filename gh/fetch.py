@@ -1,4 +1,4 @@
-import json
+import json5 as json
 import logging
 from urllib.parse import urlparse
 
