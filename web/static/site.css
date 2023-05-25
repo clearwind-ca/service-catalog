@@ -117,9 +117,9 @@ td p {
 }
 
 .copy {
-    display: none;
+    visibility: hidden;
 }
 
 tr:hover .copy {
-    display: inline;
+    visibility: visible;
 }
