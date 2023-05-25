@@ -1,2 +1,6 @@
 {% load helpers %}
-<span class="badge text-bg-{{ result.result|check_as_colour }}">{{ result.get_result_display }}</span>
+{% if result.get_result_display %}
+    <span class="badge text-bg-{{ result.result|check_as_colour }}">{{ result.get_result_display }}</span>
+{% else %}
+    <span class="badge text-bg-{{ result|check_as_colour }}">{{ result|capfirst }}</span>
+{% endif %}
