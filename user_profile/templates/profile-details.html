@@ -1,0 +1,33 @@
+{% extends "base-two-column.html" %}
+{% load octicons %}
+{% load crispy_forms_tags %}
+{% load helpers %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item">Your settings</li>
+{% endblock %}
+
+{% block top %}
+    <h2>Your settings</h2>
+{% endblock %}
+
+{% block main %}
+<div class="card mt-3 mb-3">
+    <form method="post" action="{% url 'profile:profile-update' %}" class="m-3">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-outline-primary">Update your settings</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div class="pb-3">
+    <h5 class="text-muted border-bottom">Info</h5>
+    <img src="{{ profile.avatar }}" class="rounded float-end" width="100px" />
+    <p><b>Email:</b> {{ user.email }}</p>
+    {% if member %}
+        <p>You have full <b>editor permissions</b> as a member of the organisations.</p>
+    {% endif %}
+    <p>This information is pulled from GitHub.</p>
+</div>
+{% endblock %}

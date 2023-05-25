@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     "octicons",
     "systemlogs",
     "web",
+    "user_profile",
     "gh",
 ]
 LANGUAGE_CODE = "en-us"
@@ -175,7 +176,7 @@ TEMPLATES = [
 ]
 TIME_ZONE = "UTC"
 USE_I18N = True
-USE_TZ = True
+USE_TZ = False
 WSGI_APPLICATION = "catalog.wsgi.application"
 
 

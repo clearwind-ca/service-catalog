@@ -1,7 +1,7 @@
-import json5 as json
 import logging
 from urllib.parse import urlparse
 
+import json5 as json
 from github import GithubException, UnknownObjectException
 
 from catalog.errors import NoEntryFound, NoRepository, SchemaError

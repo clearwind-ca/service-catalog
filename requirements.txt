@@ -23,3 +23,4 @@ cryptography==39.0.2
 django-login-required-middleware==0.9.0
 django-filter==23.2
 json5==0.9.14
+pytz==2023.3
