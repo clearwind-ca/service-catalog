@@ -195,8 +195,10 @@ class TestCheckPage(WithHealthCheck):
         self.client.force_login(self.user)
         res = self.client.get(self.health_check.get_absolute_url())
         # The first result is ignored.
-        self.assertEquals(res.context['results_total'], 1)
-        self.assertEquals(list(res.context['results_data']), ["fail"])
+        self.assertEquals(res.context["results_total"], 1)
+        self.assertEquals(list(res.context["results_data"]), ["fail"])
+
+
 class TestSend(WithHealthCheck):
     def setUp(self):
         super().setUp()
