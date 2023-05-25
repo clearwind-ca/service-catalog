@@ -22,10 +22,11 @@ def create_health_check():
     return {"source": source, "service": service, "health_check": health_check}
 
 
-def create_health_check_result(health_check, service):
+def create_health_check_result(health_check, service, result="unknown"):
     return CheckResult.objects.create(
         health_check=health_check,
         service=service,
+        result=result,
     )
 
 
@@ -181,6 +182,21 @@ class TestAPIResult(WithHealthCheck):
         response = self.api_client.patch(url, data, format="json")
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(CheckResult.objects.first().result, "pass")
+
+
+class TestCheckPage(WithHealthCheck):
+    def setUp(self):
+        super().setUp()
+        self.add_to_members()
+
+    def test_result_latest(self):
+        create_health_check_result(self.health_check, self.service, result="pass")
+        create_health_check_result(self.health_check, self.service, result="fail")
+        self.client.force_login(self.user)
+        res = self.client.get(self.health_check.get_absolute_url())
+        # The first result is ignored.
+        self.assertEquals(res.context["results_total"], 1)
+        self.assertEquals(list(res.context["results_data"]), ["fail"])
 
 
 class TestSend(WithHealthCheck):

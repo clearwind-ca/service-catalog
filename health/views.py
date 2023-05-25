@@ -1,3 +1,4 @@
+from collections import Counter
 from distutils.util import strtobool
 
 import django_filters
@@ -73,7 +74,25 @@ def checks_add(request):
 def checks_detail(request, slug):
     check = Check.objects.get(slug=slug)
     log = LogEntry.objects.get_for_object(check).order_by("-timestamp").first()
-    return render(request, "checks-detail.html", {"check": check, "log": log})
+    results = (
+        CheckResult.objects.filter(health_check=check)
+        .order_by("service", "-updated")
+        .distinct("service")
+    )
+    result = results.first()
+    results_data = dict(Counter(results.values_list("result", flat=True)))
+    results_total = sum(results_data.values())
+    return render(
+        request,
+        "checks-detail.html",
+        {
+            "check": check,
+            "log": log,
+            "result": result,
+            "results_data": results_data,
+            "results_total": results_total,
+        },
+    )
 
 
 @permission_required("health.change_check")

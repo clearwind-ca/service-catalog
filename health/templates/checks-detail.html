@@ -29,6 +29,36 @@
             {% endif %}
         </dd>
     </dl>
+
+    {% if results_data %}
+        <b>Last results</b>
+        <p class="form-text">This shows the status of the <i>last run</i> of each service. <a href="{% url 'health:results-list' %}{% qs request 'health_check__slug' check.slug %}">View full historical results</a>.</p>
+        <table class="table my-3">
+            <thead>
+                <tr>
+                    <th>Result</th>
+                    <th>Number of services</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for result, count in results_data.items %}
+                    <tr>
+                        <td>{% include "pass.html" with pass=result %}</td>
+                        <td>
+                            <div class="progress" role="progressbar">
+                                <div class="progress-bar progress-bar-striped" 
+                                    style="width: {% widthratio count results_total 100 %}%"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-title="{{ result|capfirst }} for {{ count }} service{{ count|pluralize}} out of {{ results_total }}"
+                                    ></div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
 {% endblock %}
 
 {% block sidebar %}
@@ -39,7 +69,12 @@
 
     <div class="pb-3">
         <h5 class="text-muted border-bottom">Results</h5>
-        <p><a href="{% url 'health:results-list' %}{% qs request 'health_check__slug' check.slug %}">View results</a></p>
+        {% if result %}
+           <p>Last result: {% include "pass.html" with pass=result.result %} &bull; {% include "since.html" with since=result.updated %}</p>
+           <p><a href="{% url 'health:results-list' %}{% qs request 'health_check__slug' check.slug %}">View more results</a></p>
+        {% else %}
+            <p>{% octicon "deny" %} No results to display.</p>
+        {% endif %}
     </div>
 
     {% include "logs.html" with no_message="No logs found for this result."  pk=check.pk type="check"  %}

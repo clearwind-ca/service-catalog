@@ -54,15 +54,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 DEBUG = os.environ.get("DEBUG")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ENFORCE_ORG_MEMBERSHIP = True
-if os.environ.get("CI"):
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": ":memory:",
-        }
-    }
-else:
-    DATABASES = {"default": dj_database_url.config(conn_max_age=600, conn_health_checks=True)}
+DATABASES = {"default": dj_database_url.config(conn_max_age=600, conn_health_checks=True)}
 
 GITHUB_CHECK_REPOSITORY = os.environ.get("GITHUB_CHECK_REPOSITORY", None)
 GITHUB_DEBUG = False

@@ -10,6 +10,16 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres
+        env:
+          POSTGRES_DB: catalog
+          POSTGRES_USER: catalog
+          POSTGRES_PASSWORD: anewpassword
+        ports:
+          - 5432:5432
+
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python 3.9
