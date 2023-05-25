@@ -1,7 +1,7 @@
 from auditlog.registry import auditlog
 from django.db import models
 from django.template.defaultfilters import slugify
-
+from django.urls import reverse
 FREQUENCY_CHOICES = (
     ("hourly", "Hourly"),
     ("daily", "Daily"),
@@ -36,6 +36,9 @@ class Check(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse("health:checks-detail", kwargs={"slug": self.slug})
 
 
 # The status of sending the check result to the service.
@@ -91,6 +94,9 @@ class CheckResult(models.Model):
             self.status = "completed"
 
         super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse("health:results-detail", kwargs={"slug": self.slug})
 
 
 auditlog.register(Check)
