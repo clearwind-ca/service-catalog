@@ -67,11 +67,17 @@ window.addEventListener("load", (event) => {
     (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
   );
 
+  const myAllowList = bootstrap.Popover.Default.allowList;
+  myAllowList.b = [];
+  myAllowList.a = ["data-copy"];
+  myAllowList.svg = ["width", "height", "version", "class"];
+  myAllowList.path = ["fill-rule", "d"];
+
   const popoverTriggerList = document.querySelectorAll(
     '[data-bs-toggle="popover"]'
   );
   const popoverList = [...popoverTriggerList].map(
-    (popoverTriggerEl) => new bootstrap.Popover(popoverTriggerEl)
+    (popoverTriggerEl) => new bootstrap.Popover(popoverTriggerEl, {allowList:myAllowList, html: true})
   );
 
   const datetimeTemplate = document.getElementById("datetime");
@@ -83,4 +89,10 @@ window.addEventListener("load", (event) => {
   if (createAppForm) {
     processCreateAppForm(createAppForm);
   }
+  
+  document.querySelectorAll(".copy").forEach((element) => {
+    element.addEventListener("click", (element) => {
+      navigator.clipboard.writeText(element.target.getAttribute("data-copy"))
+    });
+  });
 });

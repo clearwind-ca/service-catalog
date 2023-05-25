@@ -8,6 +8,8 @@ from django.utils.safestring import mark_safe
 
 from web.helpers import default_query_params
 
+
+import pytz
 register = template.Library()
 
 import json
@@ -47,6 +49,11 @@ def status_as_colour(value):
     }
     return result.get(value, "dark")
 
+
+@register.filter(name="to_timezone")
+def to_timezone(value, tz):
+    tz = tz or "UTC"
+    return value.astimezone(pytz.timezone(tz))
 
 @register.filter(name="markdown")
 def markdown_filter(text):

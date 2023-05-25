@@ -32,7 +32,7 @@
                         {% if user.is_authenticated %}
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                {% octicon "person" %} 
+                                <img src="{{ user.profile.avatar }}" class="rounded avatar" />
                                 {{ user|truncatechars:10 }}
                                 </a>
                                 {% include "user.html" %}

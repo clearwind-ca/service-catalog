@@ -29,6 +29,11 @@ label.requiredField {
     width: 16px;
 }
 
+img.avatar {
+    height: 16px;
+
+}
+
 a.nav-link svg {
     fill: white;
 } 
@@ -93,4 +98,28 @@ table > tbody > tr:last-child > td {
 td p {
     margin: 0;
     padding: 0;
+}
+
+.popover {
+    --bs-popover-border-color: var(--bs-gray-700);
+    --bs-popover-bg: var(--bs-dark);
+    --bs-popover-body-color: var(--bs-light);
+}
+
+.popover a {
+    color: var(--bs-light);
+}
+
+.popover svg {
+    width: 16px;
+    fill: var(--bs-light);
+    margin-left: 0em;
+}
+
+.copy {
+    display: none;
+}
+
+tr:hover .copy {
+    display: inline;
 }

@@ -18,6 +18,7 @@ from .fetch import file_paths, get, get_file, get_file_from_list, url_to_nwo, ge
 from .send import dispatch
 from .user import login_as_user
 from .webhooks import find_service, handle_deployment, handle_release
+from user_profile.models import Profile
 
 fake = Faker("en_US")
 
@@ -28,6 +29,7 @@ class WithGitHubUser(TestCase):
     def setUp(self):
         super().setUp()
         self.user = get_user_model().objects.create_user(username=fake.name())
+        self.profile = Profile.objects.create(user=self.user)
         self.user.oauth_connections.create(
             provider_key="github",
             provider_user_id=random.randint(1, 100),

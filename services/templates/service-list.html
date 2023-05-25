@@ -34,7 +34,8 @@
                         </td>
                         <td>{% include "health-check-badge.html" with checks=service.latest_results %}</td>
                         <td>{{ service.type }}</td>
-                        <td>{% include "since.html" with since=service.updated %}</td>
+                        <td>{% include "since.html" with since=service.updated %}
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
