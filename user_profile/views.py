@@ -1,8 +1,10 @@
-from django.shortcuts import render, redirect
-from django.urls import reverse
-from .forms import ProfileForm
-from django.views.decorators.http import require_POST
 from django.contrib import messages
+from django.shortcuts import redirect, render
+from django.urls import reverse
+from django.views.decorators.http import require_POST
+
+from .forms import ProfileForm
+
 
 def profile_detail(request):
     context = {

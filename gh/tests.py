@@ -13,12 +13,19 @@ from events.models import Event
 from health.tests import create_health_check, create_health_check_result
 from services.models import Source
 from services.tests import create_service, create_source
+from user_profile.models import Profile
 
-from .fetch import file_paths, get, get_file, get_file_from_list, url_to_nwo, get_contents
+from .fetch import (
+    file_paths,
+    get,
+    get_contents,
+    get_file,
+    get_file_from_list,
+    url_to_nwo,
+)
 from .send import dispatch
 from .user import login_as_user
 from .webhooks import find_service, handle_deployment, handle_release
-from user_profile.models import Profile
 
 fake = Faker("en_US")
 
@@ -55,7 +62,7 @@ class TestFetch(WithGitHubUser):
         super().setUp()
         self.source = Source.objects.create(url="https://gh.com/andy/gh")
         self.simple_data = {"priority": 1, "name": "test", "type": "widget"}
- 
+
     def test_get_with_json5(self):
         """
         Test that the get_contents function works with json5 files.
@@ -65,7 +72,9 @@ class TestFetch(WithGitHubUser):
         contents.decoded_content = """
         // A comment that would normally fail with JSON
         { "key": "value" }
-        """.encode("utf-8")
+        """.encode(
+            "utf-8"
+        )
         repo.get_contents.return_value = contents
         self.assertEquals(get_contents(repo, "test.json5"), {"key": "value"})
 

@@ -1,13 +1,14 @@
-from django.db import models
+import pytz
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from oauthlogin.models import OAuthConnection
-import pytz
-from django.conf import settings
-from web.shortcuts import get_object_or_None
 
 from gh import user
+from web.shortcuts import get_object_or_None
+
 
 class Profile(models.Model):
     TIMEZONE_CHOICES = zip(pytz.common_timezones, pytz.common_timezones)
@@ -22,6 +23,7 @@ class Profile(models.Model):
     def __str__(self):
         return f"Profile for: {self.user.username}"
 
+
 @receiver(post_save, sender=OAuthConnection)
 def create_user_profile(sender, instance, created, **kwargs):
     if instance.access_token:
@@ -31,4 +33,3 @@ def create_user_profile(sender, instance, created, **kwargs):
         if not existing_profile:
             profile = user.login_as_user(username).get_user(username)
             Profile.objects.create(user=instance.user, avatar=profile.avatar_url)
-    

@@ -1,6 +1,7 @@
 from urllib.parse import urlencode
 
 import markdown
+import pytz
 from django import template
 from django.urls import reverse
 from django.utils.html import urlize
@@ -8,8 +9,6 @@ from django.utils.safestring import mark_safe
 
 from web.helpers import default_query_params
 
-
-import pytz
 register = template.Library()
 
 import json
@@ -54,6 +53,7 @@ def status_as_colour(value):
 def to_timezone(value, tz):
     tz = tz or "UTC"
     return value.astimezone(pytz.timezone(tz))
+
 
 @register.filter(name="markdown")
 def markdown_filter(text):

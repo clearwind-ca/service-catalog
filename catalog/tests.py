@@ -9,8 +9,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from services.models import Organization
-from web.groups import setup_group
 from user_profile.models import Profile
+from web.groups import setup_group
 
 fake = Faker("en_US")
 
