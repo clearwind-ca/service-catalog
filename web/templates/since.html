@@ -1,14 +1,15 @@
 {% load helpers %}
 {% load humanize %}
 {% load octicons %}
+{% load tz %}
 <span 
     tabindex="0"
     class="time-popover"
     data-bs-toggle="popover"
     data-bs-trigger="hover"
     data-bs-placement="top"
-    data-bs-content='{% octicon "clock" %}<br><br>{% if request.user.profile.timezone != "UTC" %}<b>{{ request.user.profile.timezone }}</b><br>{{ since|to_timezone:request.user.profile.timezone }} <br><br>{% endif %}<b>UTC</b><br> {{ since }}'>
+    data-bs-content='{% include "since-snippet.html" %}'>
     {{ since|naturaltime }}
 </span>
 
-<a href="#" class="copy" title="Copy to the clipboard" data-copy="{{ since|to_timezone:request.user.profile.timezone }}">{% octicon "clipboard" %}</a>
+<a href="#" class="copy" title="Copy to the clipboard" data-copy="{{ since }} UTC">{% octicon "clipboard" %}</a>

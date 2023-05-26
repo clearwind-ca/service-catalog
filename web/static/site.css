@@ -104,6 +104,7 @@ td p {
     --bs-popover-border-color: var(--bs-gray-700);
     --bs-popover-bg: var(--bs-dark);
     --bs-popover-body-color: var(--bs-light);
+    --bs-popover-header-bg: var(--bs-primary);
 }
 
 .popover a {

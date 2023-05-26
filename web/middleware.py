@@ -1,12 +1,15 @@
 import logging
 import re
+import zoneinfo
 
 from django.conf import settings
 from django.contrib.auth.middleware import AuthenticationMiddleware
 from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 from django.urls import resolve
+from django.utils import timezone
 from rest_framework.exceptions import AuthenticationFailed
 
 from gh import user
@@ -158,3 +161,25 @@ class CatalogMiddleware(AuthenticationMiddleware):
 
         # Default, fail and redirect to the login-problem page.
         return redirect("web:login-problem")
+
+
+class TimezoneMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request._is_drf:
+            timezone.activate(settings.TIME_ZONE)
+            return self.get_response(request)
+
+        tzname = request.session.get("tz")
+        if not tzname:
+            try:
+                tzname = request.user.profile.timezone
+            except (AttributeError, ObjectDoesNotExist):
+                pass
+
+        tzname = tzname or settings.TIME_ZONE
+        timezone.activate(zoneinfo.ZoneInfo(tzname))
+        request.session["tz"] = tzname
+        return self.get_response(request)

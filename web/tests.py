@@ -1,19 +1,22 @@
 from unittest.mock import Mock, patch
 
 from auditlog.models import LogEntry
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser, Group
 from django.core.cache import cache
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
+from django.utils import timezone
 from faker import Faker
 from rest_framework.authtoken.models import Token
 
 from catalog.tests import BaseTestCase
 from services.models import Organization
+from user_profile.models import Profile
 
 from .groups import setup_group
-from .middleware import CatalogMiddleware
+from .middleware import CatalogMiddleware, TimezoneMiddleware
 from .signals import user_logged_in_handler
 from .templatetags.helpers import (
     apply_format,
@@ -157,7 +160,7 @@ class TestAPIToken(BaseTestCase):
         self.assertEquals(LogEntry.objects.first().object_repr[3:], "." * 10)
 
 
-class TestMiddleware(TestCase):
+class TestCatalogMiddleware(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
         self.req = self.factory.get("/services/")
@@ -375,3 +378,37 @@ class TestGroupAssignment(TestCase):
     def test_member_changes_mind(self, mock_check_org_membership):
         self.req = self.factory.get("/services/")
         self.req.user = self.user
+
+
+class TestTimezoneMiddleware(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.req = self.factory.get("/services/")
+        self.req._is_drf = False
+        self.req.session = {}
+        self.user = get_user_model().objects.create_user(username="andy")
+
+    def test_user_timezone_with_profile(self):
+        self.profile = Profile.objects.create(user=self.user, timezone="Europe/London")
+        self.req.user = self.user
+        TimezoneMiddleware(Mock())(self.req)
+        self.assertEqual(self.req.session["tz"], "Europe/London")
+        self.assertEqual(timezone.get_current_timezone_name(), "Europe/London")
+
+    def test_user_timezone_no_profile(self):
+        self.req.user = self.user
+        TimezoneMiddleware(Mock())(self.req)
+        self.assertEqual(self.req.session["tz"], "UTC")
+        self.assertEqual(timezone.get_current_timezone_name(), settings.TIME_ZONE)
+
+    def test_user_timezone_anonymous(self):
+        self.req.user = AnonymousUser()
+        TimezoneMiddleware(Mock())(self.req)
+        self.assertEqual(self.req.session["tz"], "UTC")
+        self.assertEqual(timezone.get_current_timezone_name(), settings.TIME_ZONE)
+
+    def test_drf(self):
+        self.req._is_drf = True
+        TimezoneMiddleware(Mock())(self.req)
+        self.assertEqual(self.req.session, {})
+        self.assertEqual(timezone.get_current_timezone_name(), settings.TIME_ZONE)

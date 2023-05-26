@@ -52,7 +52,7 @@
     <dt>Source</dt>
     <dd>{{ event.source }}</dd>
     <dt>URL</dt>
-    <dd><a href="{{ event.url }}">{{ event.url|truncatechars:50 }} {% octicon "link-external" %}</a></dd>
+    <dd>{% if event.url %}<a href="{{ event.url }}">{{ event.url|truncatechars:50 }} {% octicon "link-external" %}</a>{% else %}None{% endif %}</dd>
 </dl>
 {% endblock %}
 

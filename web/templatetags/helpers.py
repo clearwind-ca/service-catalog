@@ -1,7 +1,7 @@
+import zoneinfo
 from urllib.parse import urlencode
 
 import markdown
-import pytz
 from django import template
 from django.urls import reverse
 from django.utils.html import urlize
@@ -52,7 +52,7 @@ def status_as_colour(value):
 @register.filter(name="to_timezone")
 def to_timezone(value, tz):
     tz = tz or "UTC"
-    return value.astimezone(pytz.timezone(tz))
+    return value.astimezone(zoneinfo.ZoneInfo(tz))
 
 
 @register.filter(name="markdown")
