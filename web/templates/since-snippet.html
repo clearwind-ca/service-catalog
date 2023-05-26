@@ -1,9 +1,9 @@
 {% load helpers %}
 {% load tz %}
 {% if request.user.profile.timezone != "UTC" %}
-  <b>{{ request.user.profile.timezone }}</b><br>
-  {{ since|to_timezone:request.user.profile.timezone }} <br>
+  <b>{{ TIME_ZONE }}</b><br>
+  {{ since }} <br>
   <br>
 {% endif %}
 <b>UTC</b><br> 
-{% timezone None %}{{ since|to_timezone:"UTC" }}{% endtimezone %}
+{{ since|utc }}

@@ -49,12 +49,6 @@ def status_as_colour(value):
     return result.get(value, "dark")
 
 
-@register.filter(name="to_timezone")
-def to_timezone(value, tz):
-    tz = tz or "UTC"
-    return value.astimezone(zoneinfo.ZoneInfo(tz))
-
-
 @register.filter(name="markdown")
 def markdown_filter(text):
     md = markdown.Markdown(safe_mode=True, extensions=["extra", "mdx_linkify"])
