@@ -12,6 +12,7 @@ from web.shortcuts import get_object_or_None
 
 zones = sorted(zoneinfo.available_timezones())
 
+
 class Profile(models.Model):
     TIMEZONE_CHOICES = zip(zones, zones)
 

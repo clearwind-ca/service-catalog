@@ -1,4 +1,5 @@
 import random
+import zoneinfo
 from datetime import timedelta
 from urllib.parse import urlencode
 
@@ -11,7 +12,6 @@ from services.tests import create_service, create_source
 
 from . import models
 from .models import Event
-import zoneinfo
 
 fake = Faker()
 
@@ -26,7 +26,7 @@ class WithEvents(BaseTestCase):
         self.services_pks = [s.pk for s in self.services]
 
     def get_event_data(self, tz=None):
-        tz =  zoneinfo.ZoneInfo("UTC")
+        tz = zoneinfo.ZoneInfo("UTC")
         return {
             "name": fake.name(),
             "description": fake.text(),
@@ -204,7 +204,7 @@ class TestEventList(WithEvents):
         tz = zoneinfo.ZoneInfo(self.profile.timezone)
         self.profile.save()
         self.add_to_members()
-        
+
         data = self.get_event_data()
         res = self.client.post(url, data=data)
         self.assertEqual(res.status_code, 302)

@@ -171,7 +171,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "web.helpers.site_context",
-                "django.template.context_processors.tz"
+                "django.template.context_processors.tz",
             ],
         },
     },

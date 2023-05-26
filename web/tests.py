@@ -387,7 +387,7 @@ class TestTimezoneMiddleware(TestCase):
         self.req._is_drf = False
         self.req.session = {}
         self.user = get_user_model().objects.create_user(username="andy")
-    
+
     def test_user_timezone_with_profile(self):
         self.profile = Profile.objects.create(user=self.user, timezone="Europe/London")
         self.req.user = self.user
