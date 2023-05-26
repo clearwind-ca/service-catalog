@@ -125,6 +125,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "web.middleware.CatalogMiddleware",
+    "web.middleware.TimezoneMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -170,13 +171,14 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "web.helpers.site_context",
+                "django.template.context_processors.tz"
             ],
         },
     },
 ]
 TIME_ZONE = "UTC"
 USE_I18N = True
-USE_TZ = False
+USE_TZ = True
 WSGI_APPLICATION = "catalog.wsgi.application"
 
 

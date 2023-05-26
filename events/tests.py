@@ -1,3 +1,4 @@
+import random
 from datetime import timedelta
 from urllib.parse import urlencode
 
@@ -10,6 +11,7 @@ from services.tests import create_service, create_source
 
 from . import models
 from .models import Event
+import zoneinfo
 
 fake = Faker()
 
@@ -23,7 +25,8 @@ class WithEvents(BaseTestCase):
             self.services.append(create_service(self.source))
         self.services_pks = [s.pk for s in self.services]
 
-    def get_event_data(self):
+    def get_event_data(self, tz=None):
+        tz =  zoneinfo.ZoneInfo("UTC")
         return {
             "name": fake.name(),
             "description": fake.text(),
@@ -192,3 +195,19 @@ class TestEventList(WithEvents):
         self.assertEqual(res.context["filters"]["when"], "past")
         self.assertFalse(self.event_in_results(res, future))
         self.assertTrue(self.event_in_results(res, past))
+
+    def test_create_event_with_timezone_conversion(self):
+        """Test that we can post an event."""
+        url = reverse("events:events-add")
+        self.client.force_login(user=self.user)
+        self.profile.timezone = "America/New_York"
+        tz = zoneinfo.ZoneInfo(self.profile.timezone)
+        self.profile.save()
+        self.add_to_members()
+        
+        data = self.get_event_data()
+        res = self.client.post(url, data=data)
+        self.assertEqual(res.status_code, 302)
+        event = Event.objects.get()
+        # Confirm it's been converted to UTC
+        self.assertEqual(event.start, data["start"].astimezone(tz))

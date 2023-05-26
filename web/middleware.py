@@ -1,12 +1,15 @@
 import logging
 import re
+import zoneinfo
 
 from django.conf import settings
 from django.contrib.auth.middleware import AuthenticationMiddleware
 from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 from django.urls import resolve
+from django.utils import timezone
 from rest_framework.exceptions import AuthenticationFailed
 
 from gh import user
@@ -20,7 +23,6 @@ REDIRECT_FIELD_NAME = settings.LOGIN_REQUIRED_REDIRECT_FIELD_NAME
 
 # See https://github.com/CleitonDeLima/django-login-required-middleware/blob/master/login_required/middleware.py for the
 # source of this, with the changes to add in DRF.
-
 
 class CatalogMiddleware(AuthenticationMiddleware):
     def _login_required(self, request):
@@ -158,3 +160,25 @@ class CatalogMiddleware(AuthenticationMiddleware):
 
         # Default, fail and redirect to the login-problem page.
         return redirect("web:login-problem")
+
+
+class TimezoneMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request._is_drf:
+            timezone.activate(settings.TIME_ZONE)
+            return self.get_response(request)
+        
+        tzname = request.session.get("tz")
+        if not tzname:
+            try:
+                tzname = request.user.profile.timezone
+            except (AttributeError, ObjectDoesNotExist):
+                pass
+
+        tzname = tzname or settings.TIME_ZONE
+        timezone.activate(zoneinfo.ZoneInfo(tzname))
+        request.session["tz"] = tzname
+        return self.get_response(request)

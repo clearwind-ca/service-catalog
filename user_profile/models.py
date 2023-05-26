@@ -1,4 +1,5 @@
-import pytz
+import zoneinfo
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
@@ -9,9 +10,10 @@ from oauthlogin.models import OAuthConnection
 from gh import user
 from web.shortcuts import get_object_or_None
 
+zones = sorted(zoneinfo.available_timezones())
 
 class Profile(models.Model):
-    TIMEZONE_CHOICES = zip(pytz.common_timezones, pytz.common_timezones)
+    TIMEZONE_CHOICES = zip(zones, zones)
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.CharField(max_length=255)
