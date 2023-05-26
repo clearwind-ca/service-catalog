@@ -28,6 +28,7 @@ def events_add(request):
             return redirect(reverse("events:events-list"))
     else:
         form = EventForm()
+        form.fields["start"].initial = timezone.now()
 
     return render(request, "events-add.html", {"form": form})
 

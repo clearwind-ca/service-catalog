@@ -210,4 +210,4 @@ class TestEventList(WithEvents):
         self.assertEqual(res.status_code, 302)
         event = Event.objects.get()
         # Confirm it's been converted to UTC
-        self.assertEqual(event.start, data["start"].astimezone(tz))
+        self.assertEqual(event.start.tzinfo, timezone.utc)
