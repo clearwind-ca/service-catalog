@@ -1,29 +1,25 @@
 function processDateTime(datetimeTemplate) {
-  const datetimeList = document.querySelectorAll(
-    'input[type="datetime-local"]'
-  );
-  for (let element of datetimeList) {
-    let clone = datetimeTemplate.content.cloneNode(true);
-    let links = clone.querySelectorAll("a");
-    for (let link of links) {
-      link.addEventListener("click", (event) => {
-        event.preventDefault();
-        let when = event.target.getAttribute("data-when");
-        let target = new Date();
-        if (when == "tomorrow") {
-          target.setDate(target.getDate() + 1);
-        }
-        if (when == "yesterday") {
-          target.setDate(target.getDate() - 1);
-        }
-        // Just move the date not the time, because it might be 12 or 24 hour format,
-        // depending upon system settings. Doable but more work. Currently only altering the date anyway.
-        element.value =
-          target.toISOString().slice(0, 10) + element.value.slice(10, 19);
-      });
-    }
-    element.parentNode.insertBefore(clone, element.nextSibling);
+  const element = document.getElementById('id_start');
+  let clone = datetimeTemplate.content.cloneNode(true);
+  let links = clone.querySelectorAll("a");
+  for (let link of links) {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      let when = event.target.getAttribute("data-when");
+      let target = new Date();
+      if (when == "tomorrow") {
+        target.setDate(target.getDate() + 1);
+      }
+      if (when == "yesterday") {
+        target.setDate(target.getDate() - 1);
+      }
+      // Just move the date not the time, because it might be 12 or 24 hour format,
+      // depending upon system settings. Doable but more work. Currently only altering the date anyway.
+      element.value =
+        target.toISOString().slice(0, 10) + element.value.slice(10, 19);
+    });
   }
+  element.parentNode.insertBefore(clone, element.nextSibling);
 }
 
 function processCreateAppForm(createAppForm) {
