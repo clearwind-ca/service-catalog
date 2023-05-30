@@ -1,7 +1,7 @@
 import base64
 import json
 import random
-from unittest.mock import Mock, patch, ANY
+from unittest.mock import ANY, Mock, patch
 
 from django.shortcuts import reverse
 from django.test import TestCase
@@ -15,6 +15,7 @@ from services.models import Source
 from services.tests import create_service, create_source
 from user_profile.models import Profile
 
+from .create import create_json_file
 from .fetch import (
     file_paths,
     get,
@@ -23,7 +24,6 @@ from .fetch import (
     get_file_from_list,
     url_to_nwo,
 )
-from .create import create_json_file
 from .send import dispatch
 from .user import login_as_user
 from .webhooks import find_service, handle_deployment, handle_release
@@ -287,6 +287,7 @@ class TestWebhooks(WithGitHubUser):
         self.assertEqual(event.customers, True)
         self.assertEqual(event.active, True)
 
+
 class TestCreateJSON(WithGitHubUser):
     def setUp(self):
         super().setUp()
@@ -298,7 +299,7 @@ class TestCreateJSON(WithGitHubUser):
         branch = Mock()
         branch.name = "main"
         self.repo.get_branch.return_value = branch
-        
+
     @patch("gh.create.get_repo_installation")
     def test_json_file_already_exists(self, mock_get_repo_installation):
         mock_get_repo_installation.return_value = self.repo
@@ -306,14 +307,18 @@ class TestCreateJSON(WithGitHubUser):
 
     @patch("gh.create.get_repo_installation")
     def test_json_branch_already_exists(self, mock_get_repo_installation):
-        self.repo.create_git_ref.side_effect = GithubException(404, headers={}, data={"message": "Reference already exists"})
+        self.repo.create_git_ref.side_effect = GithubException(
+            404, headers={}, data={"message": "Reference already exists"}
+        )
         mock_get_repo_installation.return_value = self.repo
         self.assertRaises(errors.FileAlreadyExists, create_json_file, "andy", "gh")
 
     @patch("gh.create.get_repo_installation")
     def test_json_branch_other_problem(self, mock_get_repo_installation):
         self.repo.get_contents.side_effect = UnknownObjectException(404, "Not Found", {})
-        self.repo.create_git_ref.side_effect = GithubException(404, headers={}, data={"message": "🤷‍♂"})
+        self.repo.create_git_ref.side_effect = GithubException(
+            404, headers={}, data={"message": "🤷‍♂"}
+        )
         mock_get_repo_installation.return_value = self.repo
         self.assertRaises(GithubException, create_json_file, "andy", "gh")
 

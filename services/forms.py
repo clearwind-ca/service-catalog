@@ -160,5 +160,3 @@ class ServiceForm(forms.Form, BaseForm):
             "updated": updated,
             "logs": logs,
         }
-
-    

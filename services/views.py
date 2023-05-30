@@ -18,7 +18,7 @@ from rest_framework.response import Response
 
 from catalog.errors import FetchError, FileAlreadyExists
 from events.models import Event
-from gh import fetch, create
+from gh import create, fetch
 from web.helpers import YES_NO_CHOICES, paginate
 
 from .forms import ServiceForm, SourceForm, get_schema
@@ -264,11 +264,10 @@ def source_add_service(request, slug):
             pull = create.create_json_file(*nwo)
         except FileAlreadyExists as error:
             messages.error(request, error.message)
-        else:   
+        else:
             messages.info(request, f"Pull request [successfully created]({pull.html_url}).")
 
     return render(request, "service-add.html", context={"source": source})
-
 
 
 def schema_detail(request):

@@ -71,6 +71,7 @@ class TestYesNo(TestCase):
         self.assertEqual(yesno_if_boolean(None), None)
         self.assertEqual(yesno_if_boolean("foo"), "foo")
 
+
 class TestAPIToken(BaseTestCase):
     def setUp(self):
         super().setUp()

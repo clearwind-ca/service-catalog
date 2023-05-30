@@ -10,11 +10,11 @@ from faker import Faker
 
 from catalog.errors import FetchError
 from catalog.tests import BaseTestCase
+from gh.fetch import url_to_nwo
 from web.shortcuts import get_object_or_None
 
 from . import forms, models
 from .management.commands.refresh import Command
-from gh.fetch import url_to_nwo
 
 fake = Faker("en_US")
 
@@ -478,9 +478,10 @@ class TestServiceAdd(BaseTestCase):
         self.client.force_login(self.user)
         self.add_to_members()
         # Have to post something otherwise request.POST fails. The web page posts a CSRF.
-        self.client.post(self.url, {'csrf': 'something'})
+        self.client.post(self.url, {"csrf": "something"})
         nwo = url_to_nwo(self.source.url)
         mock_create.create_json_file.assert_called_once_with(*nwo)
+
 
 class TestServiceDelete(BaseTestCase):
     def setUp(self):
