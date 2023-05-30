@@ -123,7 +123,7 @@ class ServiceForm(forms.Form, BaseForm):
             service = models.Service.objects.create(
                 name=data["name"],
                 description=data.get("description"),
-                type=data["type"],
+                type=data.get("type"),
                 priority=data["priority"],
                 meta=data.get("meta"),
                 source=self.source,

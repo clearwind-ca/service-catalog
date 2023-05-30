@@ -36,5 +36,5 @@
             }
         }
     },
-    "required": ["priority", "type", "name"]
+    "required": ["priority", "name"]
 }

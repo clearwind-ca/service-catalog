@@ -10,6 +10,7 @@ from faker import Faker
 
 from catalog.errors import FetchError
 from catalog.tests import BaseTestCase
+from gh.fetch import url_to_nwo
 from web.shortcuts import get_object_or_None
 
 from . import forms, models
@@ -125,7 +126,6 @@ class TestServiceList(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "service-list.html")
         self.assertContains(response, service.name)
-        self.assertContains(response, service.type)
 
     def test_get_service_not_logged_in(self):
         """Test the page for viewing a service when not logged in."""
@@ -453,6 +453,36 @@ class TestServiceDetail(BaseTestCase):
         self.assertEqual(response.context["service"], self.service)
 
 
+class TestServiceAdd(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self.source = create_source()
+        self.url = reverse("services:source-add-service", kwargs={"slug": self.source.slug})
+
+    def test_not_logged_in(self):
+        self.login_required(self.client.get(self.url))
+
+    def test_add_no_perms(self):
+        self.client.force_login(self.user)
+        response = self.client.post(self.url)
+        self.login_required(response)
+
+    def test_get_add_works(self):
+        self.client.force_login(self.user)
+        self.add_to_members()
+        res = self.client.get(self.url)
+        self.assertEquals(res.context["source"], self.source)
+
+    @patch("services.views.create")
+    def test_post_add_works(self, mock_create):
+        self.client.force_login(self.user)
+        self.add_to_members()
+        # Have to post something otherwise request.POST fails. The web page posts a CSRF.
+        self.client.post(self.url, {"csrf": "something"})
+        nwo = url_to_nwo(self.source.url)
+        mock_create.create_json_file.assert_called_once_with(*nwo)
+
+
 class TestServiceDelete(BaseTestCase):
     def setUp(self):
         super().setUp()
@@ -663,8 +693,6 @@ class TestAPISource(BaseTestCase):
         self.assertEqual(len(response.json()["failures"]), 2)
         first = response.json()["failures"][0]
         assert "priority" in first["data"][0]["message"]
-        second = response.json()["failures"][1]
-        assert "type" in second["data"][0]["message"]
 
     def test_validate_error_no_perms(self):
         self.remove_from_members()

@@ -24,7 +24,15 @@
                             <a href="{% url 'services:source-detail' source.slug %}">{{ source.name }}</a>
                             {% include "active.html" with active=source.active show_inactive_only=True %}
                         </td>
-                        <td>{{ source.services.count }}</td>
+                        <td>
+                            {% with count=source.services.count %}
+                                {% if count < 1 %}
+                                    <a href="{% url 'services:source-add-service' source.slug %}" class="badge bg-primary text-light">Create an entry</a>
+                                {% else %}
+                                    <span class="badge bg-secondary text-light">{{ count }} service{{ count|pluralize }}</span>
+                                {% endif %}
+                            {% endwith %}
+                        </td>
                         <td>{% include "since.html" with since=source.updated %}</td>
                         <td>
                             <span class="dropdown-toggle" type="button"data-bs-toggle="dropdown" aria-expanded="false">
@@ -42,6 +50,11 @@
         <div class="blankslate my-3">
             {% include "blankslate.html" with message="No sources matched those filters." %}
         </div>
+    {% endif %}
+
+
+    {% if page %}
+        {% include "pagination.html" with objects=page %}
     {% endif %}
 
     {% if orgs %}
@@ -74,10 +87,6 @@
     </table>
     {% endif %}
 
-
-    {% if sources %}
-        {% include "pagination.html" with objects=sources %}
-    {% endif %}
     {% if perms.services.add_source %}
     <p><a href="{% url 'services:source-add' %}">{% octicon 'plus' %} Add in a new source</a></p>
     {% endif %}

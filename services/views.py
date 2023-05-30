@@ -16,9 +16,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from catalog.errors import FetchError
+from catalog.errors import FetchError, FileAlreadyExists
 from events.models import Event
-from gh import fetch
+from gh import create, fetch
 from web.helpers import YES_NO_CHOICES, paginate
 
 from .forms import ServiceForm, SourceForm, get_schema
@@ -253,6 +253,21 @@ def api_source_validate(request, pk):
         return Response({"success": True})
     else:
         return Response(response, status=status.HTTP_502_BAD_GATEWAY)
+
+
+@permission_required("services.add_service")
+def source_add_service(request, slug):
+    source = get_object_or_404(slug=slug, klass=Source)
+    nwo = fetch.url_to_nwo(source.url)
+    if request.POST:
+        try:
+            pull = create.create_json_file(*nwo)
+        except FileAlreadyExists as error:
+            messages.error(request, error.message)
+        else:
+            messages.info(request, f"Pull request [successfully created]({pull.html_url}).")
+
+    return render(request, "service-add.html", context={"source": source})
 
 
 def schema_detail(request):

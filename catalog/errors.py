@@ -28,3 +28,7 @@ class SchemaError(FetchError):
 
 class PermissionError(SendError):
     """The user doesn't have permission to access the repository"""
+
+
+class FileAlreadyExists(CatalogError):
+    """The branch already has a file when trying to create it"""

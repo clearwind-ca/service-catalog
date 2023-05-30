@@ -23,7 +23,7 @@ class Service(models.Model):
     description = models.TextField()
     path = models.CharField(max_length=255)
     # Up to the user to define this, some tag that makes sense within their organisation.
-    type = models.CharField(max_length=100)
+    type = models.CharField(max_length=100, null=True)
 
     # From 1 to 10, where 1 is the highest priority and 10 is the lowest.
     priority = models.IntegerField(
