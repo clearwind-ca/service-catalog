@@ -135,16 +135,6 @@ def qs(request, override_key, override_value):
     return "?" + urlencode(qs) if qs else "?"
 
 
-valid_formats = ("url", "md")
-
-
-@register.filter(name="strip")
-def strip_format(value):
-    if value.endswith(valid_formats):
-        value = value.rsplit("_", 1)[0]
-    return value.replace("_", " ").replace("-", " ").title()
-
-
 @register.simple_tag(name="apply")
 def apply_format(value, field):
     _format = None

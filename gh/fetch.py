@@ -123,7 +123,7 @@ def get_repo_installation(org_name, repo_name):
         raise NoRepository(
             f"GitHub app is unable to access the repository: `{org_name}/{repo_name}`."
         )
-
+    
 
 def get_repositories(org_name):
     gh = login_as_app()

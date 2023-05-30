@@ -66,6 +66,7 @@
         <h5 class="text-muted border-bottom">Info</h5>
         <p>Validated using <a href="{% url 'services:schema-detail' %}">this schema</a></p>
         <p>Slug: <code>{{ service.slug }}</code></p>
+        {% if service.type %}<p>Type: <code>{{ service.type }}</code></p>{% endif %}
         <p><a href="{% url 'services:source-detail' source.slug %}">View the source</a></p>
     </div>
 

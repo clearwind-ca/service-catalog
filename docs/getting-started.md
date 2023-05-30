@@ -34,11 +34,11 @@ The Catalog makes no requirements or definitions about how large or small or Ser
 Required fields:
 * `name`: a name for the service.
 * `priority`: a number from `1` to `10`. Where `1` is the highest priority, `10` being the lowest priority.
-* `type`: a string that categorises the service for you in some manner that makes sense.
 
 Optional fields:
+* `type`: a string that categorises the service for you in some manner that makes sense.
 * `description`: a text field that has more space for details about the service. Will be formatted using Markdown.
-* `active`: a boolean to mark the service as active or not.
+* `active`: a boolean to mark the service as active or not. Default: `true`.
 * `dependencies`: an array of strings, where each string is a slug of the service that is a dependency. See below for the slug 👇.
 * `meta`: an object that allows you to enter any arbitrary detail. See below for more detail 👇.
 * `files`: an array of strings, where each string is a path relative to the root of the repository that contains more catalog entries. See below for more detail 👇.

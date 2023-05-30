@@ -25,6 +25,8 @@ The long term goal is to keep the permissions needed by the GitHub App to the mi
 
 * `organization_administration` 👉 `read`: so that the Catalog can find all the places that the app is installed. If you remove this, you can add in each repo individually.
 
+* `pull_requests` 👉 `read`: so that the Catalog can create a pull request with a populated `catalog.json` to make the setup easy.
+
 Events:
 
 * `Deployments`: so that the webhooks can be sent from GitHub. If the Service Catalog is at a URL not accessible from the server, then you can manually create these using the [create-event Action](https://github.com/clearwind-ca/create-event), the API, or by polling GitHub.

@@ -23,7 +23,6 @@ from .templatetags.helpers import (
     checks_badge,
     markdown_filter,
     priority_as_colour,
-    strip_format,
     yesno_if_boolean,
 )
 
@@ -71,27 +70,6 @@ class TestYesNo(TestCase):
         self.assertEqual(yesno_if_boolean(False), "no")
         self.assertEqual(yesno_if_boolean(None), None)
         self.assertEqual(yesno_if_boolean("foo"), "foo")
-
-
-class TestFormat(TestCase):
-    def test_strip_format(self):
-        for value, expectation in (
-            ("foo", "Foo"),
-            ("foo_url", "Foo"),
-            ("foo_foo_md", "Foo Foo"),
-            ("url", "Url"),
-        ):
-            self.assertEqual(strip_format(value), expectation)
-
-    def test_apply_format(self):
-        for value, field, expectation in (
-            ("foo", "bar", "foo"),
-            ("http://f.com", "f_url", '<a href="http://f.com">http://f.com</a>'),
-            ("* foo", "foo_foo_md", "<ul>\n<li>foo</li>\n</ul>"),
-            ("http://foo.com", "url", '<a href="http://foo.com">http://foo.com</a>'),
-        ):
-            self.assertEqual(apply_format(value, field), expectation)
-
 
 class TestAPIToken(BaseTestCase):
     def setUp(self):
