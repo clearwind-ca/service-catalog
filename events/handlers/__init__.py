@@ -1,18 +1,20 @@
+import logging
 from tempfile import NamedTemporaryFile
+
 from django.conf import settings
 
-import logging
 logger = logging.getLogger(__name__)
+
 
 def dump_webhook(request, slug):
     """
     A temporary debugging tool to dump webhooks out into temparary files.
-    
+
     So you can then inspect them for testing etc. Should not be in production.
     """
     if settings.DEBUG is False:
         logger.warning("It is not recommended to have DUMP_WEBHOOKS enabled in production")
-        
+
     file = NamedTemporaryFile(suffix=".txt", mode="w", delete=False)
     logger.info(f"Created {file.name}")
 
@@ -26,4 +28,3 @@ def dump_webhook(request, slug):
     file.write(request.body.decode("utf-8"))
 
     logger.info(f"Written {file.name}")
-

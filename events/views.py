@@ -1,27 +1,30 @@
+import importlib
+import logging
 from datetime import timedelta
 from distutils.util import strtobool
-from django.conf import settings
+
 import django_filters
 from auditlog.models import LogEntry
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from rest_framework import permissions, viewsets
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
+
 from web.helpers import YES_NO_CHOICES, paginate
 
 from .forms import EventForm
+from .handlers import dump_webhook
 from .models import Event
 from .serializers import EventSerializer
-import importlib
-from .handlers import dump_webhook
 
-import logging
 logger = logging.getLogger(__name__)
+
 
 @permission_required("events.add_event")
 def events_add(request):
@@ -78,6 +81,7 @@ def events_update(request, pk):
 def imp(module):
     return importlib.import_module(f"events.handlers.{module}")
 
+
 webhook_handlers = {
     "launchdarkly": imp("flag-launchdarkly"),
     "bitbucket": imp("status-atlassian"),
@@ -89,6 +93,7 @@ webhook_handlers = {
     "trello": imp("status-atlassian"),
     "vercel": imp("status-atlassian"),
 }
+
 
 @csrf_exempt
 def webhooks(request, slug):
