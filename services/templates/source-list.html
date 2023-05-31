@@ -19,19 +19,18 @@
             </thead>
             <tbody>    
                 {% for source in page %}
+                    {% with count=source.services.count %}
                     <tr>
                         <td>
                             <a href="{% url 'services:source-detail' source.slug %}">{{ source.name }}</a>
                             {% include "active.html" with active=source.active show_inactive_only=True %}
                         </td>
                         <td>
-                            {% with count=source.services.count %}
-                                {% if count < 1 %}
-                                    <a href="{% url 'services:source-add-service' source.slug %}" class="badge bg-primary text-light">Create an entry</a>
-                                {% else %}
-                                    <span class="badge bg-secondary text-light">{{ count }} service{{ count|pluralize }}</span>
-                                {% endif %}
-                            {% endwith %}
+                            {% if count < 1 %}
+                                <a href="{% url 'services:source-add-service' source.slug %}" class="badge bg-primary text-light">Create an entry</a>
+                            {% else %}
+                                <span class="badge bg-secondary text-light">{{ count }} service{{ count|pluralize }}</span>
+                            {% endif %}
                         </td>
                         <td>{% include "since.html" with since=source.updated %}</td>
                         <td>
@@ -39,10 +38,14 @@
                                 {% octicon "hamburger" %}
                              </span>
                              <ul class="dropdown-menu">
-                                 <li><a class="dropdown-item" href="{{ source.url }}">{% octicon "link-external" %} View on GitHub</a></li>
-                             </ul>
+                                {% if count < 1 %}
+                                  <li><a class="dropdown-item" href="{% url 'services:source-add-service' source.slug %}">{% octicon "plus" %} Create an entry</a></li>
+                                {% endif %}
+                                <li><a class="dropdown-item" href="{{ source.url }}">{% octicon "link-external" %} View on GitHub</a></li>
+                              </ul>
                         </td>
                     </tr>
+                    {% endwith %}
                 {% endfor %}
             </tbody>
         </table>
