@@ -8,9 +8,10 @@
 <div>
     <div class="btn-group" role="group">
         {% include "filters-dropdown.html" with list=active all="all" key="active" in_request=request.GET.key %}
-        {% include "filters-dropdown.html" with list=types key="type" in_request=request.GET.key %}
-        {% include "filters-dropdown.html" with list=customers key="customers" in_request=request.GET.key %}
+        {% include "filters-dropdown.html" with list=source key="source" all="" in_request=request.GET.key %}
         {% include "filters-dropdown.html" with list=when key="when" all="all" in_request=request.GET.key %}
+        {% include "filters-dropdown.html" with list=customers key="customers" in_request=request.GET.key %}
+        {% include "filters-dropdown.html" with list=types key="type" in_request=request.GET.key %}
     </div>
     
     {% include "filters-text.html" with reset="events:events-list" %}
@@ -19,25 +20,25 @@
         <table class="table table-hover my-3">
             <thead>
                 <tr>
+                    <th>Source</th>
                     <th>Name</th>
-                    <th>Start</th>
                     <th>Customers</th>
                     <th>Type</th>
-                    <th>{% octicon "past" %} Updated</th>
+                    <th>{% octicon "clock" %} Start</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>    
                 {% for event in page %}
                     <tr>
+                        <td>{{ event.source }}</td>
                         <td>
                             <a href="{% url 'events:events-detail' event.pk %}">{% if event.name %}{{ event.name }}{% else %}(empty){% endif %}</a>
                             {% include "active.html" with active=event.active show_inactive_only=True %}
                         </td>
-                        <td>{% include "since.html" with since=event.start %}</td>
                         <td>{% include "customers.html" with impacts=event.customers %}</td>
                         <td>{{ event.type|capfirst }}</td>
-                        <td>{% include "since.html" with since=event.updated %}</td>
+                        <td>{% include "since.html" with since=event.start %}</td>
                         <td>
                             <span class="dropdown-toggle" type="button"data-bs-toggle="dropdown" aria-expanded="false">
                                 {% octicon "hamburger" %}

@@ -13,47 +13,34 @@
         {% include "active.html" with active=event.active %}
         {% include "customers.html" with impacts=event.customers %}
     </h4>
-    <p>{{ event.description|markdown|safe }}</p>
+    {% if event.source %}<b>Source:</b> {{ event.source }}{% endif %}
 {% endblock %}
 
 {% block main %}
-<dl>
-    <dt>When</dt>
+<p>{{ event.description|markdown|safe }}</p>
+<p>{% if event.url %}<a href="{{ event.url }}">{{ event.url|truncatechars:50 }} {% octicon "link-external" %}</a>{% else %}None{% endif %}
+<p>
     {% if event.start and event.end %}
-    <dd>{{ event.start }} to {{ event.end }}</dd>
+    <b>Started:</b> {% include "since.html" with since=event.start %} <br>
+    <b>Finished:</b> {% include "since.html" with since=event.end %} <br>
+    <b>Duration:</b> {{ event.start|timesince:event.end}}
     {% else %}
-    <dd>{% include "since.html" with since=event.start %}</dd>
-    {% endif %}
-    {% if event.status %}
-    <dt>Status</dt>
-    <dd>{{ event.status }}</dd>
+        {% octicon "clock" %}{% include "since.html" with since=event.start %}
     {% endif %}
 </dl>
 
+{% if services %}
 <div class="card mt-3 mb-3">
     <div class="card-header fw-bold">Services</div>
     <div class="card-body">
         {% with services=event.services.all %}
-        {% if services %}
             {% include "services.html" with services=services %}
             <p class="form-text">{% octicon "info" %} Services affected by this event.</p>
-        {% else %}
-            {% include "blankslate.html" with message="No services affected." %}
-        {% endif %}
         {% endwith %}
     </div>
 </div>
+{% endif %}
 
-<dl>
-    <dt>Affects customers</dt>
-    <dd>{{ event.customers|yesno|capfirst }}</dd>
-    <dt>Type</dt>
-    <dd>{{ event.type|capfirst }}</dd>
-    <dt>Source</dt>
-    <dd>{{ event.source }}</dd>
-    <dt>URL</dt>
-    <dd>{% if event.url %}<a href="{{ event.url }}">{{ event.url|truncatechars:50 }} {% octicon "link-external" %}</a>{% else %}None{% endif %}</dd>
-</dl>
 {% endblock %}
 
 {% block sidebar %}
@@ -62,6 +49,10 @@
     <p>Primary key: <code>{{ event.pk }}</code></p>
     {% if event.external_id %}
     <p>External id: <code>{{ event.external_id }}</code></p>
+    {% endif %}
+    <p>Type: <code>{{ event.type|capfirst }}</code></p>
+    {% if event.status %}
+    <p>Status: <code>{{ event.status }}</code>
     {% endif %}
 </div>
 

@@ -1,6 +1,6 @@
 from datetime import timedelta
 from distutils.util import strtobool
-
+from django.conf import settings
 import django_filters
 from auditlog.models import LogEntry
 from django.contrib import messages
@@ -10,13 +10,18 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from rest_framework import permissions, viewsets
-
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from web.helpers import YES_NO_CHOICES, paginate
 
 from .forms import EventForm
 from .models import Event
 from .serializers import EventSerializer
+import importlib
+from .handlers import dump_webhook
 
+import logging
+logger = logging.getLogger(__name__)
 
 @permission_required("events.add_event")
 def events_add(request):
@@ -70,13 +75,42 @@ def events_update(request, pk):
     return render(request, "events-update.html", context)
 
 
+def imp(module):
+    return importlib.import_module(f"events.handlers.{module}")
+
+webhook_handlers = {
+    "launchdarkly": imp("flag-launchdarkly"),
+    "bitbucket": imp("status-atlassian"),
+    "confluence": imp("status-atlassian"),
+    "fly.io": imp("status-atlassian"),
+    "github": imp("status-atlassian"),
+    "jira": imp("status-atlassian"),
+    "netlify": imp("status-atlassian"),
+    "trello": imp("status-atlassian"),
+    "vercel": imp("status-atlassian"),
+}
+
+@csrf_exempt
+def webhooks(request, slug):
+    if settings.DUMP_WEBHOOKS:
+        dump_webhook(request, slug)
+
+    if slug in webhook_handlers:
+        logger.info(f"Found handler for {slug}")
+        webhook_handlers[slug].handle(request)
+    else:
+        logger.info(f"No handler for {slug}")
+
+    return HttpResponse("OK")
+
+
 class EventsFilter(django_filters.FilterSet):
     active = django_filters.TypedChoiceFilter(choices=YES_NO_CHOICES, coerce=strtobool)
     customers = django_filters.TypedChoiceFilter(choices=YES_NO_CHOICES, coerce=strtobool)
 
     class Meta:
         model = Event
-        fields = ["type"]
+        fields = ["type", "source"]
 
 
 def events_list(request):
@@ -110,6 +144,9 @@ def events_list(request):
         {
             "types": sorted(
                 Event.objects.filter(type__gt="").values_list("type", flat=True).distinct()
+            ),
+            "source": sorted(
+                Event.objects.filter(source__gt="").values_list("source", flat=True).distinct()
             ),
             "when": ["future", "recent", "past"],
             "customers": ["yes", "no"],
