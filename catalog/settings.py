@@ -58,7 +58,7 @@ DATABASES = {"default": dj_database_url.config(conn_max_age=600, conn_health_che
 
 GITHUB_CHECK_REPOSITORY = os.environ.get("GITHUB_CHECK_REPOSITORY", None)
 GITHUB_DEBUG = False
-GOOGLE_FONTS = ["Roboto:wght@300;400;700;900", "Lato:wght@100;300;400;700"]
+GOOGLE_FONTS = ["Lato:wght@100;300;400;700"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
