@@ -58,6 +58,7 @@ DATABASES = {"default": dj_database_url.config(conn_max_age=600, conn_health_che
 
 GITHUB_CHECK_REPOSITORY = os.environ.get("GITHUB_CHECK_REPOSITORY", None)
 GITHUB_DEBUG = False
+GOOGLE_FONTS = ["Roboto:wght@300;400;700;900", "Lato:wght@100;300;400;700"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -72,6 +73,7 @@ INSTALLED_APPS = [
     "auditlog",
     "crispy_forms",
     "crispy_bootstrap5",
+    "django_google_fonts",
     "oauthlogin",
     "rest_framework",
     "rest_framework.authtoken",
@@ -159,6 +161,9 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SERVER_URL = os.environ.get("SERVER_URL")
 STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, "web", "static"))
 STATIC_URL = "static/"
+
+GOOGLE_FONTS_DIR = STATIC_ROOT
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",

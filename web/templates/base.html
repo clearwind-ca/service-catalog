@@ -6,18 +6,19 @@
         {% load helpers %}
         <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
         <link rel="stylesheet" href="{% static 'site.css' %}">
+        <link rel="stylesheet" href="{% static '/fonts/lato:wght@100;300;400;700.css' %}">
+        <link rel="icon" href="{% static 'actions-logo-solid-64.png' %}" />
         <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
         <script src="{% static 'site.js' %}"></script>
         <title>Service Catalog</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="icon" href="{% static 'actions-logo-solid-64.png' %}" />
         {% block extrahead %}{% endblock %}
     </head>
     <body class="bg-dark">
         <div class="container-lg">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid">
-                <a class="navbar-brand fw-bold" href="/"><img src="/static/actions-logo-solid-64.png"></svg> Catalog</a>
+                <a class="navbar-brand" href="/"><img src="/static/actions-logo-solid-64.png"></svg> Catalog</a>
                 <button  class="navbar-toggler" data-bs-target="#navbarToggle" data-bs-toggle="collapse" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>

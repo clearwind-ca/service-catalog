@@ -3,6 +3,11 @@ span.asteriskField {
     display: none;
 }
 
+h1, h2, .navbar-brand, .navbar-nav, .breadcrumb, footer {
+    font-family: "Lato";
+    font-weight: 300;
+}
+
 a { 
     text-decoration: none;
     color: var(--bs-gray-700);
