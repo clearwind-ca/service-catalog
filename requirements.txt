@@ -23,3 +23,4 @@ cryptography==41.0.0
 django-login-required-middleware==0.9.0
 django-filter==23.2
 json5==0.9.14
+django-google-fonts==0.0.3
