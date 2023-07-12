@@ -340,6 +340,7 @@ class TestCreateJSON(WithGitHubUser):
             base="main",
         )
 
+
 class TestCreateYAML(WithGitHubUser):
     def setUp(self):
         super().setUp()
@@ -351,14 +352,16 @@ class TestCreateYAML(WithGitHubUser):
         branch = Mock()
         branch.name = "main"
         self.repo.get_branch.return_value = branch
-        self.data = {'type': 'examine-json'}
+        self.data = {"type": "examine-json"}
         self.check = Mock()
-        self.check.slug = 'some-slug'
+        self.check.slug = "some-slug"
 
     @patch("gh.create.get_repo_installation")
     def test_yaml_file_already_exists(self, mock_get_repo_installation):
         mock_get_repo_installation.return_value = self.repo
-        self.assertRaises(errors.FileAlreadyExists, create_action_file, "andy", "gh", self.data, self.check)
+        self.assertRaises(
+            errors.FileAlreadyExists, create_action_file, "andy", "gh", self.data, self.check
+        )
 
     @patch("gh.create.get_repo_installation")
     def test_yaml_branch_already_exists(self, mock_get_repo_installation):
@@ -366,7 +369,9 @@ class TestCreateYAML(WithGitHubUser):
             404, headers={}, data={"message": "Reference already exists"}
         )
         mock_get_repo_installation.return_value = self.repo
-        self.assertRaises(errors.FileAlreadyExists, create_action_file, "andy", "gh", self.data, self.check)
+        self.assertRaises(
+            errors.FileAlreadyExists, create_action_file, "andy", "gh", self.data, self.check
+        )
 
     @patch("gh.create.get_repo_installation")
     def test_create_yaml(self, mock_get_repo_installation):

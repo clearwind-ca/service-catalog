@@ -14,5 +14,8 @@ ACTION_CHOICES = (
     ("checkout-repo", "Check out the source code of a service"),
 )
 
+
 class ActionForm(forms.Form):
-    type = forms.ChoiceField(choices=ACTION_CHOICES, widget=forms.RadioSelect(choices=ACTION_CHOICES))
+    type = forms.ChoiceField(
+        choices=ACTION_CHOICES, widget=forms.RadioSelect(choices=ACTION_CHOICES)
+    )

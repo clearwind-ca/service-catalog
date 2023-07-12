@@ -15,7 +15,6 @@ from rest_framework.response import Response
 
 from catalog.errors import FileAlreadyExists
 from gh import create, fetch
-
 from services.models import Service
 from web.helpers import YES_NO_CHOICES, paginate
 
@@ -73,6 +72,7 @@ def checks_add(request):
         request, "checks-add.html", {"form": form, "repo": settings.GITHUB_CHECK_REPOSITORY}
     )
 
+
 @permission_required("health.add_check")
 def checks_add_action(request, slug):
     check = get_object_or_404(slug=slug, klass=Check)
@@ -92,7 +92,9 @@ def checks_add_action(request, slug):
         form = ActionForm()
 
     return render(
-        request, "checks-add-action.html", {"form": form, "check": check, "repo": settings.GITHUB_CHECK_REPOSITORY}
+        request,
+        "checks-add-action.html",
+        {"form": form, "check": check, "repo": settings.GITHUB_CHECK_REPOSITORY},
     )
 
 

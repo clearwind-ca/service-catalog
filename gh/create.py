@@ -8,6 +8,7 @@ from gh.fetch import get_repo_installation
 
 branch = "catalog"
 
+
 def check_can_create(repo, default_branch, filename):
     """Do some checks that we can actually create the file."""
     sha_latest_commit = default_branch.commit.sha
@@ -18,7 +19,9 @@ def check_can_create(repo, default_branch, filename):
         pass
     else:
         # Let's just bail at this point.
-        raise FileAlreadyExists(f"Branch: `{default_branch.name}` already contains file: `{filename}`.")
+        raise FileAlreadyExists(
+            f"Branch: `{default_branch.name}` already contains file: `{filename}`."
+        )
 
     try:
         repo.create_git_ref(ref=f"refs/heads/{branch}", sha=sha_latest_commit)
@@ -38,13 +41,12 @@ def check_can_create(repo, default_branch, filename):
         else:
             # The file already exists, so if we branch, we'll get into conflict.
             # At the moment we are focusing on creating files, not updating them.
-            raise FileAlreadyExists(
-                f"Branch: `{branch}` in: already contains file: {filename}."
-            )
+            raise FileAlreadyExists(f"Branch: `{branch}` in: already contains file: {filename}.")
+
 
 def get_action_blurb(type, check):
     # pyyaml can do this, but has a habit of re-ordering things to make it hard to read.
-    if type == 'examine-json':
+    if type == "examine-json":
         return f"""name: Catalog Check - {check.name}
 run-name: Catalog check ${{{{ github.event.client_payload.check }}}} on ${{{{ github.event.client_payload.service }}}}
 on:
@@ -70,7 +72,7 @@ jobs:
     - uses: clearwind-ca/send-result@main
 """
 
-    elif type == 'checkout-repo':
+    elif type == "checkout-repo":
         return f"""name: Catalog Check - {check.name}
 run-name: Catalog check ${{{{ github.event.client_payload.check }}}} on ${{{{ github.event.client_payload.service }}}}
 on:
@@ -96,9 +98,10 @@ jobs:
     else:
         raise NotImplementedError(f"Unknown action type: {type}")
 
+
 def create_action_file(org_name, repo_name, data, check):
     repo = get_repo_installation(org_name, repo_name)
-    yaml = get_action_blurb(data['type'], check)
+    yaml = get_action_blurb(data["type"], check)
 
     default_branch = repo.get_branch(repo.default_branch)
     filename = f".github/workflows/catalog-action-{check.slug}.yml"
@@ -114,6 +117,7 @@ As of creation, it won't have enough to do anything useful, that will needed to 
     repo.create_file(filename, msg, yaml, branch=branch)
     pull = repo.create_pull(title=msg, body=body, head="catalog", base=default_branch.name)
     return pull
+
 
 def create_json_file(org_name, repo_name):
     repo = get_repo_installation(org_name, repo_name)
@@ -133,7 +137,7 @@ Note this file is JSON5: https://json5.org/ so can contain comments and trailing
 """
     text = comment + json.dumps(file, indent=2)
     default_branch = repo.get_branch(repo.default_branch)
-    
+
     check_can_create(repo, default_branch, "catalog.json")
 
     msg = f"Initial catalog file creation"
