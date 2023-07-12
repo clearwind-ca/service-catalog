@@ -15,7 +15,7 @@ from services.models import Source
 from services.tests import create_service, create_source
 from user_profile.models import Profile
 
-from .create import create_json_file
+from .create import create_action_file, create_json_file
 from .fetch import (
     file_paths,
     get,
@@ -164,7 +164,7 @@ class TestSend(WithGitHubUser):
         with self.settings(GITHUB_CHECK_REPOSITORY="https://github.com/foo/bar"):
             dispatch(result)
         args = login_mock.return_value.create_repository_dispatch.call_args
-        self.assertEqual(args[1]["event_type"], "check")
+        self.assertEqual(args[1]["event_type"], objects["health_check"].slug)
 
         payload = unpack_payload(args[1]["client_payload"]["data"])
         assert isinstance(payload, dict)
@@ -335,6 +335,57 @@ class TestCreateJSON(WithGitHubUser):
         )
         self.repo.create_pull.assert_called_with(
             title="Initial catalog file creation",
+            body=ANY,
+            head="catalog",
+            base="main",
+        )
+
+
+class TestCreateYAML(WithGitHubUser):
+    def setUp(self):
+        super().setUp()
+        self.source = create_source()
+        self.repo = Mock()
+        self.repo.name = "sample-repo"
+        self.repo.description = "sample-description"
+        self.repo.html_url = "https://gh.com/andy/gh"
+        branch = Mock()
+        branch.name = "main"
+        self.repo.get_branch.return_value = branch
+        self.data = {"type": "examine-json"}
+        self.check = Mock()
+        self.check.slug = "some-slug"
+
+    @patch("gh.create.get_repo_installation")
+    def test_yaml_file_already_exists(self, mock_get_repo_installation):
+        mock_get_repo_installation.return_value = self.repo
+        self.assertRaises(
+            errors.FileAlreadyExists, create_action_file, "andy", "gh", self.data, self.check
+        )
+
+    @patch("gh.create.get_repo_installation")
+    def test_yaml_branch_already_exists(self, mock_get_repo_installation):
+        self.repo.create_git_ref.side_effect = GithubException(
+            404, headers={}, data={"message": "Reference already exists"}
+        )
+        mock_get_repo_installation.return_value = self.repo
+        self.assertRaises(
+            errors.FileAlreadyExists, create_action_file, "andy", "gh", self.data, self.check
+        )
+
+    @patch("gh.create.get_repo_installation")
+    def test_create_yaml(self, mock_get_repo_installation):
+        self.repo.get_contents.side_effect = UnknownObjectException(404, "Not Found", {})
+        mock_get_repo_installation.return_value = self.repo
+        create_action_file("andy", "gh", self.data, self.check)
+        self.repo.create_file.assert_called_with(
+            ".github/workflows/catalog-action-some-slug.yml",
+            "Initial catalog Action creation",
+            ANY,
+            branch="catalog",
+        )
+        self.repo.create_pull.assert_called_with(
+            title="Initial catalog Action creation",
             body=ANY,
             head="catalog",
             base="main",

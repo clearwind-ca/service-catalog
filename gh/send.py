@@ -50,6 +50,8 @@ def dispatch(result):
         "server": settings.SERVER_URL,
     }
 
-    res = repo.create_repository_dispatch(event_type="check", client_payload=payload)
+    res = repo.create_repository_dispatch(
+        event_type=result.health_check.slug, client_payload=payload
+    )
     if not res:
         raise SendError("Unable to dispatch repository event.")

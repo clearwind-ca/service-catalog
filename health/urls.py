@@ -12,6 +12,7 @@ router.register("result", views.CheckResultViewSet, basename="api-result")
 urlpatterns = [
     path("health/", views.checks, name="checks-list"),
     path("health/add/", views.checks_add, name="checks-add"),
+    path("health/<str:slug>/add/", views.checks_add_action, name="checks-add-action"),
     path("health/<str:slug>/detail/", views.checks_detail, name="checks-detail"),
     path("health/<str:slug>/update/", views.checks_update, name="checks-update"),
     path("health/<str:slug>/delete/", views.checks_delete, name="checks-delete"),

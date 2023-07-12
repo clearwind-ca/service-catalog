@@ -1,0 +1,33 @@
+{% extends "base-two-column.html" %}
+{% load octicons %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'health:checks-list' %}">{% octicon "check" %} Health checks</a></li>
+    <li class="breadcrumb-item">Add an action</li>
+{% endblock %}
+{% load helpers %}
+{% load crispy_forms_tags %}
+
+{% block top %}
+    <h2>Add an Action for the health check</h2>
+{% endblock %}
+
+{% block main %}
+<div class="card mt-3 mb-3">
+    <form method="post" action="{% url 'health:checks-add-action' check.slug %}" class="m-3">
+        {% csrf_token %}
+        <div class="mb-3">
+            This will create a <b>pull request</b> with a pre-populated Actions YAML file. Choose what your health check will be doing, to have a different pre-populated template.
+        </div>
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-outline-primary">Add an Action</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div class="pb-3">
+    <h5 class="text-muted border-bottom">Info</h5>
+    <p>This will create a pull request on the repository called <code>{{ repo }}</code> with a pre-populated example Action YAML file.</p>
+</div>
+{% endblock %}
+

@@ -13,10 +13,12 @@ from rest_framework import permissions, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from catalog.errors import FileAlreadyExists
+from gh import create, fetch
 from services.models import Service
 from web.helpers import YES_NO_CHOICES, paginate
 
-from .forms import CheckForm
+from .forms import ActionForm, CheckForm
 from .models import (
     FREQUENCY_CHOICES,
     RESULT_CHOICES,
@@ -71,8 +73,33 @@ def checks_add(request):
     )
 
 
+@permission_required("health.add_check")
+def checks_add_action(request, slug):
+    check = get_object_or_404(slug=slug, klass=Check)
+    nwo = fetch.url_to_nwo(settings.GITHUB_CHECK_REPOSITORY)
+    if request.POST:
+        form = ActionForm(request.POST)
+        if form.is_valid():
+            try:
+                action = create.create_action_file(*nwo, form.cleaned_data, check)
+            except FileAlreadyExists as error:
+                messages.error(request, error.message)
+            else:
+                messages.info(request, f"Added action file `{action.html_url}`")
+                return redirect(reverse("health:checks-list"))
+
+    else:
+        form = ActionForm()
+
+    return render(
+        request,
+        "checks-add-action.html",
+        {"form": form, "check": check, "repo": settings.GITHUB_CHECK_REPOSITORY},
+    )
+
+
 def checks_detail(request, slug):
-    check = Check.objects.get(slug=slug)
+    check = get_object_or_404(slug=slug, klass=Check)
     log = LogEntry.objects.get_for_object(check).order_by("-timestamp").first()
     results = (
         CheckResult.objects.filter(health_check=check)
@@ -97,7 +124,7 @@ def checks_detail(request, slug):
 
 @permission_required("health.change_check")
 def checks_update(request, slug):
-    check = Check.objects.get(slug=slug)
+    check = get_object_or_404(slug=slug, klass=Check)
     if request.method == "POST":
         form = CheckForm(request.POST, instance=check)
         if form.is_valid():

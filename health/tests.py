@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 from faker import Faker
 
-from catalog.errors import NoRepository
+from catalog.errors import FileAlreadyExists, NoRepository
 from catalog.tests import BaseTestCase
 from services.tests import create_service, create_source
 
@@ -102,6 +102,32 @@ class TestCheck(BaseTestCase):
         self.client.force_login(self.user)
         res = self.client.post(url)
         self.login_required(res)
+
+
+class TestAction(WithHealthCheck):
+    def setUp(self):
+        super().setUp()
+        self.url = reverse("health:checks-add-action", args=[self.health_check.slug])
+
+    @patch("health.views.create")
+    def test_add_action(self, mock_create):
+        self.client.force_login(self.user)
+        self.add_to_members()
+        res = self.client.post(self.url, {"type": "examine-json"})
+        mock_create.create_action_file.assert_called_once()
+        self.assertEqual(res.status_code, 302, res.content)
+
+    def test_add_check_no_perms(self):
+        self.client.force_login(self.user)
+        res = self.client.post(self.url, {"type": "examine-json"})
+        self.login_required(res)
+
+    @patch("health.views.create")
+    def test_add_raises_error(self, mock_create):
+        self.client.force_login(self.user)
+        mock_create.create_action_file.side_effect = FileAlreadyExists("Nope")
+        res = self.client.post(self.url, {"type": "examine-json"})
+        self.assertEqual(res.status_code, 302, res.content)
 
 
 class TestAPICheck(BaseTestCase):
