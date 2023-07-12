@@ -27,6 +27,8 @@ The long term goal is to keep the permissions needed by the GitHub App to the mi
 
 * `pull_requests` 👉 `read`: so that the Catalog can create a pull request with a populated `catalog.json` to make the setup easy.
 
+* `actions` 👉 `write`: so that the Catalog can create a pull request with a pre-populated Action file in the `.github/workflows` directory.
+
 Events:
 
 * `Deployments`: so that the webhooks can be sent from GitHub. If the Service Catalog is at a URL not accessible from the server, then you can manually create these using the [create-event Action](https://github.com/clearwind-ca/create-event), the API, or by polling GitHub.

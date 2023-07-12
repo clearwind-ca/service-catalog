@@ -83,6 +83,7 @@
         <div class="pb-3">
             <h5 class="text-muted border-bottom">Admin</h5>
             <p><a href="#" data-bs-toggle="modal" data-bs-target="#run-modal">Run this check now</a></p>
+            <p><a href="{% url 'health:checks-add-action' check.slug %}">Add an Action</a></p>
             <p><a href="{% url 'health:checks-update' check.slug %}">Edit this check</a></p>
             <p><a href="#" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete this check</a></p>
         </div>

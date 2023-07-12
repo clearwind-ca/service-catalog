@@ -36,8 +36,9 @@
                                 {% octicon "hamburger" %}
                              </span>
                              <ul class="dropdown-menu">
-                                 <li><a class="dropdown-item" href="{% url 'health:results-list' %}{% qs request check check.slug %}">Results</a></li>
-                                 <li><a class="dropdown-item" href="{% url 'health:checks-update' check.slug %}">Edit</a></li>
+                                 <li><a class="dropdown-item" href="{% url 'health:checks-add-action' check.slug %}">{% octicon "plus" %} Create an Action</a></li>
+                                 <li><a class="dropdown-item" href="{% url 'health:results-list' %}{% qs request check check.slug %}">{% octicon "eye" %} Results</a></li>
+                                 <li><a class="dropdown-item" href="{% url 'health:checks-update' check.slug %}">{% octicon "change" %} Edit</a></li>
                              </ul>
                         </td>
                     </tr>

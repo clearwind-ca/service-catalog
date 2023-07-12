@@ -37,6 +37,7 @@ function processCreateAppForm(createAppForm) {
       },
       public: false,
       default_permissions: {
+        actions: "write",
         contents: "write",
         metadata: "read",
         deployments: "read",
