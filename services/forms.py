@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from urllib.parse import urlparse
 
@@ -8,9 +9,12 @@ from django.conf import settings
 from django.contrib import messages
 
 from gh.fetch import url_to_nwo
+from gh.models import Workflow
 from web.shortcuts import get_object_or_None
 
 from . import models
+
+logger = logging.getLogger(__name__)
 
 
 class BaseForm:

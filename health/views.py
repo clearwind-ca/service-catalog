@@ -121,7 +121,7 @@ def checks_delete(request, slug):
 def send(check):
     service_queryset = Service.objects.filter(active=True)
     for service in service_queryset:
-        send_to_github.delay(check.slug, service.slug)
+        send_to_github(check.slug, service.slug)
 
 
 # Sending a check is essentially asking something to change it

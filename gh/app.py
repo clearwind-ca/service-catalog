@@ -1,6 +1,12 @@
+from django.apps import AppConfig
 from django.core.exceptions import ImproperlyConfigured
 
 from .user import login_as_app
+
+
+class GitHubConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "gh"
 
 
 def get_details():

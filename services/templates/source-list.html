@@ -13,6 +13,7 @@
                 <tr>
                     <th>Repository</th>
                     <th>Services</th>
+                    <th>Use workflows</th>
                     <th>{% octicon "past" %} Updated</th>
                     <th></th>
                 </tr>
@@ -32,6 +33,7 @@
                                 <span class="badge bg-secondary text-light">{{ count }} service{{ count|pluralize }}</span>
                             {% endif %}
                         </td>
+                        <td>{{ source.sync_workflows|yesno|capfirst }}</td>
                         <td>{% include "since.html" with since=source.updated %}</td>
                         <td>
                             <span class="dropdown-toggle" type="button"data-bs-toggle="dropdown" aria-expanded="false">
@@ -74,7 +76,7 @@
             {% for org in orgs %}
                 <tr>
                     <td>{{ org.name }}</a></td>
-                    <td>{{ org.auto_add_sources|yesno }}</td>
+                    <td>{{ org.auto_add_sources|yesno|capfirst }}</td>
                     <td>{% include "since.html" with since=org.updated %}</td>
                     <td>
                         <span class="dropdown-toggle" type="button"data-bs-toggle="dropdown" aria-expanded="false">

@@ -20,10 +20,20 @@ class Check(models.Model):
         max_length=10,
         default="daily",
         choices=FREQUENCY_CHOICES,
-        help_text="How often this check will be run.",
+        help_text="How often this check will be run. If you choose ad-hoc, you will need to run the check through some other method.",
     )
 
     active = models.BooleanField(default=True)
+
+    workflow = models.ForeignKey(
+        "gh.Workflow",
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.CASCADE,
+        to_field="id",
+        help_text="If you'd like to use a GitHub Action workflow to process this event, pick a workflow here.",
+    )
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

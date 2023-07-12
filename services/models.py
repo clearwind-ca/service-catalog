@@ -97,6 +97,10 @@ class Source(models.Model):
 
     active = models.BooleanField(default=True)
 
+    sync_workflows = models.BooleanField(
+        default=False, help_text="Use this repository Actions workflows for the catalog."
+    )
+
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 

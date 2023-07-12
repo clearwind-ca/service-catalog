@@ -44,7 +44,6 @@ def should_run(check, service, quiet=False):
     return False
 
 
-@app.task
 def send_to_github(check_slug, service_slug):
     check = Check.objects.get(slug=check_slug)
     service = Service.objects.get(slug=service_slug)
@@ -54,7 +53,7 @@ def send_to_github(check_slug, service_slug):
         service=service,
     )
     try:
-        send.dispatch(result)
+        send.dispatch(result, check.workflow)
     except (SendError, NoRepository) as error:
         # Fatal error, they are all going to fail.
         # Should we log here?

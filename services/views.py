@@ -19,6 +19,7 @@ from rest_framework.response import Response
 from catalog.errors import FetchError, FileAlreadyExists
 from events.models import Event
 from gh import create, fetch
+from gh.models import update_workflows
 from web.helpers import YES_NO_CHOICES, paginate
 
 from .forms import ServiceForm, SourceForm, get_schema
@@ -107,8 +108,20 @@ def source_refresh(request, slug):
     try:
         results = fetch.get(source)
     except FetchError as error:
-        msg = f"Error attempting to refresh: `{source.slug}` via the web. {error.message}"
+        msg = f"Error attempting to refresh: `{source.slug}` catalog files. {error.message}"
         messages.error(request, msg)
+
+    if source.sync_workflows:
+        try:
+            update_workflows(Source, source, request.user)
+            messages.info(
+                request, f"Refresh of workflows in `{source.slug}` processed successfully."
+            )
+        except Exception as error:
+            messages.error(
+                request, f"Error attempting to refresh: `{source.slug}` workflows. {error}"
+            )
+
         return redirect("services:source-detail", slug=source.slug)
 
     refresh_results(results, source, request)
