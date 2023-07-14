@@ -21,7 +21,7 @@ from events.models import Event
 from gh import create, fetch
 from web.helpers import YES_NO_CHOICES, paginate
 
-from .forms import ServiceForm, SourceForm, get_schema
+from .forms import ServiceForm, SourceForm, get_schema, OrgForm
 from .models import Organization, Service, Source
 from .serializers import ServiceSerializer, SourceSerializer
 from .tasks import refresh_orgs_from_github
@@ -285,6 +285,17 @@ def api_schema_detail(request):
         {"path": settings.SERVICE_SCHEMA, "schema": get_schema()},
     )
 
+def org_detail(request, slug):
+    org = get_object_or_404(name=slug, klass=Organization)
+    if request.method == "POST":
+        form = OrgForm(request.POST, instance=org)
+        if form.is_valid():
+            form.save()
+            return redirect("services:source-list")
+        return render(request, "org-detail.html", context={"form": form, "org": org})
+
+    form = OrgForm(instance=org)
+    return render(request, "org-detail.html", context={"form": form, "org": org})
 
 class SourceViewSet(viewsets.ModelViewSet):
     queryset = Source.objects.all().order_by("-created")

@@ -1,7 +1,5 @@
 from django.apps import AppConfig
-
 from django.db.models.signals import post_migrate
-
 
 models = {
     "members": ["check", "checkresult", "event", "organization", "service", "source", "token"],
@@ -21,7 +19,7 @@ def get_filtered_content_types(models):
 
 def setup_groups(**kwargs):
     from django.contrib.auth.models import Group, Permission
-        
+
     for name in ["members", "public"]:
         to_add = []
         for ct in get_filtered_content_types(models[name]):
@@ -32,7 +30,7 @@ def setup_groups(**kwargs):
         group, created = Group.objects.get_or_create(name=name)
         if created:
             print(f"Created {name} group, so creating default permisssions.")
-            assert(to_add)
+            assert to_add
             group.permissions.set(to_add)
 
 
@@ -47,7 +45,7 @@ class WebConfig(AppConfig):
         import web.signals  # noqa: F401
 
         auditlog.register(Token)
-        
+
         def new_str(self):
             return self.key[:3] + "." * 10
 
@@ -56,4 +54,3 @@ class WebConfig(AppConfig):
 
         # Ensure that groups are setup correctly.
         post_migrate.connect(setup_groups, sender=self)
-

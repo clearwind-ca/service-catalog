@@ -7,7 +7,7 @@ from django import forms
 from django.conf import settings
 from django.contrib import messages
 
-from gh.fetch import url_to_nwo
+from gh.fetch import url_to_org, url_to_nwo
 from web.shortcuts import get_object_or_None
 
 from . import models
@@ -21,12 +21,8 @@ class BaseForm:
 class OrgForm(forms.ModelForm):
     class Meta:
         model = models.Organization
-        exclude = ["created", "modified", "active"]
-
-    def clean(self):
-        if models.Organization.objects.exists():
-            raise ValueError("Only one organization can be created.")
-        return super().clean()
+        exclude = ["created", "modified", "active", "raw_data", "name", "url"]
+        fields = ["auto_add_sources"]
 
 
 class SourceForm(forms.ModelForm, BaseForm):

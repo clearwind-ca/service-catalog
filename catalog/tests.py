@@ -10,7 +10,7 @@ from rest_framework.test import APIClient
 
 from services.models import Organization
 from user_profile.models import Profile
-from web.groups import setup_group
+from web.apps import setup_groups
 
 fake = Faker("en_US")
 
@@ -28,8 +28,7 @@ class BaseTestCase(TestCase):
         self.api_client = APIClient()
         settings.ENFORCE_ORG_MEMBERSHIP = False
 
-        setup_group("members")
-        setup_group("public")
+        setup_groups()
         self.members = Group.objects.get(name="members")
         self.public = Group.objects.get(name="public")
         return super().setUp()

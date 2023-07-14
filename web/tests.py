@@ -15,7 +15,7 @@ from catalog.tests import BaseTestCase
 from services.models import Organization
 from user_profile.models import Profile
 
-from .groups import setup_group
+from .apps import setup_groups
 from .middleware import CatalogMiddleware, TimezoneMiddleware
 from .signals import user_logged_in_handler
 from .templatetags.helpers import (
@@ -146,8 +146,7 @@ class TestCatalogMiddleware(TestCase):
         self.user = get_user_model().objects.create_user(username="andy")
         self.check_orgs = CatalogMiddleware(Mock()).check_orgs
         self.process_request = CatalogMiddleware(Mock()).process_request
-        setup_group("members")
-        setup_group("public")
+        setup_groups()
         self.members = Group.objects.get(name="members")
         self.public = Group.objects.get(name="public")
         super().setUp()
@@ -279,8 +278,7 @@ class TestChecksBadge(TestCase):
 
 class TestGroupAssignment(TestCase):
     def setUp(self):
-        setup_group("members")
-        setup_group("public")
+        setup_groups()
         self.members = Group.objects.get(name="members")
         self.public = Group.objects.get(name="public")
         self.factory = RequestFactory()

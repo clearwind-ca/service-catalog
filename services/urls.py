@@ -22,6 +22,7 @@ urlpatterns = [
     path("sources/<str:slug>/refresh/", views.source_refresh, name="source-refresh"),
     path("sources/<str:slug>/delete/", views.source_delete, name="source-delete"),
     path("sources/<str:slug>/update/", views.source_update, name="source-update"),
+    path("org/<str:slug>/detail/", views.org_detail, name="org-detail"),
     path("org/refresh/", views.org_refresh, name="org-refresh"),
     path("api/", include(router.urls)),
     path("api/sources/<pk>/refresh/", views.api_source_refresh, name="api-source-refresh"),

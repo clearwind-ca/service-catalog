@@ -81,6 +81,22 @@
     </table>
     {% endif %}
 
+
+    {% if steps.app %}
+        <h5>Step 3: Create Organizations</h5>
+        {% if not steps.orgs %}
+            <div class="card mt-3 mb-3">
+                <form method="post" action="{% url 'web:setup-orgs' %}" class="m-3">
+                    <p>Using the app that you have created in step 2, this will create the organizations into the catalog. The organizations created are ones that the GitHub app has access too. After this step, Catalog security will mirror the GitHub organisation security.</p>
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-primary">Create organizations</button>
+                </form>
+            </div>
+        {% else %}
+            <p>Organizations have been created and are installed. They can no longer be created through this screen.</p>
+        {% endif %}
+    {% endif %}
+
     {% if request.user.is_authenticated and member %}
         <h4>Review GitHub app details</h4>
         {% for installation, values in app_details.items %}
@@ -110,7 +126,6 @@
                     </tr>
                 {% endfor %}
             </table>
-
         {% endfor %}
     {% endif %}
 {% endblock %}
