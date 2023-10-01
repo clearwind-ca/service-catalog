@@ -2,6 +2,12 @@
 
 The Service Catalog is an open source tool for tracking teams, applications and tools across an organisation. It's goal is to provide clarity on how your organisation engineering teams are interconnected, reduce time to mitigate in incidents and more.
 
+Specifically it:
+* Uses configuration in GitHub repositories to build up a list of your services.
+* Provides insight into service priorities, teams and connections.
+* Allows regular checks on your service readiness using your business rules.
+* Aggregates key events from across your services to use in incidents.
+
 ### Current status
 
 👉 [Latest release](https://github.com/clearwind-ca/service-catalog/releases/tag/0.1.4)

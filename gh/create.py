@@ -55,21 +55,21 @@ on:
 
 jobs:
   meta:
+    runs-on: ubuntu-latest
     # This assumes that the service catalog token is a secret that has been added and is available to this repository.
     env:
       SERVICE_CATALOG_TOKEN: ${{{{ secrets.SERVICE_CATALOG_TOKEN }}}}
-    runs-on: ubuntu-latest
-    steps:
-    
-    # Extract the payload from the event.
-    - uses: clearwind-ca/get-payload@main
 
-    # Do something here with the payload sent from the catalog server.
-    # You will find the JSON at /tmp/service-catalog-payload.json
-    # You will find the catalog.json inside the JSON with the key `catalog.json`
+    steps:
+      # Extract the payload from the event.
+      - uses: clearwind-ca/get-payload@main
+
+      # Do something here with the payload sent from the catalog server.
+      # You will find the JSON at /tmp/service-catalog-payload.json
+      # You will find the catalog.json inside the JSON with the key `catalog.json`
     
-    # Send the result back to the server.
-    - uses: clearwind-ca/send-result@main
+      # Send the result back to the server.
+      - uses: clearwind-ca/send-result@main
 """
 
     elif type == "checkout-repo":
@@ -81,19 +81,40 @@ on:
 
 jobs:
   meta:
+    runs-on: ubuntu-latest
     # This assumes that the service catalog token is a secret that has been added and is available to this repository.
     env:
       SERVICE_CATALOG_TOKEN: ${{{{ secrets.SERVICE_CATALOG_TOKEN }}}}
     
-    # Checkout the repository as defined in the payload.
-    - uses: actions/checkout@v3
-      with:
-        repository: ${{ github.event.client_payload.repository }}
+    steps:
+      # Checkout the repository as defined in the payload.
+      - uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.client_payload.repository }}
+        
+      # Do something here with the repository.
+        
+      # Send the result back to the server.
+      - uses: clearwind-ca/send-result@main
+"""
     
-    # Do something here with the repository.
+    elif type == "no-service":
+        return f"""name: Catalog Check - {check.name}
+run-name: Catalog check ${{{{ github.event.client_payload.check }}}}
+on:
+  repository_dispatch:
+    types: [{check.slug}]
+
+jobs:
+  meta:
+    runs-on: ubuntu-latest
+    # This assumes that the service catalog token is a secret that has been added and is available to this repository.
+    env:
+      SERVICE_CATALOG_TOKEN: ${{{{ secrets.SERVICE_CATALOG_TOKEN }}}}
     
-    # Send the result back to the server.
-    - uses: clearwind-ca/send-result@main
+    steps:
+      # Send the result back to the server.
+      - uses: clearwind-ca/send-result@main
 """
     else:
         raise NotImplementedError(f"Unknown action type: {type}")
