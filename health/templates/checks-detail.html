@@ -144,7 +144,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>This will run this health check for all services.</p>
                     {% if check.frequency != 'ad-hoc' %}
                         <p>This check is set to run <code>{{ check.frequency }}</code>. You can still run it now if you'd like though.</p>
                     {% endif %}

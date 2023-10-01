@@ -30,7 +30,7 @@
                     <tr>
                         <td><a href="{% url 'health:checks-detail' result.health_check.slug %}">{{ result.health_check }}</a></td>
                         <td>{% include "pass.html" with result=result %}</td>
-                        <td><a href="{% url 'services:service-detail' result.service.slug %}">{{ result.service }}</a></td>
+                        <td>{% if result.service %}<a href="{% url 'services:service-detail' result.service.slug %}">{{ result.service }}</a>{% endif %}</td>
                         <td>{% include "status.html" with status=result %}</td>
                         <td>{% include "since.html" with since=result.updated %}</td>
                         <td>

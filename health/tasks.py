@@ -9,11 +9,15 @@ from health.models import Check, CheckResult
 from services.models import Service
 
 
-def should_run(check, service, quiet=False):
+def should_run(check, service=None, quiet=False):
     now = timezone.now()
     frequency = check.frequency
     if frequency not in ["hourly", "daily", "weekly"]:
         return False
+
+    # If there's no services defined, but you've sent a service that's a failure.
+    if check.limit == "none" and service is not None:
+        raise ValueError("You cannot send a service to a check that has no services defined.")
 
     recent_result = (
         CheckResult.objects.filter(health_check=check, service=service).order_by("-created").first()
@@ -45,14 +49,17 @@ def should_run(check, service, quiet=False):
 
 
 @app.task
-def send_to_github(check_slug, service_slug):
+def send_to_github(check_slug, service_slug=None):
     check = Check.objects.get(slug=check_slug)
-    service = Service.objects.get(slug=service_slug)
-    result = CheckResult.objects.create(
-        health_check=check,
-        status="sent",
-        service=service,
-    )
+    service = None
+    if service_slug:
+        service = Service.objects.get(slug=service_slug)
+
+    if check.limit == "none" and service is not None:
+        raise ValueError("You cannot send a service to a check that has no services defined.")
+
+    result = CheckResult.objects.create(health_check=check, status="sent", service=service)
+
     try:
         send.dispatch(result)
     except (SendError, NoRepository) as error:
@@ -67,20 +74,14 @@ def send_to_github(check_slug, service_slug):
 def send_active_to_github():
     check_queryset = Check.objects.filter(active=True)
     for check in check_queryset:
-
-        if check.limit == "all":
-            for service in Service.objects.filter(active=True):
-                if should_run(check, service):
-                    send_to_github.delay(check.slug, service.slug)
-        
-        if check.limit == "some":
-            for service in check.services.all():
-                if should_run(check, service):
-                    send_to_github.delay(check.slug, service.slug)
-
-        if check.limit == "none":
+        services = check.get_services()
+        if services is None:
             if should_run(check):
                 send_to_github.delay(check.slug)
+        else:
+            for service in services:
+                if should_run(check, service):
+                    send_to_github.delay(check.slug, service.slug)
 
 
 @app.task

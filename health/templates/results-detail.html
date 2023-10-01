@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block top %}
-    <h2>{{ result.health_check.name }} &bull; {{ result.service.name }}</h2>
+    <h2>{{ result.health_check.name }} {% if result.service %}&bull; {{ result.service.name }}{% endif %}</h2>
     <h4>
         {% include "pass.html" with pass=result.result %}
     </h4>
@@ -32,7 +32,7 @@
     <div class="pb-3">
         <h5 class="text-muted border-bottom">Check</h5>
         <p><a href="{% url 'health:checks-detail' result.health_check.slug %}">View check</a></p>
-        <p><a href="{% url 'services:service-detail' result.service.slug %}">View service</a></p>
+        <p>{% if result.service %}<a href="{% url 'services:service-detail' result.service.slug %}">View service</a>{% endif %}</p>
     </div>
 
     {% include "logs.html" with no_message="No logs found for this result." pk=result.pk type="check result" %}
