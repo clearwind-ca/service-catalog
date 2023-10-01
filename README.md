@@ -4,6 +4,8 @@ Service Catalog is an open source tool for tracking teams, applications and tool
 
 ### Current status
 
+👉 [Latest release](https://github.com/clearwind-ca/service-catalog/releases/tag/0.1.4)
+
 May 15th 2023: This is approaching a first stable release, core parts of it have stayed the same for a while now and there will be a clear migration path going forwards from here on.
 
 ### Documentation
