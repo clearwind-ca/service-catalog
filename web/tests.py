@@ -4,11 +4,11 @@ from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser, Group
+from django.contrib.messages import get_messages
 from django.core.cache import cache
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.utils import timezone
-from django.contrib.messages import get_messages
 from faker import Faker
 from rest_framework.authtoken.models import Token
 
@@ -45,7 +45,8 @@ example_app_response = {
     "client_secret": fake.text(),
 }
 
-class FakeOrg():
+
+class FakeOrg:
     def __init__(self):
         self.login = fake.slug()
         self.html_url = fake.url()
@@ -211,7 +212,7 @@ class TestCatalogMiddleware(TestCase):
     def test_multiple_orgs_member_one_fails(self, mock_user):
         Organization.objects.create(name=fake.slug(), url=fake.url())
         Organization.objects.create(name=fake.slug(), url=fake.url())
-        self.req.user = self.user   
+        self.req.user = self.user
         mock_user.check_org_membership.side_effect = [True, False]
         self.assertEqual(self.check_orgs(self.req), False)
 
@@ -222,7 +223,7 @@ class TestCatalogMiddleware(TestCase):
         self.req.user = self.user
         mock_user.check_org_membership.return_value = False
         self.assertEqual(self.check_orgs(self.req), False)
-                         
+
     @patch("web.middleware.user")
     def test_orgs_uses_cache(self, mock_user):
         Organization.objects.create(name="foo")
@@ -270,6 +271,7 @@ class TestCatalogMiddleware(TestCase):
         self.req.user = self.user
         self.assertEqual(self.process_request(self.req), None)
 
+
 class TestOrgs(TestCase):
     def setUp(self):
         self.url = reverse("web:setup-orgs")
@@ -296,6 +298,7 @@ class TestOrgs(TestCase):
 class FakeResult:
     def __init__(self, result):
         self.result = result
+
 
 class TestChecksBadge(TestCase):
     def test_all_checks_pass(self):
