@@ -1,6 +1,6 @@
 Health checks are the next step in your organisations readiness. Often we measure the quality of a service by some metrics[^1] or perhaps number of incidents. Incidents tend to be reactive in nature and health checks are intended to provide a more pro-active approach to measuring quality.
 
-A health check is a peice of code, written by the organisation to examine the service in some manner and return a value back to the Service Catalog.
+A health check is a peice of code, written by the organisation to examine the service in some manner and return a value back to the Catalog.
 
 ## Health Checks timeline
 
@@ -12,14 +12,14 @@ A health check is a peice of code, written by the organisation to examine the se
 
 ## Authentication
 
-In order to send a response back to the Service Catalog, you must authenticate with [the API](api.md) and to do that, you will need the API token for a user logged into the Service Catalog. In the following example 👇, it assumes the Secret is called `SERVICE_CATALOG_TOKEN`.
+In order to send a response back to the Catalog, you must authenticate with [the API](api.md) and to do that, you will need the API token for a user logged into the Catalog. In the following example 👇, it assumes the Secret is called `SERVICE_CATALOG_TOKEN`.
 
-For the Action to report the data back to the Service Catalog, the Action Runner (either [hosted](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners) or [self-hosted](https://docs.github.com/en/actions/hosting-your-own-runners/about-self-hosted-runners)) must have network access to the Service Catalog.
+For the Action to report the data back to the Catalog, the Action Runner (either [hosted](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners) or [self-hosted](https://docs.github.com/en/actions/hosting-your-own-runners/about-self-hosted-runners)) must have network access to the Catalog.
 
 ## Example GitHub Action using the API
 
 ```yaml
-name: Service Catalog Basic Check
+name: Catalog Basic Check
 run-name: Catalog check ${{ github.event.client_payload.check }} on ${{ github.event.client_payload.service }}
 on:
   repository_dispatch:
@@ -43,11 +43,11 @@ jobs:
 ```
 
 Three key variables are provided in the payload:
-* `data`: contains all the objects from the Service Catalog to allow you to do whatever work you'd like and post the information back to the Service Catalog.
+* `data`: contains all the objects from the Catalog to allow you to do whatever work you'd like and post the information back to the Catalog.
 * `check`: the `slug` of the check so you can identify and route the health check appropriately.
 * `service`: the `slug` of the service so you can identify and rout the health check appropriately.
 * `repository`: the `repository` the service comes from, this is suitable for passing to actions, such as [checkout](https://github.com/actions/checkout)
-* `server`: the URL of the Service Catalog.
+* `server`: the URL of the Catalog.
 
 **Note:** The `repository-dispatch` 👉 `types` field is set to `basic-check` which is the slug of the health check in the catalog.
  
@@ -60,7 +60,7 @@ You can use the [send-result Action](https://github.com/clearwind-ca/send-result
 ## Example GitHub Action using other Actions
 
 ```yaml
-name: Service Catalog Basic Check
+name: Catalog Basic Check
 run-name: Catalog check ${{ github.event.client_payload.check }} on ${{ github.event.client_payload.service }}
 on:
   repository_dispatch:
@@ -146,7 +146,7 @@ You can use the [send-result Action](https://github.com/clearwind-ca/send-result
 
 * Each health check for each service is sent as an individual GitHub Action run.
 * If the GitHub Action does not respond in a sufficient time then the check will be timed out.
-* Once a result has been sent to the Service Catalog, it cannot be changed. 
+* Once a result has been sent to the Catalog, it cannot be changed. 
 
 ---
 

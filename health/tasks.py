@@ -66,11 +66,21 @@ def send_to_github(check_slug, service_slug):
 @app.task
 def send_active_to_github():
     check_queryset = Check.objects.filter(active=True)
-    service_queryset = Service.objects.filter(active=True)
     for check in check_queryset:
-        for service in service_queryset:
-            if should_run(check, service):
-                send_to_github.delay(check.slug, service.slug)
+
+        if check.limit == "all":
+            for service in Service.objects.filter(active=True):
+                if should_run(check, service):
+                    send_to_github.delay(check.slug, service.slug)
+        
+        if check.limit == "some":
+            for service in check.services.all():
+                if should_run(check, service):
+                    send_to_github.delay(check.slug, service.slug)
+
+        if check.limit == "none":
+            if should_run(check):
+                send_to_github.delay(check.slug)
 
 
 @app.task

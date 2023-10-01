@@ -10,6 +10,12 @@ FREQUENCY_CHOICES = (
     ("ad-hoc", "Ad hoc"),
 )
 
+LIMIT = (
+    ("all", "All"),
+    ("some", "Some"),
+    ("none", "None"),
+)
+
 
 class Check(models.Model):
     name = models.CharField(max_length=255)
@@ -27,6 +33,18 @@ class Check(models.Model):
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+    limit = models.CharField(
+        max_length=6,
+        default="all",
+        choices=LIMIT,
+        help_text="How many services this check will be run against.",
+    )
+
+    services = models.ManyToManyField(
+        to="services.Service", related_name="health_checks", blank=True,
+        help_text="If this health check is limited to some services, select them here."
+    )
 
     def save(self, *args, **kwargs):
         # Ensure that changing the name does not change the slug.

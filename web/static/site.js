@@ -22,6 +22,23 @@ function processDateTime(datetimeTemplate) {
   element.parentNode.insertBefore(clone, element.nextSibling);
 }
 
+function enhanceCreateCheckForm(createCheckForm) {
+  let limit = document.getElementById("id_limit");
+  let services = document.getElementById("id_services");
+  // Load
+  if (limit.value != "some") {
+    services.disabled = true;
+  }
+  // Change
+  limit.addEventListener("change", (event) => {
+    if (event.target.value != "some") {
+      services.disabled = true;
+    } else {
+      services.disabled = false;
+    }
+  })
+}
+
 function processCreateAppForm(createAppForm) {
   createAppForm.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -58,7 +75,14 @@ function processCreateAppForm(createAppForm) {
   });
 }
 
+forms = {
+  "check-form": enhanceCreateCheckForm,
+  "create-app": processCreateAppForm,
+  "datetime": processDateTime,
+}
+
 window.addEventListener("load", (event) => {
+  // Load tooltips
   const tooltipTriggerList = document.querySelectorAll(
     '[data-bs-toggle="tooltip"]'
   );
@@ -66,12 +90,14 @@ window.addEventListener("load", (event) => {
     (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
   );
 
+  // Update popover allowlist
   const myAllowList = bootstrap.Popover.Default.allowList;
   myAllowList.b = [];
   myAllowList.a = ["data-copy"];
   myAllowList.svg = ["width", "height", "version", "class"];
   myAllowList.path = ["fill-rule", "d"];
 
+  // Load popovers
   const popoverTriggerList = document.querySelectorAll(
     '[data-bs-toggle="popover"]'
   );
@@ -79,16 +105,15 @@ window.addEventListener("load", (event) => {
     (popoverTriggerEl) => new bootstrap.Popover(popoverTriggerEl, {allowList:myAllowList, html: true})
   );
 
-  const datetimeTemplate = document.getElementById("datetime");
-  if (datetimeTemplate) {
-    processDateTime(datetimeTemplate);
-  }
-
-  const createAppForm = document.getElementById("create-app");
-  if (createAppForm) {
-    processCreateAppForm(createAppForm);
+  // Load form enhancements based on ids being present
+  for (let form of Object.keys(forms)) {
+    const element = document.getElementById(form);
+    if (element) {
+      forms[form](element);
+    }
   }
   
+  // Load copy to clipboard
   document.querySelectorAll(".copy").forEach((element) => {
     element.addEventListener("click", (element) => {
       navigator.clipboard.writeText(element.target.getAttribute("data-copy"))

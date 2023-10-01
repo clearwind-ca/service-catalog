@@ -6,9 +6,9 @@ An [example organization](https://github.com/service-catalog-testing/) is availa
 
 ## GitHub app
 
-The [GitHub app added](installing.md) provides the interface for adding repositories to the Service Catalog. To use the Service Catalog, the app should be installed in a repository in the organization.
+The [GitHub app added](installing.md) provides the interface for adding repositories to the Catalog. To use the Catalog, the app should be installed in a repository in the organization.
 
-To add in every repository for an organisation, install the Service Catalog app in GitHub to every repository for an organisation. Control of what repositories have access to the Service Catalog is controlled by GitHub.
+To add in every repository for an organisation, install the Catalog app in GitHub to every repository for an organisation. Control of what repositories have access to the Catalog is controlled by GitHub.
 
 [Install your GitHub App on your repository](https://docs.github.com/en/apps/maintaining-github-apps/installing-github-apps#installing-your-private-github-app-on-your-repository)
 
@@ -48,11 +48,11 @@ Optional fields:
 
 When a Service is added to the Catalog it is given a slug [using the built-in Django slug function](https://docs.djangoproject.com/en/4.1/ref/utils/#django.utils.text.slugify). For example: `Database Team` becomes `database-team`.
 
-Slugs must be unique within the Service Catalog.
+Slugs must be unique within the Catalog.
 
 ### Meta
 
-The Service Catalog does not have any requirements or definitions for how Services within the Catalog should provide metadata. This is completely up to the organisation to decide. 
+The Catalog does not have any requirements or definitions for how Services within the Catalog should provide metadata. This is completely up to the organisation to decide. 
 
 It's recommended that the `meta` contains information that is usefult to people in the organisation who might be unfamiliar with the service, or need to quickly find information in an incident.
 
@@ -62,7 +62,7 @@ See [configuration](configuration.md) for information on how to enforce `meta`.
 
 ### Files
 
-One repository might have multiple services. To allow this the `files` array allows one repository to contain multiple services. If `files` is encountered in a file, the Service Catalog will pull information from that file.
+One repository might have multiple services. To allow this the `files` array allows one repository to contain multiple services. If `files` is encountered in a file, the Catalog will pull information from that file.
 
-The `files` array can be in any file read by the Service Catalog.
+The `files` array can be in any file read by the Catalog.
 

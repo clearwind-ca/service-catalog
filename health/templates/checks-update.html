@@ -5,7 +5,7 @@
 {% load crispy_forms_tags %}
 
 {% block breadcrumbs %}
-    <li class="breadcrumb-item"><a href="{% url 'health:checks-list' %}">{% octicon "dashboard" %} Health checks</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'health:checks-list' %}">{% octicon "check" %} Health checks</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{ check.slug }}</li>
 {% endblock %}
 
@@ -19,7 +19,7 @@
 {% block main %}
     <div class="card mt-3 mb-3">
         <div class="card-body">
-            <form method="post" action="{% url 'health:checks-update' check.slug %}" class="m-3">
+            <form method="post" action="{% url 'health:checks-update' check.slug %}" class="m-3" id="check-form">
                 {% csrf_token %}
                 {{ form|crispy }}
                 <button type="submit" class="btn btn-outline-primary">Update health check</button>

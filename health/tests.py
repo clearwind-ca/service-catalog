@@ -11,6 +11,7 @@ from services.tests import create_service, create_source
 
 from .management.commands import send, timeout
 from .models import Check, CheckResult
+from .forms import CheckForm
 
 fake = Faker()
 
@@ -103,6 +104,11 @@ class TestCheck(BaseTestCase):
         res = self.client.post(url)
         self.login_required(res)
 
+
+class TestCheckForm(WithHealthCheck):
+    def test_duplicate_slug(self):
+        self.assertEquals(CheckForm({"name": self.health_check.name + "-bit"}).is_valid(), None)
+        self.assertFalse(CheckForm({"name": self.health_check.name}).is_valid())
 
 class TestAction(WithHealthCheck):
     def setUp(self):

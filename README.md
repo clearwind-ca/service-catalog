@@ -1,6 +1,6 @@
 [![Tests](https://github.com/clearwind-ca/service-catalog/actions/workflows/django.yml/badge.svg)](https://github.com/clearwind-ca/service-catalog/actions/workflows/django.yml)
 
-Service Catalog is an open source tool for tracking teams, applications and tools across an organisation. It's goal is to provide clarity on how your organisation engineering teams are interconnected, reduce time to mitigate in incidents and more.
+The Service Catalog is an open source tool for tracking teams, applications and tools across an organisation. It's goal is to provide clarity on how your organisation engineering teams are interconnected, reduce time to mitigate in incidents and more.
 
 ### Current status
 
@@ -27,5 +27,5 @@ Some blog posts about the catalog:
 * https://mckay.pub/2023-05-18-using-actions/ 👈 health checks and using Actions.
 ---
 
-Service Catalog is under the [MIT License](LICENSE.md) and originally built by [Clearwind Consulting](https://clearwind.ca).
+Catalog is under the [MIT License](LICENSE.md) and originally built by [Clearwind Consulting](https://clearwind.ca).
 

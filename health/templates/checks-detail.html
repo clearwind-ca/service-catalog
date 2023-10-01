@@ -5,7 +5,7 @@
 {% load crispy_forms_tags %}
 
 {% block breadcrumbs %}
-    <li class="breadcrumb-item"><a href="{% url 'health:checks-list' %}">{% octicon "dashboard" %} Health checks</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'health:checks-list' %}">{% octicon "check" %} Health checks</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{ check.slug }}</li>
 {% endblock %}
 
@@ -28,6 +28,30 @@
                 </div>
             {% endif %}
         </dd>
+
+        <dt>Limits</dt>
+        <dd>
+            {% if check.limit == 'all' %}
+                <p>This check will be run on <b>every</b> service.</p>
+            {% elif check.limit == 'some' %}
+                <p>This check will be run on <b>some</b> services.</p>
+            {% elif check.limit == 'none' %}
+                <p>This check will be run on <b>no</b> services. The payload will not contain any service information.</p>
+            {% endif %}
+        </dd>
+        {% if check.limit == 'some' %}
+            <dt>Services</dt>
+            <dd>
+                <p>This check will be run on the following services:</p>
+                <ul>
+                    {% for service in check.services.all %}
+                        <li><a href="{% url 'services:service-detail' service.slug %}">{{ service.name }}</a></li>
+                    {% empty %}
+                        <li>No services selected.</li>
+                    {% endfor %}
+                </ul>
+            </dd>
+        {% endif %}
     </dl>
 
     {% if results_data %}

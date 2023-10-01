@@ -16,7 +16,7 @@ If in the `catalog.json` your service defines some events values, those will **a
 "events": {"deployments", "releases"}
 ```
 
-In this example both deployment and releases will be sent from GitHub to the Service Catalog, as webhooks and automatically added to the events timeline. 
+In this example both deployment and releases will be sent from GitHub to the Catalog, as webhooks and automatically added to the events timeline. 
 
 If the deployment is to the `production` environment then `Affects customers` is set to true.
 
@@ -24,11 +24,11 @@ If the release is not a pre-release then `Affect customers` is set to true.
 
 ## Authentication
 
-In order to send an even to the Service Catalog, you must authenticate with [the API](api.md) and to do that, you will need the API token for a user logged into the Service Catalog. In the following example 👇, it assumes the Secret is called `SERVICE_CATALOG_TOKEN`.
+In order to send an even to the Catalog, you must authenticate with [the API](api.md) and to do that, you will need the API token for a user logged into the Catalog. In the following example 👇, it assumes the Secret is called `SERVICE_CATALOG_TOKEN`.
 
 ## Example GitHub Action
 
-You can easily send an event to the Service Catalog using the [create-event Action](https://github.com/clearwind-ca/create-event)
+You can easily send an event to the Catalog using the [create-event Action](https://github.com/clearwind-ca/create-event)
 
 ```yaml
     - uses: clearwind-ca/create-event@v1

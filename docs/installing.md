@@ -1,4 +1,4 @@
-The Service Catalog is a Django project and installable pretty much anywhere that can meet the requirements.
+The Catalog is a Django project and installable pretty much anywhere that can meet the requirements.
 
 Requirements:
 * [Python](https://www.python.org/) 3.9+
@@ -20,7 +20,7 @@ Tasks are managed through a celery backend. The docker container installs a non-
 
 ## Environment variables
 
-Where possible configuration is done through environment variables which alter the settings files. Some of these settings are specific to the Service Catalog, but some are [common to all Django projects and the documentation](https://docs.djangoproject.com/en/4.1/ref/settings/) covers those.
+Where possible configuration is done through environment variables which alter the settings files. Some of these settings are specific to the Catalog, but some are [common to all Django projects and the documentation](https://docs.djangoproject.com/en/4.1/ref/settings/) covers those.
 
 ### Setup page
 

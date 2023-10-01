@@ -1,4 +1,4 @@
-How to configure Service Catalog.
+How to configure Catalog.
 
 ## Enforcing custom schema
 
