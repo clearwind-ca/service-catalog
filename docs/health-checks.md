@@ -7,6 +7,7 @@ A health check is a peice of code, written by the organisation to examine the se
 * A health check is created in the service catalog, with a frequency of how often it should be run.
 * When the health check is run, a health check result is created in the catalog, with state of `sent` and `unknown`
 * The health check is sent to a repository on GitHub as a [repository_dispatch](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#repository_dispatch) event.
+* The `repository_dispatch` `type` is the `slug` of the name of the health check.
 * The GitHub Action runs some code and returns a result to the service catalog.
 
 ## Authentication
@@ -22,7 +23,7 @@ name: Service Catalog Basic Check
 run-name: Catalog check ${{ github.event.client_payload.check }} on ${{ github.event.client_payload.service }}
 on:
   repository_dispatch:
-    types: ["check"]
+    types: ["basic-check"]
 
 jobs:
   build:
@@ -47,7 +48,9 @@ Three key variables are provided in the payload:
 * `service`: the `slug` of the service so you can identify and rout the health check appropriately.
 * `repository`: the `repository` the service comes from, this is suitable for passing to actions, such as [checkout](https://github.com/actions/checkout)
 * `server`: the URL of the Service Catalog.
-* 
+
+**Note:** The `repository-dispatch` 👉 `types` field is set to `basic-check` which is the slug of the health check in the catalog.
+ 
 At the end of this workflow we are running a script contained in the repository of the name `calculate-result.py` which is going to process the payload.
 
 You can use the [send-result Action](https://github.com/clearwind-ca/send-result) for this.
@@ -61,13 +64,12 @@ name: Service Catalog Basic Check
 run-name: Catalog check ${{ github.event.client_payload.check }} on ${{ github.event.client_payload.service }}
 on:
   repository_dispatch:
-    types: ["check"]
+    types: ["log4j-vulnerability"]
 
 jobs:
   log4j:
     env:
       SERVICE_CATALOG_TOKEN: ${{ secrets.SERVICE_CATALOG_TOKEN }}
-    if: github.event.client_payload.check == 'log4j-vulnerability'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -88,39 +90,15 @@ jobs:
         fi
         echo `cat /tmp/service-catalog-result.json`
     - uses: clearwind-ca/send-result@inputs
-        
-
-  codeowners:
-    env:
-      SERVICE_CATALOG_TOKEN: ${{ secrets.SERVICE_CATALOG_TOKEN }}
-    if: github.event.client_payload.check == 'codeowners-check'
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        repository: ${{ github.event.client_payload.repository }}
-    - uses: mszostok/codeowners-validator@v0.7.4
-      with:
-        checks: "files,duppatterns,syntax"
-    - if: success()
-      uses: clearwind-ca/send-result@inputs
-      with:
-        result: "pass"
-    - if: failure()
-      uses: clearwind-ca/send-result@inputs
-      with:
-        result: "fail"
 ```
-
-This is a more complicated example that does two different health checks in one workflow and uses different methods to report the results.
 
 **Notes:**
 * This uses `send-result` Action to send data instead of accessing the API manually.
 * This uses `if github.event.client_payload.check` to have one workflow file running different health checks.
 * `failure` and `success` allow to report `pass` or `fail` of the build if previous steps fail.
 * `printf '{...` is a way to populate a file with a result and message to use with the `send-result` Action.
-
-
+* The `repository-dispatch` 👉 `types` field is set to `log4j-vulnerability` which is the slug of the health check in the catalog.
+ 
 ## Payload: data
 
 The data is a base64 encoded JSON object. To get access to the data in Python you'd do the following:
