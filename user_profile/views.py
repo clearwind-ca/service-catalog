@@ -24,6 +24,7 @@ def profile_update(request):
     if form.is_valid():
         form.save()
         messages.info(request, "Profile updated successfully")
+        request.session["tz"] = None
         return redirect(reverse("profile:profile-detail"))
 
     return render(request, "profile-details.html", context=context)

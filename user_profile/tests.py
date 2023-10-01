@@ -23,3 +23,4 @@ class TestUserProfile(BaseTestCase):
         self.client.force_login(user=self.user)
         res = self.client.post(url, {"timezone": "Africa/Abidjan"})
         self.assertEquals(Profile.objects.get(user=self.user).timezone, "Africa/Abidjan")
+        self.assertEquals(self.client.session["tz"], None)
