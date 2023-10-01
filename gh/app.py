@@ -31,6 +31,6 @@ def get_orgs():
     for installation in gh.get_installations():
         if installation.target_type == "Organization":
             gh_installation = login_as_installation(gh, installation)
-            org = gh_installation.get_organization(installation.raw_data['account']['login'])
+            org = gh_installation.get_organization(installation.raw_data["account"]["login"])
             orgs.append(org)
     return orgs

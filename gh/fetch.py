@@ -73,6 +73,7 @@ def url_to_nwo(url):
     organization, repo = path.split("/")
     return organization, repo
 
+
 def url_to_org(url):
     path = urlparse(url).path
     # Remove the leading slash.
@@ -85,7 +86,8 @@ def url_to_org(url):
     if path.count("/") > 0:
         raise ValueError(f"Can't parse {url}.")
 
-    return path 
+    return path
+
 
 def get_repo(gh, repo):
     try:

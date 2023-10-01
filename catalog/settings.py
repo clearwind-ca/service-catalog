@@ -112,7 +112,13 @@ LOGIN_REQUIRED_IGNORE_PATHS = [
     "^/github/webhooks/",
     "^/static/*.*",
 ]
-LOGIN_REQUIRED_IGNORE_VIEW_NAMES = ["web:home", "web:setup", "web:setup-orgs", "web:login-problem", "web:logout"]
+LOGIN_REQUIRED_IGNORE_VIEW_NAMES = [
+    "web:home",
+    "web:setup",
+    "web:setup-orgs",
+    "web:login-problem",
+    "web:logout",
+]
 LOGIN_REQUIRED_REDIRECT_FIELD_NAME = "next"
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/services/"

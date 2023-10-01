@@ -151,5 +151,7 @@ The file is validated against [the schema]({settings.SERVICE_SCHEMA}). More info
 If you'd like to change or add to the contents of this file, please do so and when ready merge this pull request.
 """
     repo.create_file("catalog.json", msg, text, branch=default_branch_name)
-    pull = repo.create_pull(title=msg, body=body, head=default_branch_name, base=default_branch.name)
+    pull = repo.create_pull(
+        title=msg, body=body, head=default_branch_name, base=default_branch.name
+    )
     return pull

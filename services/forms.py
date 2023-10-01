@@ -7,7 +7,7 @@ from django import forms
 from django.conf import settings
 from django.contrib import messages
 
-from gh.fetch import url_to_org, url_to_nwo
+from gh.fetch import url_to_nwo, url_to_org
 from web.shortcuts import get_object_or_None
 
 from . import models

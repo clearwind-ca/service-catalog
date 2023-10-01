@@ -6,6 +6,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.urls import reverse
+
 from gh.fetch import url_to_org
 from health.models import Check, CheckResult
 
@@ -153,7 +154,7 @@ class Organization(models.Model):
 
     def __str__(self):
         return self.name
-    
+
     def save(self, *args, **kwargs):
         if not self.name:
             self.name = url_to_org(self.url)

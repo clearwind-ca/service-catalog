@@ -113,7 +113,9 @@ class CatalogMiddleware(AuthenticationMiddleware):
             logger.error(f"Check-Orgs: Cache hit for {key} with {result}")
             return result
 
-        # Next, check the database.
+        # Next, check that the user is a valid user in each organisation.
+        # To prevent leakage, the user has to present in all the orgs, otherwise we'll be leaking
+        # data from one org to another.
         valid = all([user.check_org_membership(request.user.username, name) for name in names])
 
         # Set a cache key for 5 minutes.
