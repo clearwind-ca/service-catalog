@@ -50,6 +50,7 @@ def get(key):
 
 def setup(request):
     form = CreateAppForm()
+    app_details = app.get_details()
     context = {
         "keys": {
             "django": {
@@ -68,8 +69,13 @@ def setup(request):
             },
             "app": {},
         },
-        "app_details": app.get_details(),
-        "steps": {"django": False, "github": False},
+        "app_details": app_details,
+        "steps": {
+            "django": False,
+            "github": False,
+            "orgs": Organization.objects.exists(),
+            "app": bool(app_details),
+        },
         "form": form,
     }
     if request.GET and request.GET.get("code"):
@@ -99,6 +105,21 @@ def setup(request):
     )
 
     return render(request, "setup.html", context)
+
+
+@require_POST
+def setup_orgs(request):
+    # This doesn't have any permissions on it, so it will need to work before the organizations are created.
+    if Organization.objects.exists():
+        messages.add_message(
+            request, messages.ERROR, "Organizations already exist, so initial setup is unavailable."
+        )
+        return redirect(reverse("web:setup"))
+
+    for org in app.get_orgs():
+        Organization.objects.get_or_create(url=org.html_url, name=org.login)
+
+    return redirect(reverse("web:setup"))
 
 
 @permission_required("authtoken.add_token")

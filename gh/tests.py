@@ -382,11 +382,11 @@ class TestCreateYAML(WithGitHubUser):
             ".github/workflows/catalog-action-some-slug.yml",
             "Initial catalog Action creation",
             ANY,
-            branch="catalog",
+            branch="catalog-some-slug",
         )
         self.repo.create_pull.assert_called_with(
             title="Initial catalog Action creation",
             body=ANY,
-            head="catalog",
+            head="catalog-some-slug",
             base="main",
         )

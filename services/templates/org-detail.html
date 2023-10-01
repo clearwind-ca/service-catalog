@@ -1,0 +1,31 @@
+{% extends "base-two-column.html" %}
+{% load octicons %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'services:source-list' %}">{% octicon "dashboard" %}Sources</a></li>
+    <li class="breadcrumb-item">Edit organization</li>
+{% endblock %}
+{% load helpers %}
+{% load crispy_forms_tags %}
+{% block top %}
+<h2>Edit an organization</h2>
+{% endblock %}
+
+{% block main %}
+<div class="card mt-3 mb-3">
+    <form method="post" action="{% url 'services:org-detail' org.name %}" class="m-3">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form|crispy }}
+        </div>
+        <button type="submit" class="btn btn-outline-primary">Update organization</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div class="pb-3">
+    <h5 class="text-muted border-bottom">Info</h5>
+    <p>Currently the Catalog only supports <b>one organization</b> and <b>unlimited repositories</b> in any location.</p>
+</div>
+
+{% endblock %}

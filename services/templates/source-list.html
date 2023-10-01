@@ -81,7 +81,8 @@
                             {% octicon "hamburger" %}
                          </span>
                          <ul class="dropdown-menu">
-                             <li><a class="dropdown-item" href="{{ org.url }}">{% octicon "link-external" %} View on GitHub</a></li>
+                            <li><a class="dropdown-item" href="{% url 'services:org-detail' org.name %}">{% octicon "edit" %} Edit</a></li>
+                            <li><a class="dropdown-item" href="{{ org.url }}">{% octicon "link-external" %} View on GitHub</a></li>
                          </ul>
                     </td>
                 </tr>
@@ -91,14 +92,16 @@
     {% endif %}
 
     {% if perms.services.add_source %}
-    <p><a href="{% url 'services:source-add' %}">{% octicon 'plus' %} Add in a new source</a></p>
+        <p><a href="{% url 'services:source-add' %}">{% octicon 'plus' %} Add in a new source</a></p>
     {% endif %}
+
     {% if perms.services.change_source %}
-    <hr>
-    <p>Organisations and sources are automatically pulled from GitHub at intervals. You can trigger these events manually if you'd like 👇</p>
-    <form action="{% url 'services:org-refresh' %}" method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-outline-primary">Trigger GitHub refresh</button>
+        <hr>
+        <p>Organisations and sources are automatically pulled from GitHub at intervals. You can trigger these events manually if you'd like 👇</p>
+        <form action="{% url 'services:org-refresh' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-primary">Trigger GitHub refresh</button>
+        </form>
     {% endif %}
     <hr>
     <p class="form-text">The data being pulled is validated using <a href="{% url 'services:schema-detail' %}">this schema.</p>

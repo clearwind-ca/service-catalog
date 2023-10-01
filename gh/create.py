@@ -6,10 +6,10 @@ from github import GithubException, UnknownObjectException
 from catalog.errors import FileAlreadyExists
 from gh.fetch import get_repo_installation
 
-branch = "catalog"
+default_branch_name = "catalog"
 
 
-def check_can_create(repo, default_branch, filename):
+def check_can_create(repo, default_branch, filename, branch=default_branch_name):
     """Do some checks that we can actually create the file."""
     sha_latest_commit = default_branch.commit.sha
     try:
@@ -41,7 +41,7 @@ def check_can_create(repo, default_branch, filename):
         else:
             # The file already exists, so if we branch, we'll get into conflict.
             # At the moment we are focusing on creating files, not updating them.
-            raise FileAlreadyExists(f"Branch: `{branch}` in: already contains file: {filename}.")
+            raise FileAlreadyExists(f"Branch: `{branch}` already contains file: {filename}.")
 
 
 def get_action_blurb(type, check):
@@ -103,9 +103,10 @@ def create_action_file(org_name, repo_name, data, check):
     repo = get_repo_installation(org_name, repo_name)
     yaml = get_action_blurb(data["type"], check)
 
+    branch = f"{default_branch_name}-{check.slug}"
     default_branch = repo.get_branch(repo.default_branch)
     filename = f".github/workflows/catalog-action-{check.slug}.yml"
-    check_can_create(repo, default_branch, filename)
+    check_can_create(repo, default_branch, filename, branch=branch)
 
     msg = f"Initial catalog Action creation"
     body = f"""👋 This is an automated pull request to create an Action file for the catalog.
@@ -115,7 +116,7 @@ It comes from the [service]({settings.SERVER_URL}) and it was populated this wit
 As of creation, it won't have enough to do anything useful, that will needed to be added by someone. When that's done, you can probably replace these sentances with something that explains what it does.
 """
     repo.create_file(filename, msg, yaml, branch=branch)
-    pull = repo.create_pull(title=msg, body=body, head="catalog", base=default_branch.name)
+    pull = repo.create_pull(title=msg, body=body, head=branch, base=default_branch.name)
     return pull
 
 
@@ -149,6 +150,8 @@ The file is validated against [the schema]({settings.SERVICE_SCHEMA}). More info
 
 If you'd like to change or add to the contents of this file, please do so and when ready merge this pull request.
 """
-    repo.create_file("catalog.json", msg, text, branch=branch)
-    pull = repo.create_pull(title=msg, body=body, head="catalog", base=default_branch.name)
+    repo.create_file("catalog.json", msg, text, branch=default_branch_name)
+    pull = repo.create_pull(
+        title=msg, body=body, head=default_branch_name, base=default_branch.name
+    )
     return pull

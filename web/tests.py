@@ -4,6 +4,7 @@ from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser, Group
+from django.contrib.messages import get_messages
 from django.core.cache import cache
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
@@ -15,7 +16,7 @@ from catalog.tests import BaseTestCase
 from services.models import Organization
 from user_profile.models import Profile
 
-from .groups import setup_group
+from .apps import setup_groups
 from .middleware import CatalogMiddleware, TimezoneMiddleware
 from .signals import user_logged_in_handler
 from .templatetags.helpers import (
@@ -43,6 +44,12 @@ example_app_response = {
     "pem": fake.text(),
     "client_secret": fake.text(),
 }
+
+
+class FakeOrg:
+    def __init__(self):
+        self.login = fake.slug()
+        self.html_url = fake.url()
 
 
 class TestHomePage(TestCase):
@@ -146,8 +153,7 @@ class TestCatalogMiddleware(TestCase):
         self.user = get_user_model().objects.create_user(username="andy")
         self.check_orgs = CatalogMiddleware(Mock()).check_orgs
         self.process_request = CatalogMiddleware(Mock()).process_request
-        setup_group("members")
-        setup_group("public")
+        setup_groups()
         self.members = Group.objects.get(name="members")
         self.public = Group.objects.get(name="public")
         super().setUp()
@@ -173,8 +179,9 @@ class TestCatalogMiddleware(TestCase):
         self.assertEquals(self.check_orgs(self.req), False)
 
     def test_no_orgs_user(self):
+        # Passes because there are no orgs and the orgs enforce the membership.
         self.req.user = self.user
-        self.assertEquals(self.check_orgs(self.req), False)
+        self.assertEquals(self.check_orgs(self.req), True)
 
     def test_orgs_anon(self):
         Organization.objects.create(name="foo")
@@ -200,6 +207,22 @@ class TestCatalogMiddleware(TestCase):
         self.req.user = self.user
         mock_user.check_org_membership.return_value = True
         self.assertEqual(self.check_orgs(self.req), True)
+
+    @patch("web.middleware.user")
+    def test_multiple_orgs_member_one_fails(self, mock_user):
+        Organization.objects.create(name=fake.slug(), url=fake.url())
+        Organization.objects.create(name=fake.slug(), url=fake.url())
+        self.req.user = self.user
+        mock_user.check_org_membership.side_effect = [True, False]
+        self.assertEqual(self.check_orgs(self.req), False)
+
+    @patch("web.middleware.user")
+    def test_multiple_orgs_member_both_fail(self, mock_user):
+        Organization.objects.create(name=fake.slug(), url=fake.url())
+        Organization.objects.create(name=fake.slug(), url=fake.url())
+        self.req.user = self.user
+        mock_user.check_org_membership.return_value = False
+        self.assertEqual(self.check_orgs(self.req), False)
 
     @patch("web.middleware.user")
     def test_orgs_uses_cache(self, mock_user):
@@ -249,6 +272,29 @@ class TestCatalogMiddleware(TestCase):
         self.assertEqual(self.process_request(self.req), None)
 
 
+class TestOrgs(TestCase):
+    def setUp(self):
+        self.url = reverse("web:setup-orgs")
+
+    def test_orgs_get(self):
+        self.client.get(self.url).status_code == 302
+
+    def test_post_orgs_exist(self):
+        Organization.objects.create(name="foo")
+        res = self.client.post(self.url)
+        message = [m.message for m in get_messages(res.wsgi_request)][0]
+        self.assertIn("already exist", message)
+        self.assertEquals(res.status_code, 302)
+
+    @patch("web.views.app.get_orgs")
+    def test_create_orgs(self, mock_get_orgs):
+        mock_get_orgs.return_value = [FakeOrg(), FakeOrg()]
+        assert Organization.objects.count() == 0
+        res = self.client.post(self.url)
+        assert Organization.objects.count() == 2
+        self.assertEquals(res.status_code, 302)
+
+
 class FakeResult:
     def __init__(self, result):
         self.result = result
@@ -279,8 +325,7 @@ class TestChecksBadge(TestCase):
 
 class TestGroupAssignment(TestCase):
     def setUp(self):
-        setup_group("members")
-        setup_group("public")
+        setup_groups()
         self.members = Group.objects.get(name="members")
         self.public = Group.objects.get(name="public")
         self.factory = RequestFactory()

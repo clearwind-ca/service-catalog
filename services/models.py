@@ -7,6 +7,7 @@ from django.db import models
 from django.template.defaultfilters import slugify
 from django.urls import reverse
 
+from gh.fetch import url_to_org
 from health.models import Check, CheckResult
 
 
@@ -154,6 +155,11 @@ class Organization(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        if not self.name:
+            self.name = url_to_org(self.url)
+        super().save(*args, **kwargs)
+
 
 def slugify_service(name):
     return slugify(name)
@@ -163,5 +169,6 @@ def slugify_source(url):
     return slugify(urlparse(url).path.replace("/", "-"))
 
 
+auditlog.register(Organization)
 auditlog.register(Service)
 auditlog.register(Source)

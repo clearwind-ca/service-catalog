@@ -101,7 +101,7 @@ class CatalogMiddleware(AuthenticationMiddleware):
         names = Organization.objects.values_list("name", flat=True)
         if not names:
             logger.error(f"Check-Orgs: No orgs found to check membership against.")
-            return False
+            return True
 
         # Include the org names in the key, so that if the orgs change we
         # end up with a stale result.
@@ -113,7 +113,9 @@ class CatalogMiddleware(AuthenticationMiddleware):
             logger.error(f"Check-Orgs: Cache hit for {key} with {result}")
             return result
 
-        # Next, check the database.
+        # Next, check that the user is a valid user in each organisation.
+        # To prevent leakage, the user has to present in all the orgs, otherwise we'll be leaking
+        # data from one org to another.
         valid = all([user.check_org_membership(request.user.username, name) for name in names])
 
         # Set a cache key for 5 minutes.
@@ -147,11 +149,9 @@ class CatalogMiddleware(AuthenticationMiddleware):
                 if request.user.has_perm("services.view_service"):
                     return None
 
-            # Otherwise, check org membership.
-            else:
-                # This is the base we need if this is not set.
-                if self.check_orgs(request):
-                    return None
+            # This is the base we need if this is not set.
+            if self.check_orgs(request):
+                return None
 
         # This is a DRF request.
         if request._is_drf:
