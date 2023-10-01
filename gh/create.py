@@ -97,7 +97,7 @@ jobs:
       # Send the result back to the server.
       - uses: clearwind-ca/send-result@main
 """
-    
+
     elif type == "no-service":
         return f"""name: Catalog Check - {check.name}
 run-name: Catalog check ${{{{ github.event.client_payload.check }}}}

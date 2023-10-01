@@ -66,17 +66,14 @@
             <div class="row mb-2">
 
             {% if results_data and check.limit == "none" %}
-                <b>Last result</b>
-                <p class="form-text">Because this check has no services, check the <a href="{% url 'health:results-list' %}{% qs request 'health_check__slug' check.slug %}">result list</a> to see the history of results.</p>
                 <div class="my-3">
                     {% include "pass.html" with pass=result %}
                     {% include "since.html" with since=result.updated %}
                 </div>
+                <p class="form-text pt-3">{% octicon "info" %} Because this check has no services, check the <a href="{% url 'health:results-list' %}{% qs request 'health_check__slug' check.slug %}">result list</a> to see the history of results.</p>
             {% endif %}
             
             {% if results_data and check.limit != "none" %}
-                <b>Last results</b>
-                <p class="form-text">This shows the status of the <i>last run</i> of each service. <a href="{% url 'health:results-list' %}{% qs request 'health_check__slug' check.slug %}">View full historical results</a>.</p>
                 <table class="table my-3">
                     <thead>
                         <tr>
@@ -102,6 +99,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                <p class="form-text pt-3">{% octicon "info" %}This shows the status of the <i>last run</i> of each service. <a href="{% url 'health:results-list' %}{% qs request 'health_check__slug' check.slug %}">View full historical results</a>.</p>
             {% endif %}
             </div>
         </div>
