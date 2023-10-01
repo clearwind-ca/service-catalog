@@ -49,7 +49,7 @@
                 <dd><pre>{{ app.pem }}</pre></dd>
             </dl>
         {% else %}
-            <p>Create a GitHub app for your organization. This will allow you to populate the Environment variables. If you already have an existing Service Catalog GitHub app ready to go, you can just skip straight to setting up the appropriate environment variables.</p>
+            <p>Create a GitHub app for your organization. This will allow you to populate the Environment variables. If you already have an existing Catalog GitHub app ready to go, you can just skip straight to setting up the appropriate environment variables.</p>
             <div class="card mt-3 mb-3">
                 <form method="post" data-action="https://github.com/organizations/ORGANIZATION/settings/apps/new?state=abc123" id="create-app" class="m-3">
                     {% csrf_token %}

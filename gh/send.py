@@ -26,9 +26,9 @@ def dispatch(result):
             },
             "check": CheckSerializer(result.health_check).data,
             "result": CheckResultSerializer(result).data,
-            "service": ServiceSerializer(result.service).data,
-            "source": SourceSerializer(result.service.source).data,
-            "catalog.json": result.service.raw_data,
+            "service": ServiceSerializer(result.service).data if result.service else None,
+            "source": SourceSerializer(result.service.source).data if result.service else None,
+            "catalog.json": result.service.raw_data if result.service else None,
         }
     )
     # GitHub is assuming that the data is a string when you access the payload
@@ -45,8 +45,8 @@ def dispatch(result):
         "data": data,
         # Things that are really useful to have and can be accessed directly.
         "check": result.health_check.slug,
-        "service": result.service.slug,
-        "repository": "/".join(url_to_nwo(result.service.source.url)),
+        "service": result.service.slug if result.service else None,
+        "repository": "/".join(url_to_nwo(result.service.source.url)) if result.service else None,
         "server": settings.SERVER_URL,
     }
 

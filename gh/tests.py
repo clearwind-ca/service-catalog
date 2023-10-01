@@ -149,8 +149,8 @@ class TestFetch(WithGitHubUser):
         self.assertEquals(result[1], {"contents": data, "path": "catalog2.json"})
 
 
-def unpack_payload(payload):
-    return json.loads(base64.b64decode(payload).decode("utf-8"))
+def unpack_data(data):
+    return json.loads(base64.b64decode(data).decode("utf-8"))
 
 
 class TestSend(WithGitHubUser):
@@ -166,9 +166,15 @@ class TestSend(WithGitHubUser):
         args = login_mock.return_value.create_repository_dispatch.call_args
         self.assertEqual(args[1]["event_type"], objects["health_check"].slug)
 
-        payload = unpack_payload(args[1]["client_payload"]["data"])
+        payload = args[1]["client_payload"]
+        data = unpack_data(payload["data"])
         assert isinstance(payload, dict)
         assert "server" in payload.keys()
+        self.assertIsNotNone(payload["service"])
+        self.assertIsNotNone(payload["repository"])
+        self.assertIsNotNone(data["catalog.json"])
+        self.assertEqual(data["service"]["slug"], objects["service"].slug)
+        self.assertEqual(data["source"]["slug"], objects["source"].slug)
 
     @patch("gh.fetch.login_as_app")
     def test_dispatch_failed(self, gh_mock):
@@ -182,6 +188,27 @@ class TestSend(WithGitHubUser):
         )
         with self.settings(GITHUB_CHECK_REPOSITORY="https://github.com/foo/bar"):
             self.assertRaises(errors.NoRepository, dispatch, result)
+
+    @patch("gh.send.get_repo_installation")
+    def test_dispatch_no_service(self, login_mock):
+        """
+        Sends a dispatch event to the repository, even if there's no service.
+        """
+        objects = create_health_check()
+        result = create_health_check_result(objects["health_check"], None)
+        with self.settings(GITHUB_CHECK_REPOSITORY="https://github.com/foo/bar"):
+            dispatch(result)
+
+        args = login_mock.return_value.create_repository_dispatch.call_args
+        self.assertEqual(args[1]["event_type"], objects["health_check"].slug)
+
+        payload = args[1]["client_payload"]
+        data = unpack_data(payload["data"])
+        self.assertEqual(payload["service"], None)
+        self.assertEqual(payload["repository"], None)
+        self.assertEqual(data["catalog.json"], None)
+        self.assertEqual(data["service"], None)
+        self.assertEqual(data["source"], None)
 
 
 class Test(TestCase):

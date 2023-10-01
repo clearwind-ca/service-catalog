@@ -2,14 +2,14 @@ Some design notes and project goal.
 
 ## Visibility and Permissions
 
-* The Service Catalog is a single tenant project, in that it's intended to be run by one organisation and only contain the information for that organization.
-* Service Catalog pulls all repositories that the GitHub user accessing the site has access to and stores them in the Catalog. This is working on the assumption that all the services pulled into the Catalog are suitable to be shown there. This may not always be the case in some organisations, but recreating GitHub security outside of GitHub is not a project goal.
+* The Catalog is a single tenant project, in that it's intended to be run by one organisation and only contain the information for that organization.
+* Catalog pulls all repositories that the GitHub user accessing the site has access to and stores them in the Catalog. This is working on the assumption that all the services pulled into the Catalog are suitable to be shown there. This may not always be the case in some organisations, but recreating GitHub security outside of GitHub is not a project goal.
 
-By default when a user logs in, it checks the organization, if the user is a `Public member` of that organization, they get full access to the Service Catalog with the ability to add, delete and change entries in the Catalog.
+By default when a user logs in, it checks the organization, if the user is a `Public member` of that organization, they get full access to the Catalog with the ability to add, delete and change entries in the Catalog.
 
 If the user is not a `Public member` of that organization, they will have no access.
 
-If the settings `ALLOW_PUBLIC_READ_ACCESS` is set to `True` then the user will have read only access to the Service Catalog and all its contents. They will not able to add, delete and change any entries in the Catalog.
+If the settings `ALLOW_PUBLIC_READ_ACCESS` is set to `True` then the user will have read only access to the Catalog and all its contents. They will not able to add, delete and change any entries in the Catalog.
 
 **Note:** be careful about using `ALLOW_PUBLIC_READ_ACCESS`, doing so with `Private` organisations and repositories will expose all the information contained in the catalog.
 
@@ -17,7 +17,7 @@ If the settings `ALLOW_PUBLIC_READ_ACCESS` is set to `True` then the user will h
 
 ## GitHub App access
 
-See `/setup/` on your Service Catalog to see what is currently included.
+See `/setup/` on your Catalog to see what is currently included.
 
 The long term goal is to keep the permissions needed by the GitHub App to the minimum needed to satifsy the needs of the project and cope if you'd like to limit permissions, there are solutions. Currently they include:
 
@@ -31,7 +31,7 @@ The long term goal is to keep the permissions needed by the GitHub App to the mi
 
 Events:
 
-* `Deployments`: so that the webhooks can be sent from GitHub. If the Service Catalog is at a URL not accessible from the server, then you can manually create these using the [create-event Action](https://github.com/clearwind-ca/create-event), the API, or by polling GitHub.
+* `Deployments`: so that the webhooks can be sent from GitHub. If the Catalog is at a URL not accessible from the server, then you can manually create these using the [create-event Action](https://github.com/clearwind-ca/create-event), the API, or by polling GitHub.
 * `Releases`: same as above for releases.
 
 ## Running health checks

@@ -30,4 +30,4 @@ Pagination for next and previous are included the list results, but appending `?
 
 ## Response codes
 
-Service Catalog tries to follow the best practices for HTTP Response codes. If Service Catalog is getting an error back from a downstream service, such as GitHub, then it will return a `502` status code in the API.
+Catalog tries to follow the best practices for HTTP Response codes. If Catalog is getting an error back from a downstream service, such as GitHub, then it will return a `502` status code in the API.

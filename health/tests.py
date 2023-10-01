@@ -9,8 +9,9 @@ from catalog.errors import FileAlreadyExists, NoRepository
 from catalog.tests import BaseTestCase
 from services.tests import create_service, create_source
 
-from .management.commands import send, timeout
+from .forms import CheckForm
 from .models import Check, CheckResult
+from .tasks import send_active_to_github, should_run, timeout
 
 fake = Faker()
 
@@ -39,6 +40,18 @@ class WithHealthCheck(BaseTestCase):
         self.health_check = created["health_check"]
 
 
+def add_check(**kwargs):
+    result = {
+        "name": fake.name(),
+        "description": fake.text(),
+        "frequency": "daily",
+        "active": True,
+        "limit": "all",
+    }
+    result.update(kwargs)
+    return result
+
+
 class TestCheck(BaseTestCase):
     def setUp(self):
         super().setUp()
@@ -49,20 +62,14 @@ class TestCheck(BaseTestCase):
         url = reverse("health:checks-add")
         self.client.force_login(self.user)
         self.add_to_members()
-        res = self.client.post(
-            url,
-            {"name": fake.name(), "description": fake.text(), "frequency": "daily", "active": True},
-        )
+        res = self.client.post(url, add_check())
         self.assertEqual(res.status_code, 302, res.content)
         self.assertEqual(Check.objects.count(), 1)
 
     def test_add_check_no_perms(self):
         url = reverse("health:checks-add")
         self.client.force_login(self.user)
-        res = self.client.post(
-            url,
-            {"name": fake.name(), "description": fake.text(), "frequency": "daily", "active": True},
-        )
+        res = self.client.post(url, add_check())
         self.login_required(res)
 
     def test_update_check(self):
@@ -70,10 +77,7 @@ class TestCheck(BaseTestCase):
         url = reverse("health:checks-update", args=[created.slug])
         self.client.force_login(self.user)
         self.add_to_members()
-        res = self.client.post(
-            url,
-            {"name": "new name", "description": fake.text(), "frequency": "daily", "active": True},
-        )
+        res = self.client.post(url, add_check(name="new name"))
         self.assertEqual(res.status_code, 302, res.content)
         self.assertEqual(Check.objects.get().name, "new name")
 
@@ -81,10 +85,7 @@ class TestCheck(BaseTestCase):
         created = create_health_check()["health_check"]
         url = reverse("health:checks-update", args=[created.slug])
         self.client.force_login(self.user)
-        res = self.client.post(
-            url,
-            {"name": "new name", "description": fake.text(), "frequency": "daily", "active": True},
-        )
+        res = self.client.post(url, add_check())
         self.login_required(res)
 
     def test_delete_check(self):
@@ -102,6 +103,12 @@ class TestCheck(BaseTestCase):
         self.client.force_login(self.user)
         res = self.client.post(url)
         self.login_required(res)
+
+
+class TestCheckForm(WithHealthCheck):
+    def test_duplicate_slug(self):
+        self.assertEquals(CheckForm({"name": self.health_check.name + "-bit"}).is_valid(), False)
+        self.assertFalse(CheckForm({"name": self.health_check.name}).is_valid())
 
 
 class TestAction(WithHealthCheck):
@@ -226,33 +233,13 @@ class TestCheckPage(WithHealthCheck):
 
 
 class TestSend(WithHealthCheck):
-    def setUp(self):
-        super().setUp()
-        self.command = send.Command().handle
-
-    def test_arg_combos_fails(self):
-        for params in [
-            {"user": None},
-            {"all_checks": False, "check": False},
-            {"all_services": False, "service": False},
-        ]:
-            with self.assertRaises(ValueError):
-                self.command(**params)
-
-    def kwargs(self):
-        return {
-            "all_checks": True,
-            "all_services": True,
-            "quiet": True,
-        }
-
     @patch("health.tasks.send")
     def test_log_errors(self, mock_send):
         """Test that repeated errors are logged"""
         Check.objects.create(name=fake.name())
         mock_send.dispatch.side_effect = NoRepository("Nope")
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
-            self.command(**self.kwargs())
+            send_active_to_github()
         self.assertEqual(mock_send.dispatch.call_count, 2)
         results = CheckResult.objects.all()
         for result in results:
@@ -264,7 +251,7 @@ class TestSend(WithHealthCheck):
         Check.objects.create(name=fake.name())
         mock_send.dispatch.return_value = True
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
-            self.command(**self.kwargs())
+            send_active_to_github()
         # 1 Service and 2 Checks, means 2 calls.
         self.assertEqual(mock_send.dispatch.call_count, 2)
         self.assertEqual(CheckResult.objects.count(), 2)
@@ -273,12 +260,68 @@ class TestSend(WithHealthCheck):
             self.assertEqual(result.result, "unknown")
 
     @patch("health.tasks.send")
+    def test_send_some_but_none_selected(self, mock_send):
+        """Test sends one"""
+        self.health_check.limit = "some"
+        self.health_check.save()
+
+        mock_send.dispatch.return_value = True
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            send_active_to_github()
+        # 1 Service, 1 Check, but none selected, means 0 calls.
+        self.assertEqual(mock_send.dispatch.call_count, 0)
+        self.assertEqual(CheckResult.objects.count(), 0)
+
+    @patch("health.tasks.send")
+    def test_send_all(self, mock_send):
+        """Test sends to all"""
+        create_service(self.source)
+
+        mock_send.dispatch.return_value = True
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            send_active_to_github()
+        # 2 Service, 1 Check, but all selected, means 2 calls.
+        self.assertEqual(mock_send.dispatch.call_count, 2)
+        self.assertEqual(CheckResult.objects.count(), 2)
+
+    @patch("health.tasks.send")
+    def test_send_some(self, mock_send):
+        """Test sends to one, but not the other"""
+        extra = create_service(self.source)
+
+        self.health_check.limit = "some"
+        self.health_check.services.add(self.service)
+        self.health_check.save()
+
+        mock_send.dispatch.return_value = True
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            send_active_to_github()
+        # 2 Service, 1 Check, but some selected, means 1 call.
+        self.assertEqual(mock_send.dispatch.call_count, 1)
+        self.assertEqual(CheckResult.objects.count(), 1)
+
+    @patch("health.tasks.send")
+    def test_send_none(self, mock_send):
+        """Test sends to none"""
+        create_service(self.source)
+
+        self.health_check.limit = "none"
+        self.health_check.save()
+
+        mock_send.dispatch.return_value = True
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
+            send_active_to_github()
+        # 2 Service, 1 Check, but none selected, means 1 calls.
+        self.assertEqual(mock_send.dispatch.call_count, 1)
+        self.assertEqual(CheckResult.objects.count(), 1)
+
+    @patch("health.tasks.send")
     def test_ignore_inactive_check(self, mock_send):
         """Test that it will ignore inactive checks"""
         self.health_check.active = False
         self.health_check.save()
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
-            self.command(**self.kwargs())
+            send_active_to_github()
         self.assertEqual(mock_send.dispatch.call_count, 0)
 
     @patch("health.tasks.send")
@@ -287,7 +330,7 @@ class TestSend(WithHealthCheck):
         self.service.active = False
         self.service.save()
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
-            self.command(**self.kwargs())
+            send_active_to_github()
         self.assertEqual(mock_send.dispatch.call_count, 0)
 
     @patch("health.tasks.send")
@@ -296,41 +339,53 @@ class TestSend(WithHealthCheck):
         self.health_check.frequency = "adhoc"
         self.health_check.save()
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
-            self.command(**self.kwargs())
+            send_active_to_github()
         self.assertEqual(mock_send.dispatch.call_count, 0)
 
 
 class TestSendFrequency(WithHealthCheck):
     def test_send_if_not_run(self):
         """Test that it will send if not run"""
-        assert send.should_run(self.health_check, self.service)
+        assert should_run(self.health_check, self.service)
 
     def test_send_if_daily(self):
         """Test that it will send if daily"""
         self.health_check.frequency = "daily"
         CheckResult.objects.create(health_check=self.health_check, service=self.service)
-        assert not send.should_run(self.health_check, self.service)
+        assert not should_run(self.health_check, self.service)
         CheckResult.objects.update(created=timezone.now() - timedelta(days=1))
-        assert send.should_run(self.health_check, self.service)
+        assert should_run(self.health_check, self.service)
 
     def test_send_if_hourly(self):
         """Test that it will send if hourly"""
         self.health_check.frequency = "hourly"
         CheckResult.objects.create(health_check=self.health_check, service=self.service)
-        assert not send.should_run(self.health_check, self.service)
+        assert not should_run(self.health_check, self.service)
         CheckResult.objects.update(created=timezone.now() - timedelta(seconds=30 * 60))
-        assert not send.should_run(self.health_check, self.service)
+        assert not should_run(self.health_check, self.service)
 
         CheckResult.objects.update(created=timezone.now() - timedelta(seconds=60 * 60 + 1))
-        assert send.should_run(self.health_check, self.service)
+        assert should_run(self.health_check, self.service)
 
     def test_send_if_weekly(self):
         """Test that it will send if weekly"""
         self.health_check.frequency = "weekly"
         CheckResult.objects.create(health_check=self.health_check, service=self.service)
-        assert not send.should_run(self.health_check, self.service)
+        assert not should_run(self.health_check, self.service)
         CheckResult.objects.update(created=timezone.now() - timedelta(days=7))
-        assert send.should_run(self.health_check, self.service)
+        assert should_run(self.health_check, self.service)
+
+    def test_send_if_no_service(self):
+        """Test that should_run will still run, even if no service defined"""
+        self.health_check.frequency = "daily"
+        self.health_check.limit = "none"
+        self.assertRaises(ValueError, should_run, self.health_check, self.service)
+
+        CheckResult.objects.create(health_check=self.health_check)
+        assert not should_run(self.health_check)
+
+        CheckResult.objects.update(created=timezone.now() - timedelta(days=1))
+        assert should_run(self.health_check)
 
 
 class TestResultModel(WithHealthCheck):
@@ -347,7 +402,6 @@ class TestResultModel(WithHealthCheck):
 class TestTimeout(WithHealthCheck):
     def setUp(self):
         super().setUp()
-        self.command = timeout.Command().handle
 
     def test_timeout(self):
         """Timeouts a check"""
@@ -357,11 +411,11 @@ class TestTimeout(WithHealthCheck):
 
         with self.settings(CELERY_TASK_ALWAYS_EAGER=True):
             # This times out things older than 13 hours.
-            self.command(quiet=True, ago=13)
+            timeout(ago=13)
             self.assertEquals(CheckResult.objects.filter(status="sent").count(), 1)
 
             # This times out things older than 11 hours, our check result.
-            self.command(quiet=True, ago=11)
+            timeout(ago=11)
             self.assertEquals(CheckResult.objects.filter(status="timed-out").count(), 1)
 
 

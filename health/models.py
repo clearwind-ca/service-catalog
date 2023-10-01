@@ -10,6 +10,12 @@ FREQUENCY_CHOICES = (
     ("ad-hoc", "Ad hoc"),
 )
 
+LIMIT = (
+    ("all", "All"),
+    ("some", "Some"),
+    ("none", "None"),
+)
+
 
 class Check(models.Model):
     name = models.CharField(max_length=255)
@@ -28,12 +34,35 @@ class Check(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    limit = models.CharField(
+        max_length=6,
+        default="all",
+        choices=LIMIT,
+        help_text="How many services this check will be run against.",
+    )
+
+    services = models.ManyToManyField(
+        to="services.Service",
+        related_name="health_checks",
+        blank=True,
+        help_text="If this health check is limited to some services, select them here.",
+    )
+
     def save(self, *args, **kwargs):
         # Ensure that changing the name does not change the slug.
         if not self.slug:
             self.slug = slugify(self.name)
 
         super().save(*args, **kwargs)
+
+    def get_services(check):
+        from services.models import Service
+
+        if check.limit == "all":
+            return Service.objects.filter(active=True)
+        elif check.limit == "some":
+            return check.services.all()
+        return None
 
     def __str__(self):
         return self.name
@@ -68,7 +97,9 @@ RESULT_CHOICES = (
 
 
 class CheckResult(models.Model):
-    service = models.ForeignKey(to="services.Service", on_delete=models.CASCADE)
+    service = models.ForeignKey(
+        to="services.Service", on_delete=models.CASCADE, blank=True, null=True
+    )
     health_check = models.ForeignKey(Check, on_delete=models.CASCADE)
 
     # How well the service is doing with this health check.
@@ -83,6 +114,8 @@ class CheckResult(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
+        if self.service is None:
+            return f"{self.health_check} - {self.result}"
         return f"{self.service} - {self.health_check} - {self.result}"
 
     def save(self, *args, **kwargs):
