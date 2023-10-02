@@ -7,6 +7,7 @@ from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
+from django.db import connection
 from django.db.models import CharField, Value
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -45,6 +46,31 @@ def service_list(request):
         }
     )
     return render(request, "service-list.html", context)
+
+
+def service_tree(request, slug):
+    # Start with a simple naive tree that won't scale.
+    sql = """
+WITH RECURSIVE ctename AS (
+        SELECT id, CAST(0 AS BIGINT) AS parent, 0 AS level
+        FROM services_service
+        WHERE id = %s
+    UNION ALL
+        SELECT to_service_id, from_service_id, ctename.level + 1
+        FROM services_service_dependencies
+        JOIN ctename ON services_service_dependencies.from_service_id = ctename.id
+    )
+SELECT id, parent, level FROM ctename WHERE level <= 10 ORDER BY level ASC;
+"""
+    root = get_object_or_404(slug=slug, klass=Service)
+    tree = Service.objects.raw(sql, [root.pk])
+
+    context = {
+        "tree": tree,
+        "service": root,
+        "dependencies": root.dependents(),
+    }
+    return render(request, "tree.html", context)
 
 
 @require_POST
