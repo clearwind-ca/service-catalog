@@ -44,6 +44,6 @@
 {% block sidebar %}
     <div class="pb-3">
         <h5 class="text-muted border-bottom">Info</h5>
-        <p class="form-text">{% octicon "info" %}This tree has a maximum depth of 10 levels.</p>
+        <p class="form-text">{% octicon "info" %}This tree has a maximum depth of {{ max_tree_depth }} levels.</p>
     </div>
 {% endblock %}

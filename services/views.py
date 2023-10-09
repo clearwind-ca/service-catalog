@@ -59,16 +59,18 @@ WITH RECURSIVE ctename AS (
         SELECT to_service_id, from_service_id, ctename.level + 1
         FROM services_service_dependencies
         JOIN ctename ON services_service_dependencies.from_service_id = ctename.id
+        WHERE level < %s
     )
-SELECT id, parent, level FROM ctename WHERE level <= 10 ORDER BY level ASC;
+SELECT id, parent, level FROM ctename ORDER BY level ASC;
 """
     root = get_object_or_404(slug=slug, klass=Service)
-    tree = Service.objects.raw(sql, [root.pk])
+    tree = Service.objects.raw(sql, [root.pk, settings.MAX_TREE_DEPTH])
 
     context = {
         "tree": tree,
         "service": root,
         "dependencies": root.dependents(),
+        "max_tree_depth": settings.MAX_TREE_DEPTH
     }
     return render(request, "tree.html", context)
 
