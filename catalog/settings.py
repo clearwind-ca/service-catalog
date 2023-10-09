@@ -122,6 +122,7 @@ LOGIN_REQUIRED_IGNORE_VIEW_NAMES = [
 LOGIN_REQUIRED_REDIRECT_FIELD_NAME = "next"
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/services/"
+MAX_TREE_DEPTH = 10
 MESSAGE_TAGS = {
     messages.ERROR: "danger",
     messages.INFO: "primary",

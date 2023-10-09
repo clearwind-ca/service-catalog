@@ -129,3 +129,11 @@ td p {
 tr:hover .copy {
     visibility: visible;
 }
+
+.tree {
+    visibility: hidden;
+}
+
+#tree div.card-header:hover .tree {
+    visibility: visible;
+}

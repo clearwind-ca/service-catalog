@@ -176,3 +176,8 @@ def yesno_if_boolean(value):
     if isinstance(value, bool):
         return "yes" if value else "no"
     return value
+
+
+@register.filter
+def multiply(value, arg):
+    return value * arg

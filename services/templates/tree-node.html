@@ -1,0 +1,15 @@
+{% load helpers %}
+{% load octicons %}
+<div class="card my-3" style="margin-left: {{ entry.level|multiply:3 }}em; width:25rem;">
+    <div class="card-header">
+        <a href="{% url 'services:service-detail' entry.service.slug %}">{{ entry.service.name }}</a>
+        <a class="tree" href="{% url 'services:service-tree' entry.service.slug %}">{% octicon "milestone" %}</a>
+    </div>
+    <ul class="list-group list-group-flush">
+        <li class="list-group-item">{% include "priority.html" with priority=entry.service.priority %}</li>
+        {% if not entry.service.active %}<li class="list-group-item">{% include "active.html" with active=entry.service.active %}</li>{% endif %}
+    </ul>
+</div>
+    {% for pk, dependent in entry.dependents.items %}
+        {% include "tree-node.html" with entry=dependent %}
+    {% endfor %}
