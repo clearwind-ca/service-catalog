@@ -1,0 +1,259 @@
+{
+  "_links": {
+    "canonical": {
+      "href": "/api/v2/flags/default/test-flag",
+      "type": "application/json"
+    },
+    "parent": { "href": "/api/v2/auditlog", "type": "application/json" },
+    "self": {
+      "href": "/api/v2/auditlog/6477b8fccf7d00134418b646",
+      "type": "application/json"
+    },
+    "site": {
+      "href": "/default/production/features/test-flag",
+      "type": "text/html"
+    }
+  },
+  "_id": "6477b8fccf7d00134418b646",
+  "_accountId": "6477b17b0f5d071306784a90",
+  "date": 1685567740859,
+  "accesses": [
+    {
+      "action": "updateFallthrough",
+      "resource": "proj/default:env/production:flag/test-flag"
+    }
+  ],
+  "kind": "flag",
+  "name": "Test Flag",
+  "description": "* Set the default rollout to `20%`\n",
+  "shortDescription": "",
+  "comment": "",
+  "member": {
+    "_links": {
+      "parent": { "href": "/api/v2/members", "type": "application/json" },
+      "self": {
+        "href": "/api/v2/members/6477b17b0f5d071306784a92",
+        "type": "application/json"
+      }
+    },
+    "_id": "6477b17b0f5d071306784a92",
+    "email": "andy.glyn.mckay@gmail.com",
+    "firstName": "Andy",
+    "lastName": "McKay"
+  },
+  "titleVerb": "updated the flag",
+  "title": "[Andy McKay](mailto:andy.glyn.mckay@gmail.com) updated the flag [Test Flag](https://app.launchdarkly.com/default/production/features/test-flag) in `Production`",
+  "target": {
+    "_links": {
+      "canonical": {
+        "href": "/api/v2/flags/default/test-flag",
+        "type": "application/json"
+      },
+      "site": {
+        "href": "/default/production/features/test-flag",
+        "type": "text/html"
+      }
+    },
+    "name": "Test Flag",
+    "resources": ["proj/default:env/production:flag/test-flag"]
+  },
+  "parent": {
+    "_links": {
+      "canonical": {
+        "href": "/api/v2/projects/default/environments/production",
+        "type": "application/json"
+      },
+      "site": { "href": "/settings/projects", "type": "text/html" }
+    },
+    "name": "Production",
+    "resource": "proj/default:env/production"
+  },
+  "previousVersion": {
+    "name": "Test Flag",
+    "kind": "boolean",
+    "description": "",
+    "key": "test-flag",
+    "_version": 1,
+    "creationDate": 1685565850869,
+    "includeInSnippet": true,
+    "clientSideAvailability": {
+      "usingMobileKey": true,
+      "usingEnvironmentId": true
+    },
+    "variations": [
+      { "_id": "ee78381d-953f-4ade-8fa5-bdf475638d06", "value": true },
+      { "_id": "dee6d233-a64d-464d-a419-9cbbeb165f14", "value": false }
+    ],
+    "variationJsonSchema": null,
+    "temporary": true,
+    "tags": [],
+    "_links": {
+      "parent": { "href": "/api/v2/flags/default", "type": "application/json" },
+      "self": {
+        "href": "/api/v2/flags/default/test-flag",
+        "type": "application/json"
+      }
+    },
+    "maintainerId": "6477b17b0f5d071306784a92",
+    "_maintainer": {
+      "_links": {
+        "self": {
+          "href": "/api/v2/members/6477b17b0f5d071306784a92",
+          "type": "application/json"
+        }
+      },
+      "_id": "6477b17b0f5d071306784a92",
+      "firstName": "Andy",
+      "lastName": "McKay",
+      "role": "owner",
+      "email": "andy.glyn.mckay@gmail.com"
+    },
+    "goalIds": [],
+    "experiments": { "baselineIdx": 0, "items": [] },
+    "customProperties": {},
+    "archived": false,
+    "defaults": { "onVariation": 0, "offVariation": 1 },
+    "environments": {
+      "production": {
+        "on": false,
+        "archived": false,
+        "salt": "1878290269bf410dbac3f9016021a929",
+        "sel": "ef75df5cb67b49a7a63e2bd98f9a8bd3",
+        "lastModified": 1685566933596,
+        "version": 6,
+        "targets": [],
+        "contextTargets": [],
+        "rules": [],
+        "fallthrough": { "variation": 1 },
+        "offVariation": 1,
+        "prerequisites": [],
+        "_site": {
+          "href": "/default/production/features/test-flag",
+          "type": "text/html"
+        },
+        "_environmentName": "Production",
+        "trackEvents": false,
+        "trackEventsFallthrough": false
+      },
+      "test": {
+        "on": false,
+        "archived": false,
+        "salt": "07526169160b41e7a3dddbc67c054ba8",
+        "sel": "4c8610816d1a43c08b3fd0c7728a0761",
+        "lastModified": 1685565850879,
+        "version": 1,
+        "targets": [],
+        "contextTargets": [],
+        "rules": [],
+        "fallthrough": { "variation": 0 },
+        "offVariation": 1,
+        "prerequisites": [],
+        "_site": {
+          "href": "/default/test/features/test-flag",
+          "type": "text/html"
+        },
+        "_environmentName": "Test",
+        "trackEvents": false,
+        "trackEventsFallthrough": false
+      }
+    }
+  },
+  "currentVersion": {
+    "name": "Test Flag",
+    "kind": "boolean",
+    "description": "",
+    "key": "test-flag",
+    "_version": 1,
+    "creationDate": 1685565850869,
+    "includeInSnippet": true,
+    "clientSideAvailability": {
+      "usingMobileKey": true,
+      "usingEnvironmentId": true
+    },
+    "variations": [
+      { "_id": "ee78381d-953f-4ade-8fa5-bdf475638d06", "value": true },
+      { "_id": "dee6d233-a64d-464d-a419-9cbbeb165f14", "value": false }
+    ],
+    "variationJsonSchema": null,
+    "temporary": true,
+    "tags": [],
+    "_links": {
+      "parent": { "href": "/api/v2/flags/default", "type": "application/json" },
+      "self": {
+        "href": "/api/v2/flags/default/test-flag",
+        "type": "application/json"
+      }
+    },
+    "maintainerId": "6477b17b0f5d071306784a92",
+    "_maintainer": {
+      "_links": {
+        "self": {
+          "href": "/api/v2/members/6477b17b0f5d071306784a92",
+          "type": "application/json"
+        }
+      },
+      "_id": "6477b17b0f5d071306784a92",
+      "firstName": "Andy",
+      "lastName": "McKay",
+      "role": "owner",
+      "email": "andy.glyn.mckay@gmail.com"
+    },
+    "goalIds": [],
+    "experiments": { "baselineIdx": 0, "items": [] },
+    "customProperties": {},
+    "archived": false,
+    "defaults": { "onVariation": 0, "offVariation": 1 },
+    "environments": {
+      "production": {
+        "on": false,
+        "archived": false,
+        "salt": "1878290269bf410dbac3f9016021a929",
+        "sel": "ef75df5cb67b49a7a63e2bd98f9a8bd3",
+        "lastModified": 1685567740740,
+        "version": 7,
+        "targets": [],
+        "contextTargets": [],
+        "rules": [],
+        "fallthrough": {
+          "rollout": {
+            "variations": [
+              { "variation": 0, "weight": 20000 },
+              { "variation": 1, "weight": 80000 }
+            ],
+            "contextKind": "user"
+          }
+        },
+        "offVariation": 1,
+        "prerequisites": [],
+        "_site": {
+          "href": "/default/production/features/test-flag",
+          "type": "text/html"
+        },
+        "_environmentName": "Production",
+        "trackEvents": false,
+        "trackEventsFallthrough": false
+      },
+      "test": {
+        "on": false,
+        "archived": false,
+        "salt": "07526169160b41e7a3dddbc67c054ba8",
+        "sel": "4c8610816d1a43c08b3fd0c7728a0761",
+        "lastModified": 1685565850879,
+        "version": 1,
+        "targets": [],
+        "contextTargets": [],
+        "rules": [],
+        "fallthrough": { "variation": 0 },
+        "offVariation": 1,
+        "prerequisites": [],
+        "_site": {
+          "href": "/default/test/features/test-flag",
+          "type": "text/html"
+        },
+        "_environmentName": "Test",
+        "trackEvents": false,
+        "trackEventsFallthrough": false
+      }
+    }
+  }
+}
