@@ -1,4 +1,4 @@
-Django==4.1.10
+Django==4.1.13
 django-oauth-login==0.2.2
 psycopg2==2.9.5
 PyGithub==1.58
