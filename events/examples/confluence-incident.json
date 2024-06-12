@@ -1,0 +1,144 @@
+{
+  "meta": {
+    "unsubscribe": "http://confluence.status.atlassian.com/?unsubscribe=rqvq8glq2b5k",
+    "documentation": "https://help.statuspage.io/knowledge_base/topics/webhook-notifications",
+    "generated_at": "2023-05-31T21:15:55.615Z"
+  },
+  "page": {
+    "id": "4g2my7tbhjsq",
+    "status_indicator": "none",
+    "status_description": "All Systems Operational"
+  },
+  "incident": {
+    "name": "Degraded page creation/editing experience",
+    "status": "resolved",
+    "created_at": "2023-05-31T16:46:47.942Z",
+    "updated_at": "2023-05-31T21:15:43.788Z",
+    "monitoring_at": "2023-05-31T18:48:37.350Z",
+    "resolved_at": "2023-05-31T21:15:43.775Z",
+    "impact": "minor",
+    "shortlink": "https://stspg.io/h8tshxgbchp7",
+    "scheduled_for": null,
+    "scheduled_until": null,
+    "scheduled_remind_prior": false,
+    "scheduled_reminded_at": null,
+    "impact_override": null,
+    "scheduled_auto_in_progress": false,
+    "scheduled_auto_completed": false,
+    "metadata": {},
+    "started_at": "2023-05-31T16:46:47.937Z",
+    "id": "l8mz6nxc6byq",
+    "page_id": "4g2my7tbhjsq",
+    "incident_updates": [
+      {
+        "status": "resolved",
+        "body": "Between 15:00 UTC to 18:00 UTC, we experienced degradation in the editing experience for Confluence and some related features. The issue has been resolved, and the service is operating normally.",
+        "created_at": "2023-05-31T21:15:43.775Z",
+        "wants_twitter_update": false,
+        "twitter_updated_at": null,
+        "updated_at": "2023-05-31T21:15:43.775Z",
+        "display_at": "2023-05-31T21:15:43.775Z",
+        "deliver_notifications": true,
+        "tweet_id": null,
+        "id": "06qj1hr2v1tn",
+        "incident_id": "l8mz6nxc6byq",
+        "custom_tweet": null,
+        "affected_components": [
+          {
+            "code": "y4z6hxpf7d7t",
+            "name": "Create and Edit",
+            "old_status": "degraded_performance",
+            "new_status": "operational"
+          }
+        ]
+      },
+      {
+        "status": "monitoring",
+        "body": "We have identified the root cause of the issue affecting the editing experience in Confluence and have mitigated the problem. We are now monitoring closely.",
+        "created_at": "2023-05-31T18:48:37.350Z",
+        "wants_twitter_update": false,
+        "twitter_updated_at": null,
+        "updated_at": "2023-05-31T18:48:37.350Z",
+        "display_at": "2023-05-31T18:48:37.350Z",
+        "deliver_notifications": true,
+        "tweet_id": null,
+        "id": "7k3r1npcf4bk",
+        "incident_id": "l8mz6nxc6byq",
+        "custom_tweet": null,
+        "affected_components": [
+          {
+            "code": "y4z6hxpf7d7t",
+            "name": "Create and Edit",
+            "old_status": "degraded_performance",
+            "new_status": "degraded_performance"
+          }
+        ]
+      },
+      {
+        "status": "investigating",
+        "body": "We continue to investigate the root cause for the issue affecting the editing experience in Confluence and its related services. Updates will be posted within the next hour.",
+        "created_at": "2023-05-31T18:38:44.235Z",
+        "wants_twitter_update": false,
+        "twitter_updated_at": null,
+        "updated_at": "2023-05-31T18:46:19.049Z",
+        "display_at": "2023-05-31T18:38:44.000Z",
+        "deliver_notifications": true,
+        "tweet_id": null,
+        "id": "3try5p9sp764",
+        "incident_id": "l8mz6nxc6byq",
+        "custom_tweet": null,
+        "affected_components": [
+          {
+            "code": "y4z6hxpf7d7t",
+            "name": "Create and Edit",
+            "old_status": "degraded_performance",
+            "new_status": "degraded_performance"
+          }
+        ]
+      },
+      {
+        "status": "investigating",
+        "body": "We do not have a root cause for the affecting the editing experience in Confluence issue impacting Confluence and its related services. We are investigating and trying to mitigate the issue. Updates will be posted within the next hour.",
+        "created_at": "2023-05-31T16:46:47.999Z",
+        "wants_twitter_update": false,
+        "twitter_updated_at": null,
+        "updated_at": "2023-05-31T16:46:47.999Z",
+        "display_at": "2023-05-31T16:46:47.999Z",
+        "deliver_notifications": true,
+        "tweet_id": null,
+        "id": "kmkylf61k5k8",
+        "incident_id": "l8mz6nxc6byq",
+        "custom_tweet": null,
+        "affected_components": [
+          {
+            "code": "y4z6hxpf7d7t",
+            "name": "Create and Edit",
+            "old_status": "operational",
+            "new_status": "degraded_performance"
+          }
+        ]
+      }
+    ],
+    "postmortem_body": null,
+    "postmortem_body_last_updated_at": null,
+    "postmortem_ignored": false,
+    "postmortem_published_at": null,
+    "postmortem_notified_subscribers": false,
+    "postmortem_notified_twitter": false,
+    "components": [
+      {
+        "status": "operational",
+        "name": "Create and Edit",
+        "created_at": "2018-11-12T04:04:58.145Z",
+        "updated_at": "2023-05-31T21:15:43.751Z",
+        "position": 2,
+        "description": null,
+        "showcase": false,
+        "start_date": null,
+        "id": "y4z6hxpf7d7t",
+        "page_id": "4g2my7tbhjsq",
+        "group_id": null
+      }
+    ]
+  }
+}

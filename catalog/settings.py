@@ -53,6 +53,7 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 DEBUG = os.environ.get("DEBUG")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+DUMP_WEBHOOKS = os.environ.get("DUMP_WEBHOOKS", False)
 ENFORCE_ORG_MEMBERSHIP = True
 DATABASES = {"default": dj_database_url.config(conn_max_age=600, conn_health_checks=True)}
 
@@ -111,6 +112,7 @@ LOGIN_REQUIRED_IGNORE_PATHS = [
     "^/oauth/github/callback/",
     "^/github/webhooks/",
     "^/static/*.*",
+    "^/webhooks/*.*",
 ]
 LOGIN_REQUIRED_IGNORE_VIEW_NAMES = [
     "web:home",

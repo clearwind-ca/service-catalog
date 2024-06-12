@@ -122,10 +122,10 @@ td p {
     margin-left: 0em;
 }
 
-.copy {
+.since .copy {
     visibility: hidden;
 }
 
-tr:hover .copy {
+.since:hover .copy {
     visibility: visible;
 }

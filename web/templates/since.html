@@ -2,6 +2,7 @@
 {% load humanize %}
 {% load octicons %}
 {% load tz %}
+<span class="since">
 <span 
     tabindex="0"
     class="time-popover"
@@ -11,5 +12,5 @@
     data-bs-content='{% include "since-snippet.html" %}'>
     {{ since|naturaltime }}
 </span>
-
 <a href="#" class="copy" title="Copy to the clipboard" data-copy="{{ since }} UTC">{% octicon "clipboard" %}</a>
+</span>

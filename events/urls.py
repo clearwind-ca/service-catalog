@@ -14,5 +14,6 @@ urlpatterns = [
     path("events/<str:pk>/update/", views.events_update, name="events-update"),
     path("events/<str:pk>/details/", views.events_detail, name="events-detail"),
     path("events/<str:pk>/delete/", views.events_delete, name="events-delete"),
+    path("webhooks/<str:slug>/", views.webhooks, name="webhooks"),
     path("api/", include(router.urls)),
 ]
