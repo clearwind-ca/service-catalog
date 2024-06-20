@@ -22,10 +22,11 @@
         <div class="card-header fw-bold">Dependencies</div>
         <div class="card-body">
             {% if related  %}
-                {% include "dependencies.html" with items=related %}
+                {% include "dependencies.html" with items=related service=service %}
             {% else %}
                 {% include "blankslate.html" with message="No services define this service as a dependency and this service is not dependent." %}
             {% endif %}
+            <p class="form-text pt-3">{% octicon "info" %} See the full <a href="{% url 'services:service-tree' service.slug %}">dependency tree</a> for this service.</p>
         </div>
     </div>
 

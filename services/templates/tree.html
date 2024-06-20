@@ -1,0 +1,49 @@
+{% extends "base-two-column.html" %}
+{% load octicons %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{% url 'services:service-list' %}">{% octicon "dashboard" %}Services</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'services:service-detail' service.slug %}">{{ service.name }}</a></li>
+    <li class="breadcrumb-item">Tree</li>
+{% endblock %}
+{% load helpers %}
+{% load crispy_forms_tags %}
+
+{% block top %}
+<h2>Dependency Tree</h2>
+{% endblock %}
+
+{% block main %}
+
+<p>For the <b>{{ service.name }}</b>.</p>
+
+{% for dependency in dependencies %}
+    <p>
+        {% octicon "arrow-up" %} a dependency of
+        <a href="{% url 'services:service-detail' dependency.slug %}">{{ dependency.name }}</a> <a href="{% url 'services:service-tree' dependency.slug %}">{% octicon "milestone" %}</a>
+    </p>
+{% empty %}
+    <p>{% octicon "info" %}This service is not a dependency of anything else.</p>
+{% endfor %}
+
+<div id="tree">
+    {% for entry in tree %}
+        <div class="card my-3" style="margin-left: {{ entry.level|multiply:3 }}em; width:25rem;">
+            <div class="card-header">
+                <a href="{% url 'services:service-detail' entry.slug %}">{{ entry.name }}</a>
+                <a class="tree" href="{% url 'services:service-tree' entry.slug %}">{% octicon "milestone" %}</a>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">{% include "priority.html" with priority=entry.priority %}</li>
+                {% if not entry.active %}<li class="list-group-item">{% include "active.html" with active=entry.active %}</li>{% endif %}
+            </ul>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block sidebar %}
+    <div class="pb-3">
+        <h5 class="text-muted border-bottom">Info</h5>
+        <p class="form-text">{% octicon "info" %}This tree has a maximum depth of {{ max_tree_depth }} levels.</p>
+    </div>
+{% endblock %}

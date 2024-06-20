@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 from auditlog.models import LogEntry
 from django.contrib import messages
+from django.conf import settings
 from django.db.models.deletion import ProtectedError
 from django.forms.models import model_to_dict
 from django.test import TestCase
@@ -744,3 +745,55 @@ class TestAPIService(BaseTestCase):
         self.url = reverse("services:api-schema-detail")
         response = self.api_client.get(self.url)
         self.assertEqual(response.status_code, 200)
+ 
+
+class TestTree(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self.source = create_source()
+        self.service = create_service(self.source)
+        self.url = reverse("services:service-tree", kwargs={"slug": self.service.slug})
+    
+    def test_get_tree_anon(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+    
+    def test_get_tree_no_dependencies(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "tree.html")
+        self.assertEqual(response.context["service"], self.service)
+        tree = list(response.context["tree"])
+        self.assertEqual(len(tree), 1)
+        self.assertEqual(tree[0], self.service)
+
+    def test_get_tree_simple_dependencies(self):
+        self.client.force_login(self.user)
+
+        dependent = create_service(self.source)
+        self.service.dependencies.set([dependent])
+        self.service.save()
+        #dependent.dependencies.set([self.service])
+        #dependent.save()
+
+        response = self.client.get(self.url)
+        tree = list(response.context["tree"])
+        self.assertEqual(tree[0].level, 0)
+        self.assertEqual(tree[1].level, 1)
+        self.assertEqual(tree[0], self.service)
+
+    def test_get_tree_recursive(self):
+        self.client.force_login(self.user)
+
+        dependent = create_service(self.source)
+        self.service.dependencies.set([dependent])
+        self.service.save()
+        dependent.dependencies.set([self.service])
+        dependent.save()
+
+        response = self.client.get(self.url)
+        tree = list(response.context["tree"])
+        # Add on one for the source.
+        self.assertEqual(len(tree), settings.MAX_TREE_DEPTH + 1)
+        self.assertEqual(tree[0], self.service)

@@ -11,6 +11,7 @@ router.register("service", views.ServiceViewSet, basename="api-service")
 
 urlpatterns = [
     path("services/", views.service_list, name="service-list"),
+    path("services/<str:slug>/tree/", views.service_tree, name="service-tree"),
     path("services/<str:slug>/", views.service_detail, name="service-detail"),
     path("services/<str:slug>/delete/", views.service_delete, name="service-delete"),
     path("schema/", views.schema_detail, name="schema-detail"),
